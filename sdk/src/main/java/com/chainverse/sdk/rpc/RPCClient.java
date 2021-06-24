@@ -23,7 +23,9 @@ public class RPCClient {
 
     public static ArrayList<RPCParams> createParams(RPCParams param){
         ArrayList<RPCParams> params = new ArrayList<>();
-        params.add(param);
+        if(param != null){
+            params.add(param);
+        }
         return params;
     }
 }
