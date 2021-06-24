@@ -4,10 +4,8 @@ import android.annotation.SuppressLint;
 import android.util.Log;
 
 import com.chainverse.sdk.common.Constants;
-import com.chainverse.sdk.rpc.RPCRequest;
+import com.chainverse.sdk.rpc.RPCClient;
 import com.chainverse.sdk.rpc.raw.RPCParams;
-
-import java.util.ArrayList;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -36,7 +34,7 @@ public class ContractManager {
         RPCParams param = new RPCParams();
         param.setDeveloperAddress(developerAddress);
 
-        RPCRequest.request(RPCRequest.createParams(param),"eth_blockNumber")
+        RPCClient.request(RPCClient.createParams(param),"eth_blockNumber")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(jsonElement -> {
@@ -56,7 +54,7 @@ public class ContractManager {
         RPCParams param = new RPCParams();
         param.setGameAddress(gameAddress);
 
-        RPCRequest.request(RPCRequest.createParams(param),"eth_blockNumber")
+        RPCClient.request(RPCClient.createParams(param),"eth_blockNumber")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(jsonElement -> {
@@ -75,7 +73,7 @@ public class ContractManager {
         //RPC param
         RPCParams param = new RPCParams();
         param.setChainverseFactory(Constants.CONTRACT.ChainverseFactory);
-        RPCRequest.request(RPCRequest.createParams(param),"eth_blockNumber")
+        RPCClient.request(RPCClient.createParams(param),"eth_blockNumber")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(jsonElement -> {
@@ -96,7 +94,7 @@ public class ContractManager {
         RPCParams param = new RPCParams();
         param.setChainverseFactory(Constants.CONTRACT.ChainverseFactory);
 
-        RPCRequest.request(RPCRequest.createParams(param),"eth_blockNumber")
+        RPCClient.request(RPCClient.createParams(param),"eth_blockNumber")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(jsonElement -> {

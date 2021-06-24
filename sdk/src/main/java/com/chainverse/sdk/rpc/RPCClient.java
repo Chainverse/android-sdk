@@ -5,13 +5,12 @@ import com.chainverse.sdk.rpc.raw.RPCParams;
 import com.chainverse.sdk.rpc.raw.RPCRequestRaw;
 import com.google.gson.JsonElement;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import io.reactivex.Observable;
 
-public class RPCRequest {
-    public static String TAG = RPCRequest.class.getSimpleName();
+public class RPCClient {
+    public static String TAG = RPCClient.class.getSimpleName();
     public static Observable<JsonElement> request(ArrayList<RPCParams> params, String method){
         RPCRequestRaw request = new RPCRequestRaw();
         request.setJsonrpc("2.0");
