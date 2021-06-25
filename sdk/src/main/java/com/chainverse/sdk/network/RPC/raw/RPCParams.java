@@ -1,4 +1,4 @@
-package com.chainverse.sdk.rpc.raw;
+package com.chainverse.sdk.network.RPC.raw;
 
 public class RPCParams {
     private String developerAddress;

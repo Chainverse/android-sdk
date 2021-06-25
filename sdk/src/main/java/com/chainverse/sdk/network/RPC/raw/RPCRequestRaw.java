@@ -1,4 +1,4 @@
-package com.chainverse.sdk.rpc.raw;
+package com.chainverse.sdk.network.RPC.raw;
 
 import java.util.ArrayList;
 

@@ -4,8 +4,8 @@ import android.annotation.SuppressLint;
 import android.util.Log;
 
 import com.chainverse.sdk.common.Constants;
-import com.chainverse.sdk.rpc.RPCClient;
-import com.chainverse.sdk.rpc.raw.RPCParams;
+import com.chainverse.sdk.network.RPC.RPCClient;
+import com.chainverse.sdk.network.RPC.raw.RPCParams;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
