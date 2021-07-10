@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class RPCRequestRaw {
     private String jsonrpc;
     private String method;
-    private ArrayList<RPCParams> params;
+    private ArrayList<Object> params;
     private int id;
 
     public String getJsonrpc() {
@@ -24,11 +24,11 @@ public class RPCRequestRaw {
         this.method = method;
     }
 
-    public ArrayList<RPCParams> getParams() {
+    public ArrayList<Object> getParams() {
         return params;
     }
 
-    public void setParams(ArrayList<RPCParams> params) {
+    public void setParams(ArrayList<Object> params) {
         this.params = params;
     }
 

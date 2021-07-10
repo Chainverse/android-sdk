@@ -17,7 +17,7 @@ public class RESTfulClient {
         RPCRequestRaw request = new RPCRequestRaw();
         request.setJsonrpc("2.0");
         request.setMethod(method);
-        request.setParams(params);
+        //request.setParams(params);
         request.setId(1);
         LogUtil.log(TAG,request);
         return RESTfulURL.getInstance().connect(request);

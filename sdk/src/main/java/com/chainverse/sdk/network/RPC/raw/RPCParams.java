@@ -1,31 +1,24 @@
 package com.chainverse.sdk.network.RPC.raw;
 
 public class RPCParams {
-    private String developerAddress;
-    private String gameAddress;
-    private String chainverseFactory;
+    private String to;
+    private String data;
 
-    public String getDeveloperAddress() {
-        return developerAddress;
+
+    public String getTo() {
+        return to;
     }
 
-    public void setDeveloperAddress(String developerAddress) {
-        this.developerAddress = developerAddress;
+    public void setTo(String to) {
+        this.to = to;
     }
 
-    public String getGameAddress() {
-        return gameAddress;
+    public String getData() {
+        return data;
     }
 
-    public void setGameAddress(String gameAddress) {
-        this.gameAddress = gameAddress;
+    public void setData(String data) {
+        this.data = data;
     }
 
-    public String getChainverseFactory() {
-        return chainverseFactory;
-    }
-
-    public void setChainverseFactory(String chainverseFactory) {
-        this.chainverseFactory = chainverseFactory;
-    }
 }

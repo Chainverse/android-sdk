@@ -11,7 +11,7 @@ import io.reactivex.Observable;
 
 public class RPCClient {
     public static String TAG = RPCClient.class.getSimpleName();
-    public static Observable<JsonElement> request(ArrayList<RPCParams> params, String method){
+    public static Observable<JsonElement> request(ArrayList<Object> params, String method){
         RPCRequestRaw request = new RPCRequestRaw();
         request.setJsonrpc("2.0");
         request.setMethod(method);
@@ -21,11 +21,12 @@ public class RPCClient {
         return RPCURL.getInstance().connect(request);
     }
 
-    public static ArrayList<RPCParams> createParams(RPCParams param){
-        ArrayList<RPCParams> params = new ArrayList<>();
+    public static ArrayList<Object> createParams(RPCParams param){
+        ArrayList<Object> params = new ArrayList<>();
         if(param != null){
             params.add(param);
         }
+        params.add("latest");
         return params;
     }
 }
