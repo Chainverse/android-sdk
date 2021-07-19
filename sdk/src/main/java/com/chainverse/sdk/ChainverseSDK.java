@@ -21,6 +21,8 @@ public class ChainverseSDK implements Chainverse {
     private static ChainverseSDK mInstance;
     private ChainverseCallback mCallback;
     private Activity mContext;
+    public static String developerAddress;
+    public static String gameAddress;
     public static String callbackScheme;
     public static String callbackHost;
     public static ChainverseSDK getInstance(){
@@ -36,9 +38,17 @@ public class ChainverseSDK implements Chainverse {
 
     @Override
     public void init(String developerAddress, String gameAddress, Activity activity, ChainverseCallback callback) {
-        mCallback = callback;
-        mContext = activity;
-        checkContract(developerAddress, gameAddress);
+        this.mCallback = callback;
+        this.mContext = activity;
+        this.gameAddress = gameAddress;
+        this.developerAddress = developerAddress;
+        exceptionSDK();
+        checkContract();
+    }
+
+    private void exceptionSDK(){
+        ChainverseExeption.developerAddressExeption();
+        ChainverseExeption.gameAddressExeption();
     }
 
     @Override
@@ -51,8 +61,8 @@ public class ChainverseSDK implements Chainverse {
         callbackHost = host;
     }
 
-    private void checkContract(String developerAddress, String gameAddress){
-        ContractManager checkContract = new ContractManager(mContext,developerAddress, gameAddress, new ContractManager.Listener() {
+    private void checkContract(){
+        ContractManager checkContract = new ContractManager(mContext, new ContractManager.Listener() {
             @Override
             public void isChecked(boolean isCheck) {
                 if(isCheck){
@@ -63,6 +73,7 @@ public class ChainverseSDK implements Chainverse {
         });
         checkContract.check();
     }
+
 
     private void doInit(){
         Log.e("ChainverSDK_doInit","init");

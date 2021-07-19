@@ -24,7 +24,13 @@ public class MainActivity extends AppCompatActivity {
 
         String developerAddress = "0x690FDdc2a98050f924Bd7Ec5900f2D2F49b6aEC7";
         String gameAddress = "0x3F57BF31E55de54306543863E079aD234f477b88";
-        ChainverseSDK.getInstance().init(developerAddress,gameAddress,this, new ChainverseCallback() {
+        ChainverseSDK sdk = ChainverseSDK.getInstance();
+        sdk.init(developerAddress,gameAddress,this, new ChainverseCallback() {
+
+            @Override
+            public void onInitSuccess() {
+
+            }
 
             @Override
             public void onItemUpdate() {
@@ -36,23 +42,23 @@ public class MainActivity extends AppCompatActivity {
                 tvAddress.setText(address);
             }
         });
-        ChainverseSDK.getInstance().setCallbackScheme("com.chainverse.sample");
-        ChainverseSDK.getInstance().setCallbackHost("accounts_callback");
+        sdk.setCallbackScheme("com.chainverse.sample");
+        sdk.setCallbackHost("accounts_callback");
 
-        ChainverseSDK.getInstance().getSupportedWallets();
+        sdk.getSupportedWallets();
 
 
         btnChooseWallet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ChainverseSDK.getInstance().chooseWallet();
+                sdk.chooseWallet();
             }
         });
 
         btnConnectTrust.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ChainverseSDK.getInstance().connectTrust();
+                sdk.connectTrust();
             }
         });
 

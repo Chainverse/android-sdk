@@ -4,10 +4,10 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
 
+import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.base.web3.BaseWeb3;
-import com.chainverse.sdk.common.LogUtil;
-import com.chainverse.sdk.network.RPC.RPCClient;
-import com.chainverse.sdk.network.RPC.raw.RPCParams;
+import com.chainverse.sdk.common.Constants;
+
 
 import org.web3j.abi.datatypes.Address;
 import org.web3j.protocol.core.methods.response.EthCall;
@@ -15,23 +15,16 @@ import org.web3j.protocol.core.methods.response.EthCall;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 
 public class ContractManager {
     public interface Listener{
         void isChecked(boolean isCheck);
     }
-
-    private String developerAddress;
-    private String gameAddress;
     private Listener listener;
     private Context mContext;
-    public ContractManager(Context context, String developerAddress, String gameAddress, Listener listener){
+    public ContractManager(Context context, Listener listener){
         this.listener = listener;
         mContext = context;
-        this.developerAddress = developerAddress;
-        this.gameAddress = gameAddress;
     }
 
     public void check(){
@@ -45,7 +38,7 @@ public class ContractManager {
     private boolean isDeveloperContract(){
         EthCall ethCall = BaseWeb3.getInstance().init(mContext)
                 .contract(
-                        developerAddress,
+                        ChainverseSDK.developerAddress,
                         "isDeveloperContract",
                         new ArrayList<>()
                 );
@@ -58,7 +51,7 @@ public class ContractManager {
     private boolean isGameContract(){
         EthCall ethCall = BaseWeb3.getInstance().init(mContext)
                 .contract(
-                        gameAddress,
+                        ChainverseSDK.gameAddress,
                         "isGameContract",
                         new ArrayList<>()
                 );
@@ -71,9 +64,9 @@ public class ContractManager {
     private boolean isGamePaused(){
         EthCall ethCall = BaseWeb3.getInstance().init(mContext)
                 .contract(
-                        "0xd786Db6012d7A542e7531068b0f987Da6414C54B",
+                        Constants.CONTRACT.ChainverseFactory,
                         "isGamePaused",
-                        Arrays.asList(new Address(gameAddress))
+                        Arrays.asList(new Address(ChainverseSDK.gameAddress))
                 );
         if(Integer.decode(ethCall.getResult()) == 1){
             return true;
@@ -84,9 +77,9 @@ public class ContractManager {
     private boolean isDeveloperPaused(){
         EthCall ethCall = BaseWeb3.getInstance().init(mContext)
                 .contract(
-                        "0xd786Db6012d7A542e7531068b0f987Da6414C54B",
+                        Constants.CONTRACT.ChainverseFactory,
                         "isDeveloperPaused",
-                        Arrays.asList(new Address(developerAddress))
+                        Arrays.asList(new Address(ChainverseSDK.developerAddress))
                 );
         if(Integer.decode(ethCall.getResult()) == 1){
             return true;
