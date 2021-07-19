@@ -1,4 +1,4 @@
-package com.chainverse.sdk.wl.config;
+package com.chainverse.sdk.wallet.config;
 
 
 import com.chainverse.sdk.R;

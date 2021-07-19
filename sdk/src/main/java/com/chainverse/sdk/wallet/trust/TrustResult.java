@@ -1,4 +1,4 @@
-package com.chainverse.sdk.wl.trust;
+package com.chainverse.sdk.wallet.trust;
 
 import android.content.Intent;
 

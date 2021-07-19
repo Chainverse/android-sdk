@@ -1,17 +1,14 @@
-package com.chainverse.sdk.wl.trust;
+package com.chainverse.sdk.wallet.trust;
 
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
-public class TrustConnect {
-    private String callbackScheme;
-    private String callbackHost;
+import com.chainverse.sdk.ChainverseSDK;
 
-    public TrustConnect(String callbackScheme, String callbackHost){
+public class TrustConnect {
+    public TrustConnect(){
         super();
-        this.callbackScheme = callbackScheme;
-        this.callbackHost = callbackHost;
     }
 
     public void connect(Context context){
@@ -29,8 +26,8 @@ public class TrustConnect {
         builder.scheme("trust")
                 .authority("sdk_get_accounts")
                 .appendQueryParameter("action","get_accounts")
-                .appendQueryParameter("app",callbackScheme)
-                .appendQueryParameter("callback",callbackHost)
+                .appendQueryParameter("app", ChainverseSDK.callbackScheme)
+                .appendQueryParameter("callback",ChainverseSDK.callbackHost)
                 .appendQueryParameter("id","0")
                 .appendQueryParameter("coins.0","60")
                 .appendQueryParameter("coins.1","5741564")
@@ -43,23 +40,9 @@ public class TrustConnect {
     }
 
     public static class Builder{
-        private String callbackScheme;
-        private String callbackHost;
-
         public Builder(){}
-
-        public Builder setCallbackScheme(String scheme){
-            this.callbackScheme = scheme;
-            return this;
-        }
-
-        public Builder setCallbackHost(String host){
-            this.callbackHost = host;
-            return this;
-        }
-
         public TrustConnect build(){
-            return new TrustConnect(callbackScheme,callbackHost);
+            return new TrustConnect();
         }
     }
 }

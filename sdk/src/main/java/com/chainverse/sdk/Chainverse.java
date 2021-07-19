@@ -11,11 +11,23 @@ import java.util.ArrayList;
 
 public interface Chainverse {
     /**
-     * init SDK
+     * init: Hàm init ChainverseSDK
      * @param activity
      * @param callback
      */
     void init(String developerAddress, String gameAddress, Activity activity, ChainverseCallback callback);
+
+    /**
+     * setCallbackScheme: Hàm thiết lập scheme để ví Trust wallet callback về
+     * @param scheme
+     */
+    void setCallbackScheme(String scheme);
+
+    /**
+     * setCallbackHost: Hàm thiết lập host để ví Trust wallet callback về
+     * @param host
+     */
+    void setCallbackHost(String host);
 
     /**
      * return list support wallet
@@ -60,10 +72,8 @@ public interface Chainverse {
 
     /**
      * Connect with Trust Wallet
-     * @param callbackScheme
-     * @param callbackHost
      */
-    void connectTrustWL(String callbackScheme, String callbackHost);
+    void connectTrust();
 
     /**
      * Transfer with Trust Wallet

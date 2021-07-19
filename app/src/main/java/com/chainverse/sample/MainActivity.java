@@ -22,7 +22,9 @@ public class MainActivity extends AppCompatActivity {
         Button btnSend = (Button) findViewById(R.id.btnSendTransaction);
         TextView tvAddress = (TextView) findViewById(R.id.tvAddress);
 
-        ChainverseSDK.getInstance().init("0x690FDdc2a98050f924Bd7Ec5900f2D2F49b6aEC7","0x3F57BF31E55de54306543863E079aD234f477b88",this, new ChainverseCallback() {
+        String developerAddress = "0x690FDdc2a98050f924Bd7Ec5900f2D2F49b6aEC7";
+        String gameAddress = "0x3F57BF31E55de54306543863E079aD234f477b88";
+        ChainverseSDK.getInstance().init(developerAddress,gameAddress,this, new ChainverseCallback() {
 
             @Override
             public void onItemUpdate() {
@@ -34,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
                 tvAddress.setText(address);
             }
         });
+        ChainverseSDK.getInstance().setCallbackScheme("com.chainverse.sample");
+        ChainverseSDK.getInstance().setCallbackHost("accounts_callback");
 
         ChainverseSDK.getInstance().getSupportedWallets();
 
@@ -48,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         btnConnectTrust.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ChainverseSDK.getInstance().connectTrustWL("com.chainverse.sample","accounts_callback");
+                ChainverseSDK.getInstance().connectTrust();
             }
         });
 

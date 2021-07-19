@@ -14,10 +14,7 @@ import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.R;
 import com.chainverse.sdk.adapter.ChooseWLAdapter;
 import com.chainverse.sdk.listener.OnChooseWLListenter;
-import com.chainverse.sdk.model.WL;
-import com.chainverse.sdk.wl.config.SupportWL;
-
-import java.util.ArrayList;
+import com.chainverse.sdk.wallet.config.SupportWL;
 
 public class ChooseWLScreen extends Fragment {
     private RecyclerView mRecylerView;
@@ -71,7 +68,7 @@ public class ChooseWLScreen extends Fragment {
         adapter.setListenter(new OnChooseWLListenter() {
             @Override
             public void onClickItem(int position, View view) {
-                ChainverseSDK.getInstance().connectTrustWL("com.chainverse.sample","accounts_callback");
+                ChainverseSDK.getInstance().connectTrust();
             }
         });
         mRecylerView.setAdapter(adapter);

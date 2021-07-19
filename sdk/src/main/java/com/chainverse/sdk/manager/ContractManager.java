@@ -1,13 +1,19 @@
 package com.chainverse.sdk.manager;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.util.Log;
 
-import com.chainverse.sdk.common.Constants;
+import com.chainverse.sdk.base.web3.BaseWeb3;
+import com.chainverse.sdk.common.LogUtil;
 import com.chainverse.sdk.network.RPC.RPCClient;
 import com.chainverse.sdk.network.RPC.raw.RPCParams;
 
+import org.web3j.abi.datatypes.Address;
+import org.web3j.protocol.core.methods.response.EthCall;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -20,97 +26,71 @@ public class ContractManager {
     private String developerAddress;
     private String gameAddress;
     private Listener listener;
-    public ContractManager(String developerAddress, String gameAddress, Listener listener){
+    private Context mContext;
+    public ContractManager(Context context, String developerAddress, String gameAddress, Listener listener){
         this.listener = listener;
+        mContext = context;
         this.developerAddress = developerAddress;
         this.gameAddress = gameAddress;
     }
 
     public void check(){
-        checkDeveloperContract();
+        if(isGameContract() && isDeveloperContract() && isGamePaused()){
+            listener.isChecked(true);
+        }else{
+            listener.isChecked(false);
+        }
     }
 
-    @SuppressLint("CheckResult")
-    private void checkDeveloperContract(){
-        //RPC param
-        RPCParams param = new RPCParams();
-        param.setTo("0x690FDdc2a98050f924Bd7Ec5900f2D2F49b6aEC7");
-        param.setData("0x61f718bb");
-
-        RPCClient.request(RPCClient.createParams(param),"eth_call")
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(jsonElement -> {
-                    //Log.e("nampv_log",jsonElement.toString() );
-                    boolean respone = true;
-                    if(respone){
-                        checkGameContract();
-                    }
-                },throwable -> {
-
-                });
+    private boolean isDeveloperContract(){
+        EthCall ethCall = BaseWeb3.getInstance().init(mContext)
+                .contract(
+                        developerAddress,
+                        "isDeveloperContract",
+                        new ArrayList<>()
+                );
+        if(Integer.decode(ethCall.getResult()) == 1){
+            return true;
+        }
+        return false;
     }
 
-    @SuppressLint("CheckResult")
-    private void checkGameContract(){
-        //RPC param
-        RPCParams param = new RPCParams();
-        param.setTo("0x3F57BF31E55de54306543863E079aD234f477b88");
-        param.setData("0x244675aa");
-
-        RPCClient.request(RPCClient.createParams(param),"eth_call")
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(jsonElement -> {
-                    //Log.e("nampv_log",jsonElement.toString() );
-                    boolean respone = true;
-                    if(respone){
-                        checkGamePaused();
-                    }
-                },throwable -> {
-
-                });
+    private boolean isGameContract(){
+        EthCall ethCall = BaseWeb3.getInstance().init(mContext)
+                .contract(
+                        gameAddress,
+                        "isGameContract",
+                        new ArrayList<>()
+                );
+        if(Integer.decode(ethCall.getResult()) == 1){
+            return true;
+        }
+        return false;
     }
 
-    @SuppressLint("CheckResult")
-    private void checkGamePaused(){
-        //RPC param
-        RPCParams param = new RPCParams();
-        param.setTo("0xd786Db6012d7A542e7531068b0f987Da6414C54B");
-        param.setData("0x44e097aa0000000000000000000000003f57bf31e55de54306543863e079ad234f477b88");
-        RPCClient.request(RPCClient.createParams(param),"eth_call")
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(jsonElement -> {
-                    //Log.e("nampv_log",jsonElement.toString() );
-                    boolean respone = true;
-                    if(respone){
-                        checkDeveloperPaused();
-                    }
-
-                },throwable -> {
-
-                });
+    private boolean isGamePaused(){
+        EthCall ethCall = BaseWeb3.getInstance().init(mContext)
+                .contract(
+                        "0xd786Db6012d7A542e7531068b0f987Da6414C54B",
+                        "isGamePaused",
+                        Arrays.asList(new Address(gameAddress))
+                );
+        if(Integer.decode(ethCall.getResult()) == 1){
+            return true;
+        }
+        return false;
     }
 
-    @SuppressLint("CheckResult")
-    private void checkDeveloperPaused(){
-        //RPC param
-        RPCParams param = new RPCParams();
-        param.setTo("0xd786Db6012d7A542e7531068b0f987Da6414C54B");
-        param.setData("0x1298d00d000000000000000000000000690fddc2a98050f924bd7ec5900f2d2f49b6aec7");
-
-        RPCClient.request(RPCClient.createParams(param),"eth_call")
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(jsonElement -> {
-                    Log.e("nampv_log",jsonElement.toString() );
-                    boolean respone = true;
-                    if(respone){
-                        listener.isChecked(respone);
-                    }
-                },throwable -> {
-
-                });
+    private boolean isDeveloperPaused(){
+        EthCall ethCall = BaseWeb3.getInstance().init(mContext)
+                .contract(
+                        "0xd786Db6012d7A542e7531068b0f987Da6414C54B",
+                        "isDeveloperPaused",
+                        Arrays.asList(new Address(developerAddress))
+                );
+        if(Integer.decode(ethCall.getResult()) == 1){
+            return true;
+        }
+        return false;
     }
 }
