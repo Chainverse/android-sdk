@@ -3,10 +3,9 @@ package com.chainverse.sdk.base.web3;
 import android.content.Context;
 
 import com.chainverse.sdk.common.LogUtil;
-import com.chainverse.sdk.common.PrefUtil;
+import com.chainverse.sdk.common.EncryptPreferenceUser;
 
 import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.protocol.Web3j;
@@ -15,7 +14,6 @@ import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.http.HttpService;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -25,7 +23,7 @@ public class BaseWeb3 {
     private Web3j web3;
     public static BaseWeb3 getInstance(){
         if(instance == null){
-            synchronized (PrefUtil.class){
+            synchronized (EncryptPreferenceUser.class){
                 if(instance == null){
                     instance = new BaseWeb3();
                 }

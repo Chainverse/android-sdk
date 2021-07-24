@@ -9,7 +9,7 @@ import android.view.WindowManager;
 
 import com.chainverse.sdk.R;
 import com.chainverse.sdk.common.Utils;
-import com.chainverse.sdk.ui.screen.ChooseWLScreen;
+import com.chainverse.sdk.ui.screen.ConnectWalletScreen;
 
 public class ChainverseSDKActivity extends AppCompatActivity {
     private String screen;
@@ -23,7 +23,7 @@ public class ChainverseSDKActivity extends AppCompatActivity {
 
     private void initLayout(){
         WindowManager.LayoutParams params = getWindow().getAttributes();
-        params.height = Utils.convertDPToPixels(this,300);
+        params.height = Utils.convertDPToPixels(this,282);
         params.width =  Utils.convertDPToPixels(this,300);
         params.gravity = Gravity.CENTER;
         getWindow().setAttributes(params);
@@ -32,8 +32,8 @@ public class ChainverseSDKActivity extends AppCompatActivity {
     private void showScreen(){
         screen = getIntent().getStringExtra("screen");
         switch (screen){
-            case "choosewl":
-                replaceFragment(new ChooseWLScreen());
+            case "showConnectWalletView":
+                replaceFragment(new ConnectWalletScreen());
                 break;
         }
     }

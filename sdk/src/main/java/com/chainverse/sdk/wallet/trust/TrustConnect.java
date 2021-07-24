@@ -34,7 +34,7 @@ public class TrustConnect {
                 .appendQueryParameter("coins.2","283")
                 .appendQueryParameter("coins.3","118")
                 .appendQueryParameter("coins.4","714")
-                .appendQueryParameter("coins.5","145");
+                ;
 
         return builder.build();
     }

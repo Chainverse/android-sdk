@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 
 import com.chainverse.sdk.model.Item;
-import com.chainverse.sdk.model.User;
-import com.chainverse.sdk.model.WL;
 
 import java.util.ArrayList;
 
@@ -16,6 +14,12 @@ public interface Chainverse {
      * @param callback
      */
     void init(String developerAddress, String gameAddress, Activity activity, ChainverseCallback callback);
+
+    /**
+     * setKeepConnectWallet: Hàm thiết lập keep connect wallet
+     * @param keep: true(giữ trạng thái connect từ lần trước đó) | false (phải connect lại)
+     */
+    void setKeepConnectWallet(boolean keep);
 
     /**
      * setCallbackScheme: Hàm thiết lập scheme để ví Trust wallet callback về
@@ -33,25 +37,7 @@ public interface Chainverse {
      * return list support wallet
      * @return
      */
-    ArrayList<WL> getSupportedWallets();
-
-    /**
-     * login with signature
-     * @param signature
-     */
-    void loginWithSignature(String signature);
-
-    /**
-     * return user
-     * @return
-     */
-    User getUser();
-
-    /**
-     * return item;
-     * @return
-     */
-    Item getItem();
+    ArrayList<Item> getItems();
 
     /**
      * return version
@@ -63,12 +49,12 @@ public interface Chainverse {
      * handle result intent
      * @param intent
      */
-    void handleResult(Intent intent);
+    void onNewIntent(Intent intent);
 
     /**
      * choose wallet
      */
-    void chooseWallet();
+    void showConnectWalletView();
 
     /**
      * Connect with Trust Wallet
@@ -83,4 +69,9 @@ public interface Chainverse {
      * @param amount
      */
     void transferTrustWL(String callbackScheme, int asset, String to, String amount);
+
+    /**
+     * logout: Hàm thực hiện logout
+     */
+    void logout();
 }

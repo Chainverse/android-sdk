@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="10dp"
-    android:background="@drawable/com_chainverse_sdk_background_wl_item">
+    android:background="@drawable/chainverse_background_connect_wallet_item">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

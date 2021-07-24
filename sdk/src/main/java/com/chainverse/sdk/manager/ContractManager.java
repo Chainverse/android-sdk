@@ -2,6 +2,7 @@ package com.chainverse.sdk.manager;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.chainverse.sdk.ChainverseSDK;
@@ -15,6 +16,12 @@ import org.web3j.protocol.core.methods.response.EthCall;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+import rx.functions.Func0;
+
 
 public class ContractManager {
     public interface Listener{
@@ -27,12 +34,32 @@ public class ContractManager {
         mContext = context;
     }
 
-    public void check(){
+    private Observable<Boolean> checkContractObservable(){
+        return Observable.defer(new Func0<ObservableSource<? extends Boolean>>(){
+
+            @Override
+            public ObservableSource<? extends Boolean> call() {
+                return Observable.just(checkContract());
+            }
+        });
+    }
+
+    private Boolean checkContract(){
         if(isGameContract() && isDeveloperContract() && isGamePaused()){
-            listener.isChecked(true);
+            return true;
         }else{
-            listener.isChecked(false);
+            return false;
         }
+    }
+
+
+    public void check(){
+        checkContractObservable()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(isChecked -> {
+                    listener.isChecked(isChecked);
+                });
     }
 
     private boolean isDeveloperContract(){
