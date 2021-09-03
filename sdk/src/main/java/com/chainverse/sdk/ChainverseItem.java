@@ -1,6 +1,9 @@
-package com.chainverse.sdk.model;
+package com.chainverse.sdk;
 
-public class Item {
+public class ChainverseItem {
+    public static final int TRANSFER_ITEM_TO_USER = 1;
+    public static final int TRANSFER_ITEM_FROM_USER = 2;
+
     private int item_id;
     private int category_id;
     private String game_address;

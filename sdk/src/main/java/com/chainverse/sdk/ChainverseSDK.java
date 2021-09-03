@@ -5,28 +5,40 @@ import android.content.Intent;
 
 import com.chainverse.sdk.common.CallbackToGame;
 import com.chainverse.sdk.common.EncryptPreferenceUser;
-import com.chainverse.sdk.model.Item;
+import com.chainverse.sdk.common.LogUtil;
+import com.chainverse.sdk.common.Utils;
+import com.chainverse.sdk.listener.OnEmitterListenter;
 import com.chainverse.sdk.manager.ContractManager;
+import com.chainverse.sdk.manager.TransferItemManager;
+import com.chainverse.sdk.network.RESTful.RESTfulClient;
 import com.chainverse.sdk.ui.ChainverseSDKActivity;
+import com.chainverse.sdk.wallet.chainverse.ChainverseConnect;
+import com.chainverse.sdk.wallet.chainverse.ChainverseResult;
 import com.chainverse.sdk.wallet.trust.TrustConnect;
 import com.chainverse.sdk.wallet.trust.TrustResult;
-import com.chainverse.sdk.wallet.trust.TrustTransfer;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 public class ChainverseSDK implements Chainverse {
     private static ChainverseSDK mInstance;
     public static String developerAddress;
     public static String gameAddress;
-    public static String callbackScheme;
+    public static String scheme;
     public static String callbackHost;
     public static ChainverseCallback mCallback;
 
-    private boolean isKeepConnectWallet = true;
+    private boolean isKeepConnect = true;
     private Activity mContext;
     private EncryptPreferenceUser encryptPreferenceUser;
+    private boolean isInitSDK = false;
     public static ChainverseSDK getInstance(){
         if(mInstance == null){
             synchronized (ChainverseSDK.class){
@@ -50,8 +62,8 @@ public class ChainverseSDK implements Chainverse {
     }
 
     @Override
-    public void setKeepConnectWallet(boolean keep) {
-        isKeepConnectWallet = keep;
+    public void setKeepConnect(boolean keep) {
+        isKeepConnect = keep;
     }
 
     private void exceptionSDK(){
@@ -60,27 +72,51 @@ public class ChainverseSDK implements Chainverse {
     }
 
     @Override
-    public void setCallbackScheme(String scheme) {
-        callbackScheme = scheme;
+    public void setScheme(String scheme) {
+        ChainverseSDK.scheme = scheme;
     }
 
     @Override
-    public void setCallbackHost(String host) {
+    public void setHost(String host) {
         callbackHost = host;
     }
 
     @Override
-    public ArrayList<Item> getItems() {
-        return null;
+    public void getItems() {
+        if(!isInitSDKSuccess()){
+            return;
+        }
+        if(isUserConnected()){
+            RESTfulClient.getItems(encryptPreferenceUser.getXUserAddress(),ChainverseSDK.gameAddress)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(jsonElement -> {
+                        if(Utils.getErrorCodeResponse(jsonElement) == 0){
+                            Gson gson = new Gson();
+                            ArrayList<ChainverseItem> items = gson.fromJson(jsonElement.getAsJsonObject().get("items"),new TypeToken<ArrayList<ChainverseItem>>(){}.getType());
+                            CallbackToGame.onGetItems(items);
+                        }else{
+                            CallbackToGame.onError(ChainverseError.ERROR_REQUEST_ITEM);
+                        }
+
+                    },throwable -> {
+                        throwable.printStackTrace();
+                        CallbackToGame.onError(ChainverseError.ERROR_REQUEST_ITEM);
+                    });
+        }
+
+
     }
 
     private void checkContract(){
         ContractManager checkContract = new ContractManager(mContext, new ContractManager.Listener() {
             @Override
             public void isChecked(boolean isCheck) {
-                CallbackToGame.onInitSDK(isCheck);
                 if(isCheck){
+                    CallbackToGame.onInitSDKSuccess();
                     doInit();
+                }else{
+                    CallbackToGame.onError(ChainverseError.ERROR_INIT_SDK);
                 }
             }
 
@@ -90,65 +126,158 @@ public class ChainverseSDK implements Chainverse {
 
 
     private void doInit(){
-        if(isKeepConnectWallet){
-            keepConnectWallet();
+        isInitSDK = true;
+        if(isKeepConnect){
+            doConnectSuccess();
         }else{
             encryptPreferenceUser.clearXUserAddress();
+            encryptPreferenceUser.clearXUserSignature();
         }
 
     }
 
-    private void keepConnectWallet(){
-        if(!encryptPreferenceUser.getXUserAddress().isEmpty()){
-            CallbackToGame.onUserAddress(encryptPreferenceUser.getXUserAddress());
+    private Boolean isInitSDKSuccess(){
+        if(!isInitSDK){
+            CallbackToGame.onError(ChainverseError.ERROR_WAITING_INIT_SDK);
+            return false;
+        }
+        return true;
+    }
+
+    private void doConnectSuccess(){
+        if(isUserConnected()){
+            CallbackToGame.onConnectSuccess(encryptPreferenceUser.getXUserAddress());
+            TransferItemManager transferItemManager = new TransferItemManager(mContext);
+            transferItemManager.on(new OnEmitterListenter() {
+                @Override
+                public void call(String event, Object... args) {
+                    switch (event){
+                        case "transfer_item_to_user":
+                            if(args.length > 0){
+                                JsonElement jsonElement = new JsonParser().parse(args[0].toString());
+                                Gson gson = new Gson();
+                                ChainverseItem item = gson.fromJson(jsonElement.getAsJsonObject(),new TypeToken<ChainverseItem>(){}.getType());
+                                CallbackToGame.onItemUpdate(item,ChainverseItem.TRANSFER_ITEM_TO_USER);
+                                getItems();
+                            }
+
+                            break;
+                        case "transfer_item_from_user":
+                            if(args.length > 0){
+                                JsonElement jsonElement = new JsonParser().parse(args[0].toString());
+                                Gson gson = new Gson();
+                                ChainverseItem item = gson.fromJson(jsonElement.getAsJsonObject(),new TypeToken<ChainverseItem>(){}.getType());
+                                CallbackToGame.onItemUpdate(item,ChainverseItem.TRANSFER_ITEM_FROM_USER);
+                                getItems();
+                            }
+                            break;
+                    }
+                    LogUtil.log("socket_" + event,args);
+                }
+            });
+            transferItemManager.connect();
         }
     }
 
     @Override
     public String getVersion() {
-        return "1.0.0" ;
+        return ChainverseVersion.BUILD ;
     }
 
     @Override
     public void onNewIntent(Intent intent) {
-        String action = TrustResult.getAction(intent);
-        switch (action){
-            case "get_accounts":
-                String xUserAddress = TrustResult.getUserAddress(intent);
-                EncryptPreferenceUser.getInstance().init(mContext).setXUserAddress(xUserAddress);
-                CallbackToGame.onUserAddress(xUserAddress);
-                break;
+        if(encryptPreferenceUser.getConnectWallet().equals("trust")){
+            String action = TrustResult.getAction(intent);
+            switch (action){
+                case "get_accounts":
+                    String xUserAddress = TrustResult.getUserAddress(intent);
+                    encryptPreferenceUser.setXUserAddress(xUserAddress);
+                    doConnectSuccess();
+                    break;
+            }
+        }else{
+            String xUserAddress = ChainverseResult.getUserAddress(intent);
+            String xUserSignature = ChainverseResult.getUserSignature(intent);
+            encryptPreferenceUser.setXUserAddress(xUserAddress);
+            encryptPreferenceUser.setXUserSignature(xUserSignature);
+            doConnectSuccess();
         }
     }
 
     @Override
-    public void showConnectWalletView() {
+    public void showConnectView() {
+        if(!isInitSDKSuccess()){
+            return;
+        }
         Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
-        intent.putExtra("screen","showConnectWalletView");
+        intent.putExtra("screen","showConnectView");
         mContext.startActivity(intent);
     }
 
     @Override
-    public void connectTrust() {
+    public void connectWithTrust() {
+        if(!isInitSDKSuccess()){
+            return;
+        }
+        encryptPreferenceUser.setConnectWallet("trust");
         TrustConnect trust = new TrustConnect.Builder().build();
         trust.connect(mContext);
     }
 
     @Override
-    public void transferTrustWL(String callbackScheme, int asset, String toAddress, String amount) {
-        TrustTransfer trustTransfer = new TrustTransfer.Builder()
-                .setCallbackScheme(callbackScheme)
-                .asset(asset)
-                .to(toAddress)
-                .amount(new BigDecimal(amount))
-                .build();
-        trustTransfer.transfer(mContext);
+    public void connectWithChainverse() {
+        if(!isInitSDKSuccess()){
+            return;
+        }
+
+        if(Utils.isChainverseInstalled(mContext)){
+            encryptPreferenceUser.setConnectWallet("chainverse");
+            ChainverseConnect chainverse = new ChainverseConnect.Builder().build();
+            chainverse.connect(mContext);
+        }
     }
+
 
     @Override
     public void logout() {
-        CallbackToGame.onUserLogout(encryptPreferenceUser.getXUserAddress());
+        if(!isInitSDKSuccess()){
+            return;
+        }
+        CallbackToGame.onLogout(encryptPreferenceUser.getXUserAddress());
         encryptPreferenceUser.clearXUserAddress();
+        encryptPreferenceUser.clearXUserSignature();
+    }
+
+    @Override
+    public Boolean isUserConnected() {
+        if(!encryptPreferenceUser.getXUserSignature().isEmpty()){
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public ChainverseUser getUser() {
+        if(isUserConnected()){
+            ChainverseUser info = new ChainverseUser();
+            info.setAddress(encryptPreferenceUser.getXUserAddress());
+            info.setSignature(encryptPreferenceUser.getXUserSignature());
+            return info;
+        }
+        return null;
+    }
+
+    @Override
+    public void testBuy() {
+        RESTfulClient.testBuy()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(jsonElement -> {
+                    LogUtil.log("nampv_testbuy",jsonElement.toString());
+
+                },throwable -> {
+                    throwable.printStackTrace();
+                });
     }
 
 

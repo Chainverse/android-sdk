@@ -3,27 +3,48 @@ package com.chainverse.sdk.common;
 
 
 import com.chainverse.sdk.ChainverseSDK;
+import com.chainverse.sdk.ChainverseItem;
+
+import java.util.ArrayList;
 
 public class CallbackToGame {
-    public static void onUserAddress(String address) {
+    public static void onConnectSuccess(String address) {
         if(!address.isEmpty()){
             if(ChainverseSDK.mCallback != null){
-                ChainverseSDK.mCallback.onUserAddress(address);
+                ChainverseSDK.mCallback.onConnectSuccess(address);
             }
         }
     }
 
-    public static void onInitSDK(boolean isCheck){
+    public static void onInitSDKSuccess(){
         if(ChainverseSDK.mCallback != null){
-            ChainverseSDK.mCallback.onInitSDK(isCheck);
+            ChainverseSDK.mCallback.onInitSDKSuccess();
         }
     }
 
-    public static void onUserLogout(String address) {
+    public static void onLogout(String address) {
         if(!address.isEmpty()){
             if(ChainverseSDK.mCallback != null){
-                ChainverseSDK.mCallback.onUserLogout(address);
+                ChainverseSDK.mCallback.onLogout(address);
             }
+        }
+    }
+
+    public static void onError(int errorCode) {
+        if(ChainverseSDK.mCallback != null){
+            ChainverseSDK.mCallback.onError(errorCode);
+        }
+    }
+
+    public static void onGetItems(ArrayList<ChainverseItem> items) {
+        if(ChainverseSDK.mCallback != null){
+            ChainverseSDK.mCallback.onGetItems(items);
+        }
+    }
+
+    public static void onItemUpdate(ChainverseItem item, int type) {
+        if(ChainverseSDK.mCallback != null){
+            ChainverseSDK.mCallback.onItemUpdate(item, type);
         }
     }
 }

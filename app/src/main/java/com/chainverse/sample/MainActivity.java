@@ -1,9 +1,9 @@
 package com.chainverse.sample;
 
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -11,8 +11,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.chainverse.sdk.ChainverseCallback;
+import com.chainverse.sdk.ChainverseError;
 import com.chainverse.sdk.ChainverseSDK;
-import com.chainverse.sdk.model.Item;
+import com.chainverse.sdk.ChainverseUser;
+import com.chainverse.sdk.common.LogUtil;
+import com.chainverse.sdk.ChainverseItem;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,62 +31,85 @@ public class MainActivity extends AppCompatActivity {
         Button btnLogout = (Button) findViewById(R.id.btnLogout);
         TextView tvAddress = (TextView) findViewById(R.id.tvAddress);
 
-        String developerAddress = "0x690FDdc2a98050f924Bd7Ec5900f2D2F49b6aEC7";
-        String gameAddress = "0x3F57BF31E55de54306543863E079aD234f477b88";
-        ChainverseSDK sdk = ChainverseSDK.getInstance();
-        sdk.init(developerAddress,gameAddress,this, new ChainverseCallback() {
+        String developerAddress = "0xE1717d89f2d7A7b4834c2724408b319ABAf500ec";
+        String gameAddress = "0xD146b45817fd18555c59c061C840e3a446Cd5A6c";
+        ChainverseSDK.getInstance().init(developerAddress,gameAddress,this, new ChainverseCallback() {
+
             @Override
-            public void onInitSDK(boolean status) {
-                Log.e("nampv_init","ok");
+            public void onInitSDKSuccess() {
+
             }
 
             @Override
             public void onError(int error) {
+                Log.e("onError", "" + error);
+                switch (error){
+                    case ChainverseError.ERROR_INIT_SDK:
+                        break;
+                }
 
             }
 
             @Override
-            public void onItemUpdate(Item item) {
+            public void onItemUpdate(ChainverseItem item, int type) {
+                LogUtil.log("onItemUpdate",item);
+                switch (type){
+                    case ChainverseItem.TRANSFER_ITEM_TO_USER:
+                        break;
+                    case ChainverseItem.TRANSFER_ITEM_FROM_USER:
+                        break;
+                }
+            }
 
+            @Override
+            public void onGetItems(ArrayList<ChainverseItem> items) {
+                LogUtil.log("onGetItems",items);
             }
 
 
             @Override
-            public void onUserAddress(String address) {
+            public void onConnectSuccess(String address) {
                 tvAddress.setText("Wellcome: " +  address);
+                Log.e("onConnectSuccess", "" + address);
+                ChainverseSDK.getInstance().getItems();
             }
 
             @Override
-            public void onUserLogout(String address) {
+            public void onLogout(String address) {
                 tvAddress.setText("No Connect Wallet!");
                 Toast.makeText(MainActivity.this,"User Address" + address + " Logout",Toast.LENGTH_LONG ).show();
             }
         });
-        sdk.setCallbackScheme("com.chainverse.sample");
-        sdk.setCallbackHost("accounts_callback");
-        sdk.setKeepConnectWallet(true);
-
-        sdk.getItems();
+        ChainverseSDK.getInstance().setScheme("trust-rn-example1://");
+        ChainverseSDK.getInstance().setHost("accounts_callback");
+        ChainverseSDK.getInstance().setKeepConnect(true);
 
 
+        if(ChainverseSDK.getInstance().isUserConnected()){
+            //Connected
+            ChainverseUser info = ChainverseSDK.getInstance().getUser();
+            LogUtil.log("info",info);
+        }else{
+            //No connect
+        }
         btnChooseWallet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sdk.showConnectWalletView();
+                ChainverseSDK.getInstance().showConnectView();
             }
         });
 
         btnConnectTrust.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sdk.connectTrust();
+                ChainverseSDK.getInstance().connectWithTrust();
             }
         });
 
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ChainverseSDK.getInstance().transferTrustWL("com.chainverse.sample", 714,"0x5efe370cfedf4d38f99cf645d38b993627937f46","1.0");
+                ChainverseSDK.getInstance().testBuy();
             }
         });
 

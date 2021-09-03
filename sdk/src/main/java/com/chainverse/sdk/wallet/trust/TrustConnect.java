@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 
 import com.chainverse.sdk.ChainverseSDK;
+import com.chainverse.sdk.common.Utils;
 
 public class TrustConnect {
     public TrustConnect(){
@@ -12,13 +13,7 @@ public class TrustConnect {
     }
 
     public void connect(Context context){
-        try{
-            Intent intent = new Intent(Intent.ACTION_VIEW, buildUri());
-            context.startActivity(intent);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
+        Utils.openURI(context,buildUri());
     }
 
     private Uri buildUri(){
@@ -26,7 +21,7 @@ public class TrustConnect {
         builder.scheme("trust")
                 .authority("sdk_get_accounts")
                 .appendQueryParameter("action","get_accounts")
-                .appendQueryParameter("app", ChainverseSDK.callbackScheme)
+                .appendQueryParameter("app", ChainverseSDK.scheme)
                 .appendQueryParameter("callback",ChainverseSDK.callbackHost)
                 .appendQueryParameter("id","0")
                 .appendQueryParameter("coins.0","60")

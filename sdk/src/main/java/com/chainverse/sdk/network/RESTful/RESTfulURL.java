@@ -1,15 +1,68 @@
 package com.chainverse.sdk.network.RESTful;
 
+import com.chainverse.sdk.common.Constants;
+import com.chainverse.sdk.common.EncryptPreferenceUser;
 import com.chainverse.sdk.network.RPC.RPCEndpoint;
 
+import java.io.IOException;
+
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RESTfulURL {
     public static RESTfulEndpoint getInstance(){
+        Interceptor interceptor = new Interceptor() {
+            @Override
+            public okhttp3.Response intercept(Chain chain) throws IOException {
+                final Request request = chain.request().newBuilder()
+                        .addHeader("X-User-Signature", EncryptPreferenceUser.getInstance().getXUserSignature())
+                        .addHeader("X-Signature-Ethers", "true")
+                        .build();
+
+                return chain.proceed(request);
+
+            }
+        };
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(interceptor)
+                .build();
+
+
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.101.144:8545")
+                .baseUrl(Constants.URL.urlRestful)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .build();
+        return retrofit.create(RESTfulEndpoint .class);
+    }
+
+    public static RESTfulEndpoint getInstanceTest(){
+        Interceptor interceptor = new Interceptor() {
+            @Override
+            public okhttp3.Response intercept(Chain chain) throws IOException {
+                final Request request = chain.request().newBuilder()
+                        .addHeader("X-User-Signature", EncryptPreferenceUser.getInstance().getXUserSignature())
+                        .build();
+
+                return chain.proceed(request);
+
+            }
+        };
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(interceptor)
+                .build();
+
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(Constants.URL.urlBuyTest)
+                .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();

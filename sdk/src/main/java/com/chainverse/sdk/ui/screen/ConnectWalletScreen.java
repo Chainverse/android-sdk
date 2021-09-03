@@ -2,7 +2,7 @@ package com.chainverse.sdk.ui.screen;
 
 import android.os.Bundle;
 
-import androidx.fragment.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,7 +43,9 @@ public class ConnectWalletScreen extends Fragment implements View.OnClickListene
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.chainverse_button_connect_trust) {
-            ChainverseSDK.getInstance().connectTrust();
+            ChainverseSDK.getInstance().connectWithTrust();
+        }else if (v.getId() == R.id.chainverse_button_connect) {
+            ChainverseSDK.getInstance().connectWithChainverse();
         }else if(v.getId() == R.id.chainverse_button_close){
             getActivity().finish();
         }

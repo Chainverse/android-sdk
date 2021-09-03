@@ -3,41 +3,37 @@ package com.chainverse.sdk;
 import android.app.Activity;
 import android.content.Intent;
 
-import com.chainverse.sdk.model.Item;
-
-import java.util.ArrayList;
-
 public interface Chainverse {
     /**
-     * init: Hàm init ChainverseSDK
+     * init: init ChainverseSDK
      * @param activity
      * @param callback
      */
     void init(String developerAddress, String gameAddress, Activity activity, ChainverseCallback callback);
 
     /**
-     * setKeepConnectWallet: Hàm thiết lập keep connect wallet
-     * @param keep: true(giữ trạng thái connect từ lần trước đó) | false (phải connect lại)
+     * setKeepConnect: Keep connect wallet
+     * @param keep: true(keep connect wallet) | false (reconnect wallet)
      */
-    void setKeepConnectWallet(boolean keep);
+    void setKeepConnect(boolean keep);
 
     /**
-     * setCallbackScheme: Hàm thiết lập scheme để ví Trust wallet callback về
+     * setScheme: setup connect wallet
      * @param scheme
      */
-    void setCallbackScheme(String scheme);
+    void setScheme(String scheme);
 
     /**
-     * setCallbackHost: Hàm thiết lập host để ví Trust wallet callback về
+     * setCallbackHost: setup connect wallet
      * @param host
      */
-    void setCallbackHost(String host);
+    void setHost(String host);
 
     /**
      * return list support wallet
      * @return
      */
-    ArrayList<Item> getItems();
+    void getItems();
 
     /**
      * return version
@@ -52,26 +48,36 @@ public interface Chainverse {
     void onNewIntent(Intent intent);
 
     /**
-     * choose wallet
+     * showConnectView: Show screen choose wallet
      */
-    void showConnectWalletView();
+    void showConnectView();
 
     /**
-     * Connect with Trust Wallet
+     * connectWithTrust: Connect with Trust Wallet
      */
-    void connectTrust();
+    void connectWithTrust();
 
     /**
-     * Transfer with Trust Wallet
-     * @param callbackScheme
-     * @param asset
-     * @param to
-     * @param amount
+     * connectWithChainverse: Connect with Chainverse
      */
-    void transferTrustWL(String callbackScheme, int asset, String to, String amount);
+    void connectWithChainverse();
 
     /**
-     * logout: Hàm thực hiện logout
+     * logout: Logout
      */
     void logout();
+
+    /**
+     * isUserConnected: return status connected or no connected
+     * @return
+     */
+    Boolean isUserConnected();
+
+    /**
+     * getUserInfo: Return user info
+     * @return
+     */
+    ChainverseUser getUser();
+
+    void testBuy();
 }

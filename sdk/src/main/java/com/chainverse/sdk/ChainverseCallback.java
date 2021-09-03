@@ -1,11 +1,12 @@
 package com.chainverse.sdk;
 
-import com.chainverse.sdk.model.Item;
+import java.util.ArrayList;
 
 public interface ChainverseCallback {
-    void onInitSDK(boolean status);
+    void onInitSDKSuccess();
     void onError(int error);
-    void onItemUpdate(Item item);
-    void onUserAddress(String address);
-    void onUserLogout(String address);
+    void onItemUpdate(ChainverseItem item, int type);
+    void onGetItems(ArrayList<ChainverseItem> items);
+    void onConnectSuccess(String address);
+    void onLogout(String address);
 }

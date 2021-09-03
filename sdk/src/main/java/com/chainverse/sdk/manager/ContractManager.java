@@ -5,9 +5,12 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.chainverse.sdk.ChainverseError;
 import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.base.web3.BaseWeb3;
+import com.chainverse.sdk.common.CallbackToGame;
 import com.chainverse.sdk.common.Constants;
+import com.chainverse.sdk.common.Convert;
 
 
 import org.web3j.abi.datatypes.Address;
@@ -45,11 +48,26 @@ public class ContractManager {
     }
 
     private Boolean checkContract(){
-        if(isGameContract() && isDeveloperContract() && isGamePaused()){
-            return true;
-        }else{
-            return false;
+        if(!isGameContract()){
+            CallbackToGame.onError(ChainverseError.ERROR_GAME_ADDRESS);
         }
+
+        if(!isDeveloperContract()){
+            CallbackToGame.onError(ChainverseError.ERROR_DEVELOPER_ADDRESS);
+        }
+
+        if(isGamePaused()){
+            CallbackToGame.onError(ChainverseError.ERROR_GAME_PAUSE);
+        }
+
+        if(isDeveloperPaused()){
+            CallbackToGame.onError(ChainverseError.ERROR_DEVELOPER_PAUSE);
+        }
+
+        if(isGameContract() && isDeveloperContract() && !isGamePaused() && !isDeveloperPaused()){
+            return true;
+        }
+        return false;
     }
 
 
@@ -69,10 +87,8 @@ public class ContractManager {
                         "isDeveloperContract",
                         new ArrayList<>()
                 );
-        if(Integer.decode(ethCall.getResult()) == 1){
-            return true;
-        }
-        return false;
+
+        return Convert.hexToBool(ethCall.getResult());
     }
 
     private boolean isGameContract(){
@@ -82,10 +98,7 @@ public class ContractManager {
                         "isGameContract",
                         new ArrayList<>()
                 );
-        if(Integer.decode(ethCall.getResult()) == 1){
-            return true;
-        }
-        return false;
+        return Convert.hexToBool(ethCall.getResult());
     }
 
     private boolean isGamePaused(){
@@ -95,10 +108,7 @@ public class ContractManager {
                         "isGamePaused",
                         Arrays.asList(new Address(ChainverseSDK.gameAddress))
                 );
-        if(Integer.decode(ethCall.getResult()) == 1){
-            return true;
-        }
-        return false;
+        return Convert.hexToBool(ethCall.getResult());
     }
 
     private boolean isDeveloperPaused(){

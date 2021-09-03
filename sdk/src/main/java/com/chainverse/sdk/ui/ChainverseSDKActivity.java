@@ -1,7 +1,9 @@
 package com.chainverse.sdk.ui;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
+
+import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
+
 
 import android.os.Bundle;
 import android.view.Gravity;
@@ -32,7 +34,7 @@ public class ChainverseSDKActivity extends AppCompatActivity {
     private void showScreen(){
         screen = getIntent().getStringExtra("screen");
         switch (screen){
-            case "showConnectWalletView":
+            case "showConnectView":
                 replaceFragment(new ConnectWalletScreen());
                 break;
         }
