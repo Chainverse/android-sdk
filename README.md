@@ -354,14 +354,18 @@ boolean isConnect = ChainverseSDK.getInstance().isUserConnected()
 
 Chainverse SDK Android sử dụng những thư viện sau:
 ###### 1. Retrofit
+License: Apache License
 Home page: https://square.github.io/retrofit/
 Mục đích sử dụng: Để kết nối REST (API)
 ###### 2. RxJava - RxAndroid
+License: Apache License
 Home page: https://github.com/ReactiveX/RxJava
 Mục đích sử dụng: Xử lý bất động bộ khi connect API
 ###### 3. Socket io
+License: MIT License
 Home page: https://socket.io/
 Mục đích sử dụng: Xử lý realtime
 ###### 4. Web3j
+License: Apache License
 Home page: https://github.com/web3j/web3j
 Mục đích sử dụng: Connect với blockchain
