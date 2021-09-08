@@ -9,7 +9,7 @@ import com.chainverse.sdk.common.LogUtil;
 import com.chainverse.sdk.common.Utils;
 import com.chainverse.sdk.listener.OnEmitterListenter;
 import com.chainverse.sdk.manager.ContractManager;
-import com.chainverse.sdk.manager.TransferItemManager;
+import com.chainverse.sdk.manager.SocketIOManager;
 import com.chainverse.sdk.network.RESTful.RESTfulClient;
 import com.chainverse.sdk.ui.ChainverseSDKActivity;
 import com.chainverse.sdk.wallet.chainverse.ChainverseConnect;
@@ -86,7 +86,7 @@ public class ChainverseSDK implements Chainverse {
         if(!isInitSDKSuccess()){
             return;
         }
-        if(isUserConnected()){
+        if(!encryptPreferenceUser.getXUserSignature().isEmpty()){
             RESTfulClient.getItems(encryptPreferenceUser.getXUserAddress(),ChainverseSDK.gameAddress)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -138,50 +138,54 @@ public class ChainverseSDK implements Chainverse {
 
     private Boolean isInitSDKSuccess(){
         if(!isInitSDK){
-            CallbackToGame.onError(ChainverseError.ERROR_WAITING_INIT_SDK);
+            CallbackToGame.onError(ChainverseError.ERROR_INIT_SDK);
             return false;
         }
         return true;
     }
 
     private void doConnectSuccess(){
-        if(isUserConnected()){
+        if(!encryptPreferenceUser.getXUserSignature().isEmpty()){
             CallbackToGame.onConnectSuccess(encryptPreferenceUser.getXUserAddress());
-            TransferItemManager transferItemManager = new TransferItemManager(mContext);
-            transferItemManager.on(new OnEmitterListenter() {
-                @Override
-                public void call(String event, Object... args) {
-                    switch (event){
-                        case "transfer_item_to_user":
-                            if(args.length > 0){
-                                JsonElement jsonElement = new JsonParser().parse(args[0].toString());
-                                Gson gson = new Gson();
-                                ChainverseItem item = gson.fromJson(jsonElement.getAsJsonObject(),new TypeToken<ChainverseItem>(){}.getType());
-                                CallbackToGame.onItemUpdate(item,ChainverseItem.TRANSFER_ITEM_TO_USER);
-                                getItems();
-                            }
-
-                            break;
-                        case "transfer_item_from_user":
-                            if(args.length > 0){
-                                JsonElement jsonElement = new JsonParser().parse(args[0].toString());
-                                Gson gson = new Gson();
-                                ChainverseItem item = gson.fromJson(jsonElement.getAsJsonObject(),new TypeToken<ChainverseItem>(){}.getType());
-                                CallbackToGame.onItemUpdate(item,ChainverseItem.TRANSFER_ITEM_FROM_USER);
-                                getItems();
-                            }
-                            break;
-                    }
-                    LogUtil.log("socket_" + event,args);
-                }
-            });
-            transferItemManager.connect();
+            transferItemListener();
         }
+    }
+
+    private void transferItemListener(){
+        SocketIOManager manager = new SocketIOManager(mContext);
+        manager.on(new OnEmitterListenter() {
+            @Override
+            public void call(String event, Object... args) {
+                switch (event){
+                    case "transfer_item_to_user":
+                        if(args.length > 0){
+                            JsonElement jsonElement = new JsonParser().parse(args[0].toString());
+                            Gson gson = new Gson();
+                            ChainverseItem item = gson.fromJson(jsonElement.getAsJsonObject(),new TypeToken<ChainverseItem>(){}.getType());
+                            CallbackToGame.onItemUpdate(item,ChainverseItem.TRANSFER_ITEM_TO_USER);
+                            getItems();
+                        }
+
+                        break;
+                    case "transfer_item_from_user":
+                        if(args.length > 0){
+                            JsonElement jsonElement = new JsonParser().parse(args[0].toString());
+                            Gson gson = new Gson();
+                            ChainverseItem item = gson.fromJson(jsonElement.getAsJsonObject(),new TypeToken<ChainverseItem>(){}.getType());
+                            CallbackToGame.onItemUpdate(item,ChainverseItem.TRANSFER_ITEM_FROM_USER);
+                            getItems();
+                        }
+                        break;
+                }
+                LogUtil.log("socket_" + event,args);
+            }
+        });
+        manager.connect();
     }
 
     @Override
     public String getVersion() {
-        return ChainverseVersion.BUILD ;
+        return "1.0.0" ;
     }
 
     @Override
@@ -210,7 +214,7 @@ public class ChainverseSDK implements Chainverse {
             return;
         }
         Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
-        intent.putExtra("screen","showConnectView");
+        intent.putExtra("screen","showConnectWalletView");
         mContext.startActivity(intent);
     }
 
@@ -229,12 +233,9 @@ public class ChainverseSDK implements Chainverse {
         if(!isInitSDKSuccess()){
             return;
         }
-
-        if(Utils.isChainverseInstalled(mContext)){
-            encryptPreferenceUser.setConnectWallet("chainverse");
-            ChainverseConnect chainverse = new ChainverseConnect.Builder().build();
-            chainverse.connect(mContext);
-        }
+        encryptPreferenceUser.setConnectWallet("chainverse");
+        ChainverseConnect chainverse = new ChainverseConnect.Builder().build();
+        chainverse.connect(mContext);
     }
 
 
@@ -246,25 +247,6 @@ public class ChainverseSDK implements Chainverse {
         CallbackToGame.onLogout(encryptPreferenceUser.getXUserAddress());
         encryptPreferenceUser.clearXUserAddress();
         encryptPreferenceUser.clearXUserSignature();
-    }
-
-    @Override
-    public Boolean isUserConnected() {
-        if(!encryptPreferenceUser.getXUserSignature().isEmpty()){
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public ChainverseUser getUser() {
-        if(isUserConnected()){
-            ChainverseUser info = new ChainverseUser();
-            info.setAddress(encryptPreferenceUser.getXUserAddress());
-            info.setSignature(encryptPreferenceUser.getXUserSignature());
-            return info;
-        }
-        return null;
     }
 
     @Override

@@ -2,7 +2,6 @@ package com.chainverse.sdk.base.web3;
 
 import android.content.Context;
 
-import com.chainverse.sdk.common.Constants;
 import com.chainverse.sdk.common.LogUtil;
 import com.chainverse.sdk.common.EncryptPreferenceUser;
 
@@ -35,7 +34,7 @@ public class BaseWeb3 {
 
 
     public BaseWeb3 init(Context context){
-        web3 = Web3j.build(new HttpService(Constants.URL.urlBlockchain));
+        web3 = Web3j.build(new HttpService("https://data-seed-prebsc-1-s1.binance.org:8545"));
         return instance;
     }
 

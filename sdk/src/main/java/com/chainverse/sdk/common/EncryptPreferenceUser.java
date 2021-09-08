@@ -3,15 +3,18 @@ package com.chainverse.sdk.common;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKeys;
+
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 
 public class EncryptPreferenceUser {
-    public static final String NAME =  "CHAINVERSE_SDK";
-    public static final String KEY_1 = "CHAINVERSE_SDK_KEY_1";
-    public static final String KEY_2 = "CHAINVERSE_SDK_KEY_2";
-    public static final String KEY_3 = "CHAINVERSE_SDK_KEY_3";
+    public static final String NAME = "ChainverseEncryptPreferenceUser";
+    public static final String KEY_1 = "chainverse_x_user_address";
+    public static final String KEY_2 = "chainverse_x_user_signature";
+    public static final String KEY_3 = "chainverse_connect_wallet_type";
     SharedPreferences preferences;
     SharedPreferences.Editor editor;
 
@@ -30,12 +33,24 @@ public class EncryptPreferenceUser {
 
     public EncryptPreferenceUser init(Context context){
         if(preferences == null){
-            preferences = context.getSharedPreferences(NAME, 0);
+            try {
+                String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
+                preferences = EncryptedSharedPreferences.create(
+                        NAME,
+                        masterKeyAlias,
+                        context,
+                        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                );
+                editor = preferences.edit();
+            } catch (GeneralSecurityException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
-        if(editor == null){
-            editor = preferences.edit();
-        }
-        return this;
+        return instance;
     }
 
     public synchronized void setXUserAddress(String value){

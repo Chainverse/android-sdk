@@ -2,7 +2,6 @@ package com.chainverse.sdk.manager;
 
 import android.content.Context;
 
-import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.common.Constants;
 import com.chainverse.sdk.common.EncryptPreferenceUser;
 import com.chainverse.sdk.common.LogUtil;
@@ -19,18 +18,15 @@ import io.socket.engineio.client.transports.Polling;
 import io.socket.engineio.client.transports.PollingXHR;
 import io.socket.engineio.client.transports.WebSocket;
 
-public class TransferItemManager {
+public class SocketIOManager {
     private Socket mSocket;
     private Context mContext;
     private Map<String, String> map = new HashMap<String, String>();
-    public TransferItemManager(Context context){
+    public SocketIOManager(Context context){
         mContext = context;
         map.put("type", "SDK");
-        map.put("signature", EncryptPreferenceUser.getInstance().getXUserSignature());
-        map.put("signature_ethers", "true");
         map.put("user_address", EncryptPreferenceUser.getInstance().getXUserAddress());
-        map.put("game_address", ChainverseSDK.gameAddress);
-
+        map.put("signature", EncryptPreferenceUser.getInstance().getXUserSignature());
         IO.Options opts = new IO.Options();
         opts.transports = new String[]{Polling.NAME, PollingXHR.NAME, WebSocket.NAME};
         opts.auth = map;

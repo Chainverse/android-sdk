@@ -20,7 +20,6 @@ public class RESTfulURL {
             public okhttp3.Response intercept(Chain chain) throws IOException {
                 final Request request = chain.request().newBuilder()
                         .addHeader("X-User-Signature", EncryptPreferenceUser.getInstance().getXUserSignature())
-                        .addHeader("X-Signature-Ethers", "true")
                         .build();
 
                 return chain.proceed(request);

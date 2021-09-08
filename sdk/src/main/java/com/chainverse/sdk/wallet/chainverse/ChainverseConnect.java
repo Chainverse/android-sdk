@@ -6,12 +6,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.chainverse.sdk.ChainverseSDK;
-import com.chainverse.sdk.common.Utils;
 import com.chainverse.sdk.wallet.trust.TrustConnect;
-
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 
 public class ChainverseConnect {
     public ChainverseConnect(){
@@ -19,19 +14,40 @@ public class ChainverseConnect {
     }
 
     public void connect(Context context){
-        Utils.openURI(context,Uri.parse(buildUri()));
+        try{
+            String test = "chainverse://sdk_account_sign_message?action=account_sign_message&coins.0=20000714&coin=20000714&data=chainverse&app=trust-rn-example://&callback=sdk_account_sign_result&id=2";
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(test));
+            context.startActivity(intent);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 
-    private String buildUri(){
-        return String.format("chainverse://%s?action=%s&coins.0=%s&coin=%s&data=%s&app=%s&callback=%s&id=%s",
-                "sdk_account_sign_message",
-                "account_sign_message",
-                "20000714",
-                "20000714",
-                "chainverse",
-                ChainverseSDK.scheme,
-                "sdk_account_sign_result",
-                "2");
+    private Uri buildUri(){
+        Uri.Builder builder = new Uri.Builder();
+        /*builder.scheme("chainverse")
+                .authority("sdk_account_sign_message")
+                .appendQueryParameter("action","account_sign_message")
+                .appendQueryParameter("coins.0","20000714")
+                .appendQueryParameter("coin","20000714")
+                .appendQueryParameter("data","chainverse")
+                .appendQueryParameter("app", ChainverseSDK.scheme)
+                .appendQueryParameter("callback","accounts_callback")
+                .appendQueryParameter("id","0")
+        ;*/
+        builder.scheme("chainverse")
+                .authority("sdk_get_accounts")
+                .appendQueryParameter("action","get_accounts")
+                .appendQueryParameter("app", ChainverseSDK.scheme)
+                .appendQueryParameter("callback","accounts_callback")
+                .appendQueryParameter("coins.0","20000714")
+                .appendQueryParameter("coins.1","0")
+                .appendQueryParameter("id","0")
+        ;
+
+        Log.e("chainverse_connect", builder.build().toString());
+        return builder.build();
     }
 
     public static class Builder{

@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.net.Uri;
 
 import com.chainverse.sdk.ChainverseSDK;
-import com.chainverse.sdk.common.Utils;
 
 public class TrustConnect {
     public TrustConnect(){
@@ -13,7 +12,13 @@ public class TrustConnect {
     }
 
     public void connect(Context context){
-        Utils.openURI(context,buildUri());
+        try{
+            Intent intent = new Intent(Intent.ACTION_VIEW, buildUri());
+            context.startActivity(intent);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 
     private Uri buildUri(){

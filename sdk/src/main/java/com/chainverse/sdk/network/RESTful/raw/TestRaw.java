@@ -4,7 +4,6 @@ public class TestRaw {
     private String game_contract;
     private String player_address;
     private String category_id;
-    private String type;
 
     public String getGame_contract() {
         return game_contract;
@@ -28,13 +27,5 @@ public class TestRaw {
 
     public void setCategory_id(String category_id) {
         this.category_id = category_id;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 }

@@ -39,7 +39,7 @@ maven {
 #### Bước 2: Khai báo dependencies
 
 ```
-implementation 'com.github.gmogame:chainversesdk:alpha-1.0.15'
+implementation 'com.github.gmogame:chainversesdk:alpha-1.0.18'
 ```
 
 ### Config trong file AndroidManifest.xml
@@ -49,7 +49,7 @@ Khai báo quyền sử dụng Internet.
 <uses-permission android:name="android.permission.INTERNET" />
 ```
 #### Bước 2: Khai báo deeplink
-Khai báo callback deeplink (trong tag activity) để ví Trust, Chainverse mở lại app (Khi connect ví).
+Khai báo callback deeplink (trong tag activity) để ví Chainverse mở lại app (Khi connect ví).
 {app_scheme} : Khai báo app scheme
 
 ```
@@ -92,7 +92,7 @@ Tài liệu này chứa các tham số bắt buộc. Bạn phải đảm bảo k
 
 1. "Game Address": Địa chỉ contract của game.
 2. "Developer Address": Địa chỉ contract của developer.
-3. "App Scheme": Khai báo scheme để connect Trust Wallet, Chainverse.
+3. "App Scheme": Khai báo scheme để connect Chainverse.
 
 ### Khởi tạo Chainverse SDK
 #### Bước 1: Import dependencies 
@@ -139,7 +139,7 @@ public void onError(int error) {
 ```
 
 ##### 3. Callback onConnectSuccess
-Khi user connect tới ví Trust, Chainverse thành công thì sẽ có callback này. Thông tin trả về là địa chỉ ví của user. 
+Khi user connect tới ví Chainverse thành công thì sẽ có callback này. Thông tin trả về là địa chỉ ví của user. 
 
 ```
 @Override
@@ -250,21 +250,14 @@ Hàm này hiển thị màn hình danh sách các ví để user lựa chọn co
 ChainverseSDK.getInstance().showConnectView();
 ```
 
-#### 2. Hàm connectWithTrust
-Sử dụng hàm này để kết nối với ví Trust, mà không cần hiển thị giao diện. 
-
-```
-ChainverseSDK.getInstance().connectWithTrust();
-```
-
-#### 3. Hàm connectWithChainverse
+#### 2. Hàm connectWithChainverse
 Sử dụng hàm này để kết nối với ví Chainverse, mà không cần hiển thị giao diện. 
 
 ```
 ChainverseSDK.getInstance().connectWithChainverse();
 ```
 
-#### 4. Hàm getItems
+#### 3. Hàm getItems
 Sử dụng hàm này để lấy danh sách ITEM của user. Thông tin sẽ được trả về qua callback  onGetItems .
 
 ```
@@ -277,7 +270,7 @@ public void onGetItems(ArrayList<ChainverseItem> items) {
 }
 ```
 
-#### 5. Hàm logout
+#### 4. Hàm logout
 Gọi hàm này để thực hiện logout. Thông tin được trả về qua callback onLogout .
 
 ```
@@ -290,8 +283,8 @@ public void onLogout(String address) {
 }
 ```
 
-#### 6. Hàm hứng data được trả về từ ví Trust, Chainverse
-Khi connect thành công với ví Trust. Trust sẽ mở lại app/game thông qua scheme (đã khai báo ở phần Intergrate SDK). Vì vậy cần khai báo các hàm này để Chainverse SDK xử lý dữ liệu được trả về từ ví Trust.
+#### 5. Hàm hứng data được trả về từ ví Chainverse
+Khi connect thành công với ví Chainverse. Chainverse sẽ mở lại app/game thông qua scheme (đã khai báo ở phần Intergrate SDK). Vì vậy cần khai báo các hàm này để Chainverse SDK xử lý dữ liệu được trả về từ ví Chainverse.
 
 ```
 ChainverseSDK.getInstance().onNewIntent(intent);
@@ -309,8 +302,8 @@ protected void onNewIntent(Intent intent) {
 }
 ```
 
-#### 7. Hàm setKeepConnect
-Hàm này tuỳ chọn thiết lập trạng thái giữ connect với ví Trust (Khi vào lại app không cần phải kết nối lại ví)
+#### 6. Hàm setKeepConnect
+Hàm này tuỳ chọn thiết lập trạng thái giữ connect với ví Chainverse (Khi vào lại app không cần phải kết nối lại ví)
  
 true : Giữ trạng thái keep connect.
 false: Không giữ trạng thái keep connect.
@@ -319,21 +312,21 @@ false: Không giữ trạng thái keep connect.
 ChainverseSDK.getInstance().setKeepConnect(true);
 ```
 
-#### 8. Hàm getVersion
+#### 7. Hàm getVersion
 Trả về version của SDK
 
 ```
 ChainverseSDK.getInstance().getVersion();
 ```
 
-#### 9. Hàm setScheme
-Để config khi connect với ví Trust (Ví Trust/Chainverse sẽ mở lại app thông qua config này) 
+#### 8. Hàm setScheme
+Để config khi connect với ví Chainverse (Ví Chainverse sẽ mở lại app thông qua config này) 
 
 ```
 ChainverseSDK.getInstance().setScheme("trust-rn-example1://");
 ```
 
-#### 10. Hàm getUser
+#### 9. Hàm getUser
 Trả về thông tin của user bao gồm : address và signature
 
 ```
@@ -342,7 +335,7 @@ info.getAddress();
 info.getSignature();
 ```
 
-#### 11. Hàm isUserConnected
+#### 10. Hàm isUserConnected
 Kiểm tra trạng thái connect ví của user. Trả về boolean
 
 ```
