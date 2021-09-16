@@ -34,6 +34,7 @@ Khai báo jitpack ở file build.gralde (project)
 ```
 maven {
             url "https://jitpack.io"
+            credentials { username "jp_l28krc7a5uel5l48doj354csk9" }
         }
 ```
 #### Bước 2: Khai báo dependencies
