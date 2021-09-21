@@ -4,7 +4,7 @@
 
 Đơn giản hoá tích hợp Blokchain vào game của bạn với Chainverse SDK. 
 
-Chainverse Native SDK sử dụng các API và tối ưu hóa dành riêng cho hệ điều hành để mang lại trải nghiệm người dùng tốt hơn. Chúng chứa chức năng cốt lõi để tích hợp vào game nhanh chóng hơn bao gồm các chức năng chính: Kết nối với ví Blockchain (TrustWallet và các ví khác) và trao đổi item NFT. 
+Chainverse Native SDK sử dụng các API và tối ưu hóa dành riêng cho hệ điều hành để mang lại trải nghiệm người dùng tốt hơn. Chúng chứa chức năng cốt lõi để tích hợp vào game nhanh chóng hơn bao gồm các chức năng chính: Kết nối với ví Blockchain (Chainverse) và trao đổi item NFT. 
 
 ## Mô hình Chainverse SDK
 ### Sequence flow 1
@@ -109,7 +109,7 @@ Khai báo DeveloperAddress, GameAddress, Scheme
 String developerAddress = "DeveloperAddress";
 String gameAddress = "GameAddress";
 ChainverseSDK.getInstance().init(developerAddress,gameAddress, activity, new ChainverseCallback);
-ChainverseSDK.getInstance().setScheme("trust-rn-example1://");
+ChainverseSDK.getInstance().setScheme("your-app-scheme://");
 ```
 
 #### Bước 3: Implement các hàm callback
@@ -239,7 +239,7 @@ public void onItemUpdate(ChainverseItem item, int type) {
                 
             }
         });
-        ChainverseSDK.getInstance().setScheme("trust-rn-example1://");
+        ChainverseSDK.getInstance().setScheme("your-app-scheme://");
 ```
 
 ## Functions
@@ -324,7 +324,7 @@ ChainverseSDK.getInstance().getVersion();
 Để config khi connect với ví Chainverse (Ví Chainverse sẽ mở lại app thông qua config này) 
 
 ```
-ChainverseSDK.getInstance().setScheme("trust-rn-example1://");
+ChainverseSDK.getInstance().setScheme("your-app-scheme://");
 ```
 
 #### 9. Hàm getUser
