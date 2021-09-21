@@ -51,7 +51,7 @@ Khai báo quyền sử dụng Internet.
 ```
 #### Bước 2: Khai báo deeplink
 Khai báo callback deeplink (trong tag activity) để ví Chainverse mở lại app (Khi connect ví).
-{app_scheme} : Khai báo app scheme
+{your-app-scheme} : Khai báo app scheme
 
 ```
 <activity
@@ -69,7 +69,7 @@ Khai báo callback deeplink (trong tag activity) để ví Chainverse mở lại
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <action android:name="android.intent.action.VIEW" />
-                <data android:scheme="{app_scheme}"/>
+                <data android:scheme="{your-app-scheme}"/>
             </intent-filter>
         </activity>
 ```
