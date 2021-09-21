@@ -7,10 +7,10 @@
 Chainverse Native SDK sử dụng các API và tối ưu hóa dành riêng cho hệ điều hành để mang lại trải nghiệm người dùng tốt hơn. Chúng chứa chức năng cốt lõi để tích hợp vào game nhanh chóng hơn bao gồm các chức năng chính: Kết nối với ví Blockchain (Chainverse) và trao đổi item NFT. 
 
 ## Mô hình Chainverse SDK
-### Sequence flow 1
+### Sequence Diagram Flow SDK
 <img src="https://gblobscdn.gitbook.com/assets%2F-MfegUcnHBLzXgHaEQpA%2F-MfeiNnnfjqea_AfGmtY%2F-MfemVicwlXwEXbOG_HR%2Fcv1.jpg?alt=media&token=51652a27-807a-464d-bf0d-01d883c641b6" width="100%" alt="NFT Shiba Inu">
 
-### Sequence flow 2
+### Sequence Diagram Move & Transfer Item NFT giữa các game với nhau
 <img src="https://gblobscdn.gitbook.com/assets%2F-MfegUcnHBLzXgHaEQpA%2F-MfeiNnnfjqea_AfGmtY%2F-MfemkBnwJ-UhkunG7OT%2Fcv2.jpg?alt=media&token=7f403309-3062-479f-ac14-e6c0a1113c81" width="100%" alt="NFT Shiba Inu">
 
 ## Error Code
