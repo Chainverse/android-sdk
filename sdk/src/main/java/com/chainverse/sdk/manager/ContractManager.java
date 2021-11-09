@@ -88,7 +88,10 @@ public class ContractManager {
                         new ArrayList<>()
                 );
 
-        return Convert.hexToBool(ethCall.getResult());
+        if(ethCall != null && ethCall.getResult() != null){
+            return Convert.hexToBool(ethCall.getResult());
+        }
+        return false;
     }
 
     private boolean isGameContract(){
@@ -98,7 +101,10 @@ public class ContractManager {
                         "isGameContract",
                         new ArrayList<>()
                 );
-        return Convert.hexToBool(ethCall.getResult());
+        if(ethCall != null && ethCall.getResult() != null){
+            return Convert.hexToBool(ethCall.getResult());
+        }
+        return false;
     }
 
     private boolean isGamePaused(){
@@ -108,7 +114,10 @@ public class ContractManager {
                         "isGamePaused",
                         Arrays.asList(new Address(ChainverseSDK.gameAddress))
                 );
-        return Convert.hexToBool(ethCall.getResult());
+        if(ethCall != null && ethCall.getResult() != null){
+            return Convert.hexToBool(ethCall.getResult());
+        }
+        return false;
     }
 
     private boolean isDeveloperPaused(){
@@ -118,8 +127,9 @@ public class ContractManager {
                         "isDeveloperPaused",
                         Arrays.asList(new Address(ChainverseSDK.developerAddress))
                 );
-        if(Integer.decode(ethCall.getResult()) == 1){
-            return true;
+
+        if(ethCall != null && ethCall.getResult() != null){
+            return Convert.hexToBool(ethCall.getResult());
         }
         return false;
     }

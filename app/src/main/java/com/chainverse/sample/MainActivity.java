@@ -1,9 +1,9 @@
 package com.chainverse.sample;
 
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.chainverse.sdk.ChainverseCallback;
 import com.chainverse.sdk.ChainverseError;
 import com.chainverse.sdk.ChainverseSDK;
+import com.chainverse.sdk.ChainverseUser;
 import com.chainverse.sdk.common.LogUtil;
 import com.chainverse.sdk.ChainverseItem;
 
@@ -30,10 +31,9 @@ public class MainActivity extends AppCompatActivity {
         Button btnLogout = (Button) findViewById(R.id.btnLogout);
         TextView tvAddress = (TextView) findViewById(R.id.tvAddress);
 
-        String developerAddress = "0x9aa2DC5A69eEd97d072A4168A83Cc000873321ff";
-        String gameAddress = "0xD703d36e924A84D050F7b17f392F7d6D2Dd483AF";
-        ChainverseSDK sdk = ChainverseSDK.getInstance();
-        sdk.init(developerAddress,gameAddress,this, new ChainverseCallback() {
+        String developerAddress = "0xb870a48dc209F3611c5B76532352023DF7737385";
+        String gameAddress = "0x6d910c0cE6e0fa53C62637920964d306aCb9f051";
+        ChainverseSDK.getInstance().init(developerAddress,gameAddress,this, new ChainverseCallback() {
 
             @Override
             public void onInitSDKSuccess() {
@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onItemUpdate(ChainverseItem item, int type) {
+                LogUtil.log("onItemUpdate",item);
                 switch (type){
                     case ChainverseItem.TRANSFER_ITEM_TO_USER:
                         break;
@@ -79,29 +80,36 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this,"User Address" + address + " Logout",Toast.LENGTH_LONG ).show();
             }
         });
-        sdk.setScheme("ota-wallet-rn://");
-        sdk.setHost("accounts_callback");
-        sdk.setKeepConnect(true);
+        ChainverseSDK.getInstance().setScheme("trust-rn-example1://");
+        ChainverseSDK.getInstance().setHost("accounts_callback");
+        ChainverseSDK.getInstance().setKeepConnect(true);
 
 
+        if(ChainverseSDK.getInstance().isUserConnected()){
+            //Connected
+            ChainverseUser info = ChainverseSDK.getInstance().getUser();
+            LogUtil.log("info_sig",info.getSignature());
+        }else{
+            //No connect
+        }
         btnChooseWallet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sdk.showConnectView();
+                ChainverseSDK.getInstance().showConnectView();
             }
         });
 
         btnConnectTrust.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sdk.connectWithTrust();
+                ChainverseSDK.getInstance().connectWithTrust();
             }
         });
 
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sdk.testBuy();
+                ChainverseSDK.getInstance().testBuy();
             }
         });
 

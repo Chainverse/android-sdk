@@ -12,7 +12,7 @@ public class ChainverseResult {
     }
 
     public static String getUserSignature(Intent intent){
-        return intent.getData().getQueryParameter("signature");
+        return "0x" + intent.getData().getQueryParameter("signature");
     }
 
     public static String getAction(Intent intent){

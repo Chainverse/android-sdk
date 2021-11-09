@@ -5,26 +5,26 @@ import android.content.Intent;
 
 public interface Chainverse {
     /**
-     * init: Hàm init ChainverseSDK
+     * init: init ChainverseSDK
      * @param activity
      * @param callback
      */
     void init(String developerAddress, String gameAddress, Activity activity, ChainverseCallback callback);
 
     /**
-     * setKeepConnectWallet: Hàm thiết lập keep connect wallet
-     * @param keep: true(giữ trạng thái connect từ lần trước đó) | false (phải connect lại)
+     * setKeepConnect: Keep connect wallet
+     * @param keep: true(keep connect wallet) | false (reconnect wallet)
      */
     void setKeepConnect(boolean keep);
 
     /**
-     * setCallbackScheme: Hàm thiết lập scheme để ví Trust wallet callback về
+     * setScheme: setup connect wallet
      * @param scheme
      */
     void setScheme(String scheme);
 
     /**
-     * setCallbackHost: Hàm thiết lập host để ví Trust wallet callback về
+     * setCallbackHost: setup connect wallet
      * @param host
      */
     void setHost(String host);
@@ -48,21 +48,36 @@ public interface Chainverse {
     void onNewIntent(Intent intent);
 
     /**
-     * choose wallet
+     * showConnectView: Show screen choose wallet
      */
     void showConnectView();
 
     /**
-     * Connect with Trust Wallet
+     * connectWithTrust: Connect with Trust Wallet
      */
     void connectWithTrust();
 
+    /**
+     * connectWithChainverse: Connect with Chainverse
+     */
     void connectWithChainverse();
 
     /**
-     * logout: Hàm thực hiện logout
+     * logout: Logout
      */
     void logout();
+
+    /**
+     * isUserConnected: return status connected or no connected
+     * @return
+     */
+    Boolean isUserConnected();
+
+    /**
+     * getUserInfo: Return user info
+     * @return
+     */
+    ChainverseUser getUser();
 
     void testBuy();
 }

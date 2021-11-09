@@ -25,6 +25,7 @@ public class RESTfulClient {
         raw.setGame_contract(ChainverseSDK.gameAddress);
         raw.setPlayer_address(EncryptPreferenceUser.getInstance().getXUserAddress());
         raw.setCategory_id("1");
+        raw.setType("2");
 
         return RESTfulURL.getInstanceTest().testBuy(raw);
     }

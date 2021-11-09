@@ -70,7 +70,8 @@
         android:textColor="#000000"
         android:textSize="16dp"
         android:textAllCaps="false"
-        style="?android:attr/borderlessButtonStyle"/>
+        style="?android:attr/borderlessButtonStyle"
+        android:visibility="gone"/>
 
     <Button
         android:id="@+id/chainverse_button_connect"
@@ -80,7 +81,7 @@
         android:drawablePadding="-48dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="26dp"
         android:background="@drawable/chainverse_background_connect_wallet_item"
         android:text="Chainverse"
         android:textColor="#000000"

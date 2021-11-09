@@ -14,7 +14,7 @@ public interface RESTfulEndpoint {
     Observable<JsonElement> getItems(@Path("user_address") String  userAddress, @Path("game_address") String  gameAddress);
 
 
-    @POST("/game-signer-1/v1/item")
+    @POST("/v1/item")
     Observable<JsonElement> testBuy(@Body TestRaw body);
 
 }
