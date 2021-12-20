@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="left"
+        android:padding="5dp"
+        android:background="@drawable/chainverse_background_phrase_item">
+
+        <TextView
+            android:id="@+id/chainverse_tvnum"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="10dp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:textColor="#AFB2B6"
+            android:layout_marginRight="5dp"/>
+
+        <TextView
+            android:id="@+id/chainverse_tvphrase"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="12dp"
+            android:gravity="center"
+            android:textColor="#000000"
+            android:visibility="visible"/>
+    </LinearLayout>
+
+</RelativeLayout>

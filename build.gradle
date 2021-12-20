@@ -17,6 +17,13 @@ allprojects {
         google()
         jcenter()
         maven { url 'https://jitpack.io'}
+        maven {
+            url = uri("https://maven.pkg.github.com/trustwallet/wallet-core")
+            credentials {
+                username = "vananh96"
+                password = "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"
+            }
+        }
     }
 }
 

@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    tools:context=".ui.screen.ConnectWalletScreen"
+    android:background="@color/ChainverseColorPrimary">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <Button
+                android:id="@+id/chainverse_button_close"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:drawableLeft="@drawable/chainverse_ic_back"
+                android:drawablePadding="15dp"
+                android:background="@android:color/transparent"
+                android:text="Create a wallet"
+                android:textSize="18dp"
+                android:textColor="#FFFFFF"
+                android:textAllCaps="false"/>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="@drawable/chainverse_background_container"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="26dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="WALLET NAME"
+                    android:textSize="12dp"
+                    android:textStyle="bold"
+                    android:textColor="#B4B5B8" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColorHint="#727D92"
+                    android:layout_marginTop="17dp"
+                    app:hintEnabled="false"
+                    android:background="@drawable/chainverse_background_wallet_create_input"
+                    app:hintTextAppearance="@style/ChainverseSDKTextInputLayout"
+                    android:paddingLeft="12dp"
+                    android:paddingRight="12dp">
+
+                    <EditText
+                        android:id="@+id/com_gamota_editLoginName"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:background="@null"
+                        android:hint="Wallet Name"
+                        android:inputType="text"
+                        android:lines="1"
+                        android:textColor="#8590A6"
+                        android:textColorHint="#8590A6"
+                        android:textSize="15dp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PHRASE LENGTH"
+                    android:textSize="12dp"
+                    android:textStyle="bold"
+                    android:textColor="#B4B5B8" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="17dp">
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/chainverse_background_wallet_create_input"
+                        android:padding="10dp"
+                        android:layout_marginRight="10dp">
+                        <CheckBox
+                            android:id="@+id/chainverse_checkbox_12word"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            android:button="@drawable/chainverse_custom_checkbox"
+                            android:scaleX="0.8"
+                            android:scaleY="0.8"
+                            android:checked="true"
+                            android:visibility="visible"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="12 WORDS"
+                            android:textSize="15dp"
+                            android:textStyle="bold"
+                            android:textColor="#0A0A0A"
+                            android:layout_marginLeft="10dp"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/chainverse_background_wallet_create_input"
+                        android:padding="10dp"
+                        android:layout_marginLeft="10dp">
+                        <CheckBox
+                            android:id="@+id/chainverse_checkbox_24word"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            android:button="@drawable/chainverse_custom_checkbox"
+                            android:scaleX="0.8"
+                            android:scaleY="0.8"
+                            android:visibility="visible"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="24 WORDS"
+                            android:textSize="15dp"
+                            android:textStyle="bold"
+                            android:textColor="#0A0A0A"
+                            android:layout_marginLeft="10dp"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="30dp"
+                android:gravity="center_vertical">
+                <CheckBox
+                    android:id="@+id/chainverse_checkbox_term"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:button="@drawable/chainverse_custom_checkbox"
+                    android:scaleX="0.8"
+                    android:scaleY="0.8"
+                    android:visibility="visible"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="I have read and agree to the Chainverse Wallet Terms, Conditions of Use"
+                    android:textSize="12dp"
+                    android:textStyle="bold"
+                    android:textColor="#95979B"
+                    android:layout_marginLeft="10dp"/>
+            </LinearLayout>
+    </LinearLayout>
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/chainverse_button_create"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="26dp"
+        android:background="@drawable/chainverse_background_button_wallet_create_default"
+        android:text="CREATE A NEW WALLET"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:textSize="16dp"
+        android:textAllCaps="false"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="16dp"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_alignParentBottom="true"/>
+
+</RelativeLayout>

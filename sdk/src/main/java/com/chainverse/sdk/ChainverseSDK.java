@@ -1,10 +1,18 @@
 package com.chainverse.sdk;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.Uri;
+import android.os.Bundle;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.chainverse.sdk.base.web3.BaseWeb3;
 import com.chainverse.sdk.common.CallbackToGame;
-import com.chainverse.sdk.common.EncryptPreferenceUser;
+import com.chainverse.sdk.common.Constants;
+import com.chainverse.sdk.common.EncryptPreferenceUtils;
 import com.chainverse.sdk.common.LogUtil;
 import com.chainverse.sdk.common.Utils;
 import com.chainverse.sdk.listener.OnEmitterListenter;
@@ -12,6 +20,7 @@ import com.chainverse.sdk.manager.ContractManager;
 import com.chainverse.sdk.manager.TransferItemManager;
 import com.chainverse.sdk.network.RESTful.RESTfulClient;
 import com.chainverse.sdk.ui.ChainverseSDKActivity;
+import com.chainverse.sdk.model.SignerData;
 import com.chainverse.sdk.wallet.chainverse.ChainverseConnect;
 import com.chainverse.sdk.wallet.chainverse.ChainverseResult;
 import com.chainverse.sdk.wallet.trust.TrustConnect;
@@ -22,10 +31,17 @@ import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 
+import org.web3j.abi.datatypes.Type;
+import org.web3j.protocol.core.methods.response.EthCall;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+
 
 public class ChainverseSDK implements Chainverse {
     private static ChainverseSDK mInstance;
@@ -37,8 +53,13 @@ public class ChainverseSDK implements Chainverse {
 
     private boolean isKeepConnect = true;
     private Activity mContext;
-    private EncryptPreferenceUser encryptPreferenceUser;
+    private EncryptPreferenceUtils encryptPreferenceUtils;
     private boolean isInitSDK = false;
+    private BroadcastReceiver receiverCreatedWallet;
+    private TransferItemManager transferItemManager;
+    static {
+        System.loadLibrary("TrustWalletCore");
+    }
     public static ChainverseSDK getInstance(){
         if(mInstance == null){
             synchronized (ChainverseSDK.class){
@@ -56,10 +77,26 @@ public class ChainverseSDK implements Chainverse {
         this.mContext = activity;
         this.gameAddress = gameAddress;
         this.developerAddress = developerAddress;
-        encryptPreferenceUser = EncryptPreferenceUser.getInstance().init(mContext);
+        encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(mContext);
         exceptionSDK();
         checkContract();
+        receiverCreatedWallet();
     }
+
+    private void receiverCreatedWallet(){
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Constants.ACTION.CREATED_WALLET);
+        receiverCreatedWallet = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals(Constants.ACTION.CREATED_WALLET)) {
+                    doConnectSuccess();
+                }
+            }
+        };
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(receiverCreatedWallet, filter);
+    }
+
 
     @Override
     public void setKeepConnect(boolean keep) {
@@ -87,7 +124,7 @@ public class ChainverseSDK implements Chainverse {
             return;
         }
         if(isUserConnected()){
-            RESTfulClient.getItems(encryptPreferenceUser.getXUserAddress(),ChainverseSDK.gameAddress)
+            RESTfulClient.getItems(encryptPreferenceUtils.getXUserAddress(),ChainverseSDK.gameAddress)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(jsonElement -> {
@@ -130,8 +167,8 @@ public class ChainverseSDK implements Chainverse {
         if(isKeepConnect){
             doConnectSuccess();
         }else{
-            encryptPreferenceUser.clearXUserAddress();
-            encryptPreferenceUser.clearXUserSignature();
+            encryptPreferenceUtils.clearXUserAddress();
+            encryptPreferenceUtils.clearXUserSignature();
         }
 
     }
@@ -146,8 +183,8 @@ public class ChainverseSDK implements Chainverse {
 
     private void doConnectSuccess(){
         if(isUserConnected()){
-            CallbackToGame.onConnectSuccess(encryptPreferenceUser.getXUserAddress());
-            TransferItemManager transferItemManager = new TransferItemManager(mContext);
+            CallbackToGame.onConnectSuccess(encryptPreferenceUtils.getXUserAddress());
+            transferItemManager = new TransferItemManager(mContext);
             transferItemManager.on(new OnEmitterListenter() {
                 @Override
                 public void call(String event, Object... args) {
@@ -186,20 +223,20 @@ public class ChainverseSDK implements Chainverse {
 
     @Override
     public void onNewIntent(Intent intent) {
-        if(encryptPreferenceUser.getConnectWallet().equals("trust")){
+        if(encryptPreferenceUtils.getConnectWallet().equals("trust")){
             String action = TrustResult.getAction(intent);
             switch (action){
                 case "get_accounts":
                     String xUserAddress = TrustResult.getUserAddress(intent);
-                    encryptPreferenceUser.setXUserAddress(xUserAddress);
+                    encryptPreferenceUtils.setXUserAddress(xUserAddress);
                     doConnectSuccess();
                     break;
             }
         }else{
             String xUserAddress = ChainverseResult.getUserAddress(intent);
             String xUserSignature = ChainverseResult.getUserSignature(intent);
-            encryptPreferenceUser.setXUserAddress(xUserAddress);
-            encryptPreferenceUser.setXUserSignature(xUserSignature);
+            encryptPreferenceUtils.setXUserAddress(xUserAddress);
+            encryptPreferenceUtils.setXUserSignature(xUserSignature);
             doConnectSuccess();
         }
     }
@@ -210,7 +247,7 @@ public class ChainverseSDK implements Chainverse {
             return;
         }
         Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
-        intent.putExtra("screen","showConnectView");
+        intent.putExtra("screen",Constants.SCREEN.CONNECT_VIEW);
         mContext.startActivity(intent);
     }
 
@@ -219,7 +256,7 @@ public class ChainverseSDK implements Chainverse {
         if(!isInitSDKSuccess()){
             return;
         }
-        encryptPreferenceUser.setConnectWallet("trust");
+        encryptPreferenceUtils.setConnectWallet("trust");
         TrustConnect trust = new TrustConnect.Builder().build();
         trust.connect(mContext);
     }
@@ -231,7 +268,7 @@ public class ChainverseSDK implements Chainverse {
         }
 
         if(Utils.isChainverseInstalled(mContext)){
-            encryptPreferenceUser.setConnectWallet("chainverse");
+            encryptPreferenceUtils.setConnectWallet("chainverse");
             ChainverseConnect chainverse = new ChainverseConnect.Builder().build();
             chainverse.connect(mContext);
         }
@@ -243,14 +280,16 @@ public class ChainverseSDK implements Chainverse {
         if(!isInitSDKSuccess()){
             return;
         }
-        CallbackToGame.onLogout(encryptPreferenceUser.getXUserAddress());
-        encryptPreferenceUser.clearXUserAddress();
-        encryptPreferenceUser.clearXUserSignature();
+        CallbackToGame.onLogout(encryptPreferenceUtils.getXUserAddress());
+        encryptPreferenceUtils.clearXUserAddress();
+        encryptPreferenceUtils.clearXUserSignature();
+        encryptPreferenceUtils.clearMnemonic();
+        transferItemManager.disConnect();
     }
 
     @Override
     public Boolean isUserConnected() {
-        if(!encryptPreferenceUser.getXUserSignature().isEmpty()){
+        if(!encryptPreferenceUtils.getXUserSignature().isEmpty()){
             return true;
         }
         return false;
@@ -260,11 +299,86 @@ public class ChainverseSDK implements Chainverse {
     public ChainverseUser getUser() {
         if(isUserConnected()){
             ChainverseUser info = new ChainverseUser();
-            info.setAddress(encryptPreferenceUser.getXUserAddress());
-            info.setSignature(encryptPreferenceUser.getXUserSignature());
+            info.setAddress(encryptPreferenceUtils.getXUserAddress());
+            info.setSignature(encryptPreferenceUtils.getXUserSignature());
             return info;
         }
         return null;
+    }
+
+    @Override
+    public BigDecimal getBalance() {
+        try {
+            return BaseWeb3.getInstance().init(mContext).getBalance(encryptPreferenceUtils.getXUserAddress());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public EthCall callFunction(String address, String method, List<Type> inputParameters) {
+        try {
+            return BaseWeb3.getInstance().init(mContext).callFunction(address, method, inputParameters);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public void signMessage(String message) {
+        SignerData data = new SignerData();
+        data.setMessage(message);
+        Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putString("screen",Constants.SCREEN.CONFIRM_SIGN);
+        bundle.putString("type","message");
+        bundle.putParcelable("data",data);
+        intent.putExtras(bundle);
+        mContext.startActivity(intent);
+    }
+
+    @Override
+    public void signTransaction(String chainId, String gasPrice, String gasLimit, String toAddress, String amount) {
+        SignerData data = new SignerData();
+        data.setChainId(chainId);
+        data.setGasPrice(gasPrice);
+        data.setGasLimit(gasLimit);
+        data.setToAddress(toAddress);
+        data.setAmount(amount);
+        Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putString("screen",Constants.SCREEN.CONFIRM_SIGN);
+        bundle.putString("type","transaction");
+        bundle.putParcelable("data",data);
+        intent.putExtras(bundle);
+        mContext.startActivity(intent);
+    }
+
+    @Override
+    public String transfer(String to, BigDecimal amount) {
+        try {
+            BaseWeb3.getInstance().init(mContext).transfer(to,amount);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public void showConnectWalletView() {
+        Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
+        intent.putExtra("screen",Constants.SCREEN.WALLET);
+        intent.putExtra("type","normal");
+        mContext.startActivity(intent);
+    }
+
+    @Override
+    public void showWalletInfoView() {
+        Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
+        intent.putExtra("screen",Constants.SCREEN.WALLET_INFO);
+        mContext.startActivity(intent);
     }
 
     @Override
@@ -279,6 +393,8 @@ public class ChainverseSDK implements Chainverse {
                     throwable.printStackTrace();
                 });
     }
+
+
 
 
 }

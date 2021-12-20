@@ -5,4 +5,9 @@
         <item name="windowNoTitle">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
+
+    <style name="ChainverseSDKTextInputLayout" parent="@android:style/TextAppearance">
+        <item name="android:textColor">#727D92</item>
+        <item name="android:textSize">12sp</item>
+    </style>
 </resources>

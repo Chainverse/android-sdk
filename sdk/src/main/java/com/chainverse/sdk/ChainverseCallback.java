@@ -9,4 +9,6 @@ public interface ChainverseCallback {
     void onGetItems(ArrayList<ChainverseItem> items);
     void onConnectSuccess(String address);
     void onLogout(String address);
+    void onSignMessage(String signed);
+    void onSignTransaction(String signed);
 }

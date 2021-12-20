@@ -1,13 +1,20 @@
 package com.chainverse.sdk.common;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 import com.google.gson.JsonElement;
+
+import java.security.KeyStore;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 
 public class Utils {
     public static int convertDPToPixels(Context context, int dp) {
@@ -53,4 +60,17 @@ public class Utils {
         return true;
     }
 
+    public static String byteToHexString(byte[] payload) {
+        if (payload == null) return "<empty>";
+        StringBuilder stringBuilder = new StringBuilder(payload.length);
+        for (byte byteChar : payload)
+            stringBuilder.append(String.format("%02x", byteChar));
+        return stringBuilder.toString().toLowerCase();
+    }
+
+    public static void copyFromClipboard(Context context, String label, String value){
+        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText(label, value);
+        clipboard.setPrimaryClip(clip);
+    }
 }

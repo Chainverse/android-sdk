@@ -3,7 +3,7 @@ package com.chainverse.sample;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -26,13 +26,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Button btnChooseWallet = (Button) findViewById(R.id.btnChooseWallet);
-        Button btnConnectTrust = (Button) findViewById(R.id.btnConnectTrust);
+        Button btnConnectTrust = (Button) findViewById(R.id.btnWalletInfo);
         Button btnSend = (Button) findViewById(R.id.btnSendTransaction);
         Button btnLogout = (Button) findViewById(R.id.btnLogout);
         TextView tvAddress = (TextView) findViewById(R.id.tvAddress);
+        TextView tvBalance = (TextView) findViewById(R.id.tvBalance);
 
-        String developerAddress = "0xb870a48dc209F3611c5B76532352023DF7737385";
-        String gameAddress = "0x6d910c0cE6e0fa53C62637920964d306aCb9f051";
+        String developerAddress = "0x6A6c53a166DDDbE7049982864d21C75AB18fc50C";
+        String gameAddress = "0x13f1A9097A7Cd7BeBC5Ad5c79160db3067FEf20E";
         ChainverseSDK.getInstance().init(developerAddress,gameAddress,this, new ChainverseCallback() {
 
             @Override
@@ -70,14 +71,28 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onConnectSuccess(String address) {
                 tvAddress.setText("Wellcome: " +  address);
+                tvBalance.setText("Balance: " + ChainverseSDK.getInstance().getBalance());
                 Log.e("onConnectSuccess", "" + address);
                 ChainverseSDK.getInstance().getItems();
+                ChainverseSDK.getInstance().getBalance();
+                btnConnectTrust.setVisibility(View.VISIBLE);
             }
 
             @Override
             public void onLogout(String address) {
                 tvAddress.setText("No Connect Wallet!");
+                btnConnectTrust.setVisibility(View.GONE);
                 Toast.makeText(MainActivity.this,"User Address" + address + " Logout",Toast.LENGTH_LONG ).show();
+            }
+
+            @Override
+            public void onSignMessage(String signed) {
+                Log.e("onSignMessage",signed);
+            }
+
+            @Override
+            public void onSignTransaction(String signed) {
+                Log.e("onSignTransaction",signed);
             }
         });
         ChainverseSDK.getInstance().setScheme("trust-rn-example1://");
@@ -88,9 +103,11 @@ public class MainActivity extends AppCompatActivity {
         if(ChainverseSDK.getInstance().isUserConnected()){
             //Connected
             ChainverseUser info = ChainverseSDK.getInstance().getUser();
+            btnConnectTrust.setVisibility(View.VISIBLE);
             LogUtil.log("info_sig",info.getSignature());
         }else{
             //No connect
+            btnConnectTrust.setVisibility(View.GONE);
         }
         btnChooseWallet.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,21 +119,23 @@ public class MainActivity extends AppCompatActivity {
         btnConnectTrust.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ChainverseSDK.getInstance().connectWithTrust();
+                ChainverseSDK.getInstance().showWalletInfoView();
             }
         });
 
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ChainverseSDK.getInstance().testBuy();
+                //ChainverseSDK.getInstance().signMessage("chainverse");
+                //ChainverseSDK.getInstance().signTransaction("01","100000","100000000000","0xC37054b3b48C3317082E7ba872d7753D13da4986","0.0001");
+                ChainverseSDK.getInstance().showConnectWalletView();
             }
         });
 
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ChainverseSDK.getInstance().logout();
+                ChainverseSDK.getInstance().testBuy();
             }
         });
     }

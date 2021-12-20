@@ -4,8 +4,7 @@ import android.content.Context;
 
 import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.common.Constants;
-import com.chainverse.sdk.common.EncryptPreferenceUser;
-import com.chainverse.sdk.common.LogUtil;
+import com.chainverse.sdk.common.EncryptPreferenceUtils;
 import com.chainverse.sdk.listener.OnEmitterListenter;
 
 import java.net.URISyntaxException;
@@ -26,9 +25,9 @@ public class TransferItemManager {
     public TransferItemManager(Context context){
         mContext = context;
         map.put("type", "SDK");
-        map.put("signature", EncryptPreferenceUser.getInstance().getXUserSignature());
+        map.put("signature", EncryptPreferenceUtils.getInstance().getXUserSignature());
         map.put("signature_ethers", "false");
-        map.put("user_address", EncryptPreferenceUser.getInstance().getXUserAddress());
+        map.put("user_address", EncryptPreferenceUtils.getInstance().getXUserAddress());
         map.put("game_address", ChainverseSDK.gameAddress);
 
         IO.Options opts = new IO.Options();
@@ -80,6 +79,10 @@ public class TransferItemManager {
 
     public void connect(){
         mSocket.connect();
+    }
+
+    public void disConnect(){
+        mSocket.disconnect();
     }
 }
 

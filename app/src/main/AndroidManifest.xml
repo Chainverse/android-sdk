@@ -12,7 +12,8 @@
         android:theme="@style/AppTheme.NoActionBar"
         android:usesCleartextTraffic="true">
         <activity android:name=".MainActivity"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -30,9 +31,8 @@
 
         <activity
             android:name="com.chainverse.sdk.ui.ChainverseSDKActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:theme="@style/ChainverseSDKTheme"
-            android:windowSoftInputMode="adjustResize"/>
+            android:windowSoftInputMode="stateAlwaysHidden"
+            android:theme="@style/ChainverseSDKTheme" />
     </application>
 
 </manifest>

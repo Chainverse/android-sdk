@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    tools:context=".ui.screen.ConnectWalletScreen"
+    android:background="@color/ChainverseColorPrimary">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <Button
+                android:id="@+id/chainverse_button_close"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:drawableLeft="@drawable/chainverse_ic_back"
+                android:drawablePadding="10dp"
+                android:background="@android:color/transparent"
+                android:text=""
+                android:textColor="#FFFFFF"
+                android:textAllCaps="false"/>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="@drawable/chainverse_background_container"
+            android:padding="16dp">
+
+            <androidx.core.widget.NestedScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="60dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginRight="20dp"
+                        android:layout_marginTop="10dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Saved mnemonic phrase"
+                            android:textSize="20dp"
+                            android:textStyle="bold"
+                            android:textColor="#000000" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Write down or copy the words in the right order and save them somewhere safe. Never share recovery phrase with anyone, store it securely!"
+                            android:textSize="13dp"
+                            android:textColor="#000000"
+                            android:layout_marginTop="8dp"
+                            android:gravity="center_horizontal"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="26dp"
+                        android:background="@drawable/chainverse_background_wallet_create_input">
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/chainverse_phraseview"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                    <Button
+                        android:id="@+id/chainverse_button_copy"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="26dp"
+                        android:text="Copy phrase"
+                        android:textColor="#565250"
+                        android:textStyle="bold"
+                        android:textSize="16dp"
+                        android:layout_gravity="center_horizontal"
+                        android:textAllCaps="false"
+                        style="?android:attr/borderlessButtonStyle"
+                        android:layout_alignParentBottom="true"/>
+
+
+                    <LinearLayout
+                        android:id="@+id/chainverse_view_copied"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="26dp"
+                        android:layout_gravity="center_horizontal"
+                        android:gravity="center_vertical"
+                        android:visibility="gone">
+                        <ImageButton
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/chainverse_ic_checked"
+                            android:background="@android:color/transparent"
+                            android:visibility="visible"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="The phrase was copied"
+                            android:textSize="15dp"
+                            android:textColor="#077DC5"
+                            android:layout_marginLeft="10dp"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+            </androidx.core.widget.NestedScrollView>
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/chainverse_button_next"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="26dp"
+        android:background="@drawable/chainverse_background_button_wallet_create"
+        android:text="NEXT"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:textSize="16dp"
+        android:textAllCaps="false"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="16dp"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_alignParentBottom="true"/>
+
+</RelativeLayout>

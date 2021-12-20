@@ -1,10 +1,10 @@
 package com.chainverse.sdk.network.RESTful;
 
 import com.chainverse.sdk.common.Constants;
-import com.chainverse.sdk.common.EncryptPreferenceUser;
-import com.chainverse.sdk.network.RPC.RPCEndpoint;
+import com.chainverse.sdk.common.EncryptPreferenceUtils;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -19,7 +19,7 @@ public class RESTfulURL {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
                 final Request request = chain.request().newBuilder()
-                        .addHeader("X-User-Signature", EncryptPreferenceUser.getInstance().getXUserSignature())
+                        .addHeader("X-User-Signature", EncryptPreferenceUtils.getInstance().getXUserSignature())
                         .addHeader("X-Signature-Ethers", "false")
                         .build();
 
@@ -47,7 +47,7 @@ public class RESTfulURL {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
                 final Request request = chain.request().newBuilder()
-                        .addHeader("X-User-Signature", EncryptPreferenceUser.getInstance().getXUserSignature())
+                        .addHeader("X-User-Signature", EncryptPreferenceUtils.getInstance().getXUserSignature())
                         .build();
 
                 return chain.proceed(request);
@@ -57,6 +57,9 @@ public class RESTfulURL {
 
         OkHttpClient client = new OkHttpClient.Builder()
                 .addInterceptor(interceptor)
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(15, TimeUnit.SECONDS)
+                .writeTimeout(15, TimeUnit.SECONDS)
                 .build();
 
 

@@ -1,9 +1,6 @@
 package com.chainverse.sdk.manager;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.os.AsyncTask;
-import android.util.Log;
 
 import com.chainverse.sdk.ChainverseError;
 import com.chainverse.sdk.ChainverseSDK;
@@ -81,55 +78,51 @@ public class ContractManager {
     }
 
     private boolean isDeveloperContract(){
-        EthCall ethCall = BaseWeb3.getInstance().init(mContext)
-                .contract(
-                        ChainverseSDK.developerAddress,
-                        "isDeveloperContract",
-                        new ArrayList<>()
-                );
-
-        if(ethCall != null && ethCall.getResult() != null){
-            return Convert.hexToBool(ethCall.getResult());
+        try {
+            EthCall ethCall = BaseWeb3.getInstance().init(mContext).callFunction(ChainverseSDK.developerAddress, "isDeveloperContract", new ArrayList<>());
+            if(ethCall != null && ethCall.getResult() != null){
+                return Convert.hexToBool(ethCall.getResult());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return false;
     }
 
     private boolean isGameContract(){
-        EthCall ethCall = BaseWeb3.getInstance().init(mContext)
-                .contract(
-                        ChainverseSDK.gameAddress,
-                        "isGameContract",
-                        new ArrayList<>()
-                );
-        if(ethCall != null && ethCall.getResult() != null){
-            return Convert.hexToBool(ethCall.getResult());
+        try {
+            EthCall ethCall = BaseWeb3.getInstance().init(mContext).callFunction(ChainverseSDK.gameAddress, "isGameContract", new ArrayList<>());
+            if(ethCall != null && ethCall.getResult() != null){
+                return Convert.hexToBool(ethCall.getResult());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
         return false;
     }
 
     private boolean isGamePaused(){
-        EthCall ethCall = BaseWeb3.getInstance().init(mContext)
-                .contract(
-                        Constants.CONTRACT.ChainverseFactory,
-                        "isGamePaused",
-                        Arrays.asList(new Address(ChainverseSDK.gameAddress))
-                );
-        if(ethCall != null && ethCall.getResult() != null){
-            return Convert.hexToBool(ethCall.getResult());
+        try {
+            EthCall ethCall = BaseWeb3.getInstance().init(mContext).callFunction(Constants.CONTRACT.ChainverseFactory, "isGamePaused", Arrays.asList(new Address(ChainverseSDK.gameAddress)));
+            if(ethCall != null && ethCall.getResult() != null){
+                return Convert.hexToBool(ethCall.getResult());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
         return false;
     }
 
     private boolean isDeveloperPaused(){
-        EthCall ethCall = BaseWeb3.getInstance().init(mContext)
-                .contract(
-                        Constants.CONTRACT.ChainverseFactory,
-                        "isDeveloperPaused",
-                        Arrays.asList(new Address(ChainverseSDK.developerAddress))
-                );
-
-        if(ethCall != null && ethCall.getResult() != null){
-            return Convert.hexToBool(ethCall.getResult());
+        try {
+            EthCall ethCall = BaseWeb3.getInstance().init(mContext).callFunction(Constants.CONTRACT.ChainverseFactory, "isDeveloperPaused", Arrays.asList(new Address(ChainverseSDK.developerAddress)));
+            if(ethCall != null && ethCall.getResult() != null){
+                return Convert.hexToBool(ethCall.getResult());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return false;
     }

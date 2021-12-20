@@ -3,6 +3,13 @@ package com.chainverse.sdk;
 import android.app.Activity;
 import android.content.Intent;
 
+import org.web3j.abi.datatypes.Type;
+import org.web3j.protocol.core.methods.response.EthCall;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.List;
+
 public interface Chainverse {
     /**
      * init: init ChainverseSDK
@@ -78,6 +85,46 @@ public interface Chainverse {
      * @return
      */
     ChainverseUser getUser();
+
+    /**
+     * getBalance
+     */
+    BigDecimal getBalance();
+
+    /**
+     * callFunction
+     */
+    EthCall callFunction(String address, String method, List<Type> inputParameters);
+
+    /**
+     * signMessage
+     * @param data
+     */
+    void signMessage(String data);
+
+    /**
+     * signTransaction
+     * @param chainId
+     * @param gasPrice
+     * @param gasLimit
+     * @param toAddress
+     * @param amount
+     */
+    void signTransaction(String chainId, String gasPrice, String gasLimit, String toAddress, String amount);
+
+    /**
+     *
+     * @param to
+     * @param amount
+     * @return
+     */
+    String transfer(String to, BigDecimal amount);
+    /**
+     * showWalletView
+     */
+    void showConnectWalletView();
+
+    void showWalletInfoView();
 
     void testBuy();
 }
