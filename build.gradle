@@ -15,13 +15,14 @@ buildscript {
 allprojects {
     repositories {
         google()
+        mavenCentral()
         jcenter()
-        maven { url 'https://jitpack.io'}
+        maven { url 'https://jitpack.io' }
         maven {
             url = uri("https://maven.pkg.github.com/trustwallet/wallet-core")
             credentials {
-                username = "vananh96"
-                password = "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"
+                username = "tuannm2"
+                password = "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"
             }
         }
     }

@@ -1,17 +1,20 @@
 package com.chainverse.sample;
 
-
 import android.content.Intent;
 import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.chainverse.sample.marketplace.MarketPlaceActivity;
 import com.chainverse.sdk.ChainverseCallback;
 import com.chainverse.sdk.ChainverseError;
+import com.chainverse.sdk.model.MarketItem.ChainverseItemMarket;
 import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.ChainverseUser;
 import com.chainverse.sdk.common.LogUtil;
@@ -21,6 +24,9 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+    String developerAddress = "0x6A6c53a166DDDbE7049982864d21C75AB18fc50C";
+    String gameAddress = "0x81d64E03ee22C4500b71c2A6d4Bd789BaEBA31ac";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,12 +35,12 @@ public class MainActivity extends AppCompatActivity {
         Button btnConnectTrust = (Button) findViewById(R.id.btnWalletInfo);
         Button btnSend = (Button) findViewById(R.id.btnSendTransaction);
         Button btnLogout = (Button) findViewById(R.id.btnLogout);
+        Button btnMarket = (Button) findViewById(R.id.btnMarket);
         TextView tvAddress = (TextView) findViewById(R.id.tvAddress);
         TextView tvBalance = (TextView) findViewById(R.id.tvBalance);
 
-        String developerAddress = "0x6A6c53a166DDDbE7049982864d21C75AB18fc50C";
-        String gameAddress = "0x13f1A9097A7Cd7BeBC5Ad5c79160db3067FEf20E";
-        ChainverseSDK.getInstance().init(developerAddress,gameAddress,this, new ChainverseCallback() {
+
+        ChainverseSDK.getInstance().init(developerAddress, gameAddress, this, new ChainverseCallback() {
 
             @Override
             public void onInitSDKSuccess() {
@@ -44,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onError(int error) {
                 Log.e("onError", "" + error);
-                switch (error){
+                switch (error) {
                     case ChainverseError.ERROR_INIT_SDK:
                         break;
                 }
@@ -53,8 +59,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onItemUpdate(ChainverseItem item, int type) {
-                LogUtil.log("onItemUpdate",item);
-                switch (type){
+                LogUtil.log("onItemUpdate", item);
+                switch (type) {
                     case ChainverseItem.TRANSFER_ITEM_TO_USER:
                         break;
                     case ChainverseItem.TRANSFER_ITEM_FROM_USER:
@@ -64,17 +70,23 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onGetItems(ArrayList<ChainverseItem> items) {
-                LogUtil.log("onGetItems",items);
             }
 
+            @Override
+            public void onGetItemMarket(ArrayList<ChainverseItemMarket> items) {
+            }
 
             @Override
             public void onConnectSuccess(String address) {
-                tvAddress.setText("Wellcome: " +  address);
+                tvAddress.setText("Wellcome: " + address);
                 tvBalance.setText("Balance: " + ChainverseSDK.getInstance().getBalance());
+
+//                System.out.println("Balance of token " + ChainverseSDK.getInstance().getBalanceToken("0x672021e3c741910896cad6D6121446a328ba5634"));
+
                 Log.e("onConnectSuccess", "" + address);
-                ChainverseSDK.getInstance().getItems();
-                ChainverseSDK.getInstance().getBalance();
+//                ChainverseSDK.getInstance().getItems();
+//                ChainverseSDK.getInstance().getItemOnMarket(0, 20, "");
+//                ChainverseSDK.getInstance().getBalance();
                 btnConnectTrust.setVisibility(View.VISIBLE);
             }
 
@@ -82,17 +94,17 @@ public class MainActivity extends AppCompatActivity {
             public void onLogout(String address) {
                 tvAddress.setText("No Connect Wallet!");
                 btnConnectTrust.setVisibility(View.GONE);
-                Toast.makeText(MainActivity.this,"User Address" + address + " Logout",Toast.LENGTH_LONG ).show();
+                Toast.makeText(MainActivity.this, "User Address" + address + " Logout", Toast.LENGTH_LONG).show();
             }
 
             @Override
             public void onSignMessage(String signed) {
-                Log.e("onSignMessage",signed);
+                Log.e("onSignMessage", signed);
             }
 
             @Override
             public void onSignTransaction(String signed) {
-                Log.e("onSignTransaction",signed);
+                Log.e("onSignTransaction", signed);
             }
         });
         ChainverseSDK.getInstance().setScheme("trust-rn-example1://");
@@ -100,12 +112,12 @@ public class MainActivity extends AppCompatActivity {
         ChainverseSDK.getInstance().setKeepConnect(true);
 
 
-        if(ChainverseSDK.getInstance().isUserConnected()){
+        if (ChainverseSDK.getInstance().isUserConnected()) {
             //Connected
             ChainverseUser info = ChainverseSDK.getInstance().getUser();
             btnConnectTrust.setVisibility(View.VISIBLE);
-            LogUtil.log("info_sig",info.getSignature());
-        }else{
+            LogUtil.log("info_sig", info.getSignature());
+        } else {
             //No connect
             btnConnectTrust.setVisibility(View.GONE);
         }
@@ -136,6 +148,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 ChainverseSDK.getInstance().testBuy();
+            }
+        });
+
+        btnMarket.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                ChainverseSDK.getInstance().callContract();
+                Intent intent = new Intent(MainActivity.this, MarketPlaceActivity.class);
+                intent.putExtra("developerAddress", developerAddress);
+                intent.putExtra("gameAddress", gameAddress);
+                startActivity(intent);
             }
         });
     }

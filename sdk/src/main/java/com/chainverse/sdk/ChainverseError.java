@@ -8,4 +8,5 @@ public class ChainverseError {
     public static final int ERROR_DEVELOPER_ADDRESS = 1004;
     public static final int ERROR_GAME_PAUSE = 1005;
     public static final int ERROR_DEVELOPER_PAUSE = 1006;
+    public static final int ERROR_CALL_FUNCTION = 1007;
 }

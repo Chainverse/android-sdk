@@ -10,11 +10,16 @@ import io.reactivex.Observable;
 
 public class RESTfulClient {
     public static String TAG = RPCClient.class.getSimpleName();
-    public static Observable<JsonElement> getItems(String xUserAddress, String gameAddress){
-        return RESTfulURL.getInstance().getItems(xUserAddress,gameAddress);
+
+    public static Observable<JsonElement> getItems(String xUserAddress, String gameAddress) {
+        return RESTfulURL.getInstance().getItems(xUserAddress, gameAddress);
     }
 
-    public static Observable<JsonElement> testBuy(){
+    public static Observable<JsonElement> getItemOnMarket(String gameAddress, int page, int pageSize, String name) {
+        return RESTfulURL.getInstanceMarket().getItemOnMarket(gameAddress, page, pageSize, name);
+    }
+
+    public static Observable<JsonElement> testBuy() {
         TestRaw raw = new TestRaw();
         raw.setGame_contract(ChainverseSDK.gameAddress);
         raw.setPlayer_address(EncryptPreferenceUtils.getInstance().getXUserAddress());

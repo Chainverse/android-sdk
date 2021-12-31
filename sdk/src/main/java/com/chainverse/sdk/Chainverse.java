@@ -13,6 +13,7 @@ import java.util.List;
 public interface Chainverse {
     /**
      * init: init ChainverseSDK
+     *
      * @param activity
      * @param callback
      */
@@ -20,36 +21,51 @@ public interface Chainverse {
 
     /**
      * setKeepConnect: Keep connect wallet
+     *
      * @param keep: true(keep connect wallet) | false (reconnect wallet)
      */
     void setKeepConnect(boolean keep);
 
     /**
      * setScheme: setup connect wallet
+     *
      * @param scheme
      */
     void setScheme(String scheme);
 
     /**
      * setCallbackHost: setup connect wallet
+     *
      * @param host
      */
     void setHost(String host);
 
     /**
      * return list support wallet
+     *
      * @return
      */
     void getItems();
 
     /**
+     * return list item on market by game
+     *
+     * @param page
+     * @param pageSize
+     * @param name
+     */
+    void getItemOnMarket(int page, int pageSize, String name);
+
+    /**
      * return version
+     *
      * @return
      */
     String getVersion();
 
     /**
      * handle result intent
+     *
      * @param intent
      */
     void onNewIntent(Intent intent);
@@ -76,12 +92,14 @@ public interface Chainverse {
 
     /**
      * isUserConnected: return status connected or no connected
+     *
      * @return
      */
     Boolean isUserConnected();
 
     /**
      * getUserInfo: Return user info
+     *
      * @return
      */
     ChainverseUser getUser();
@@ -92,18 +110,27 @@ public interface Chainverse {
     BigDecimal getBalance();
 
     /**
+     * getBalanceToken
+     *
+     * @param contractAddress
+     */
+    BigDecimal getBalanceToken(String contractAddress);
+
+    /**
      * callFunction
      */
     EthCall callFunction(String address, String method, List<Type> inputParameters);
 
     /**
      * signMessage
+     *
      * @param data
      */
     void signMessage(String data);
 
     /**
      * signTransaction
+     *
      * @param chainId
      * @param gasPrice
      * @param gasLimit
@@ -113,12 +140,12 @@ public interface Chainverse {
     void signTransaction(String chainId, String gasPrice, String gasLimit, String toAddress, String amount);
 
     /**
-     *
      * @param to
      * @param amount
      * @return
      */
     String transfer(String to, BigDecimal amount);
+
     /**
      * showWalletView
      */
@@ -127,4 +154,13 @@ public interface Chainverse {
     void showWalletInfoView();
 
     void testBuy();
+
+    /**
+     * Buy NFT
+     * @param currency
+     * @param listing_id
+     * @param price
+     * return
+     */
+    void buyNFT(String currency, Long listing_id, Double price);
 }

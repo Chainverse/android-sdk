@@ -14,6 +14,7 @@ import com.chainverse.sdk.R;
 import com.chainverse.sdk.common.Constants;
 import com.chainverse.sdk.common.Utils;
 import com.chainverse.sdk.ui.screen.AlertScreen;
+import com.chainverse.sdk.ui.screen.BuyNftScreen;
 import com.chainverse.sdk.ui.screen.LoadingScreen;
 import com.chainverse.sdk.ui.screen.SignerScreen;
 import com.chainverse.sdk.ui.screen.ConnectWalletScreen;
@@ -29,6 +30,7 @@ import com.chainverse.sdk.ui.screen.WalletVerifyScreen;
 public class ChainverseSDKActivity extends AppCompatActivity {
     private String screen;
     private int screenW, screenH;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,44 +46,47 @@ public class ChainverseSDKActivity extends AppCompatActivity {
         screenH = metrics.heightPixels;
     }
 
-    private void initLayout(){
+    private void initLayout() {
         screen = getIntent().getStringExtra("screen");
-        if(screen.equals(Constants.SCREEN.WALLET) || screen.equals(Constants.SCREEN.WALLET_INFO) || screen.equals(Constants.SCREEN.CREATE_WALLET) || screen.equals(Constants.SCREEN.EXPORT_WALLET) || screen.equals(Constants.SCREEN.IMPORT_WALLET) || screen.equals(Constants.SCREEN.BACKUP_WALLET) || screen.equals(Constants.SCREEN.VERIFY_WALLET) || screen.equals(Constants.SCREEN.RECOVERY_WALLET)){
+        if (screen.equals(Constants.SCREEN.WALLET) || screen.equals(Constants.SCREEN.WALLET_INFO) || screen.equals(Constants.SCREEN.CREATE_WALLET) || screen.equals(Constants.SCREEN.EXPORT_WALLET) || screen.equals(Constants.SCREEN.IMPORT_WALLET) || screen.equals(Constants.SCREEN.BACKUP_WALLET) || screen.equals(Constants.SCREEN.VERIFY_WALLET) || screen.equals(Constants.SCREEN.RECOVERY_WALLET)) {
             WindowManager.LayoutParams params = getWindow().getAttributes();
             params.height = screenH;
-            params.width =  screenW;
+            params.width = screenW;
             params.gravity = Gravity.CENTER;
             getWindow().setAttributes(params);
-        }else if(screen.equals(Constants.SCREEN.ALERT)){
+        } else if (screen.equals(Constants.SCREEN.ALERT)) {
             WindowManager.LayoutParams params = getWindow().getAttributes();
-            params.height = Utils.convertDPToPixels(this,200);//220
-            params.width =  Utils.convertDPToPixels(this,300);
+            params.height = Utils.convertDPToPixels(this, 200);//220
+            params.width = Utils.convertDPToPixels(this, 300);
             params.gravity = Gravity.CENTER;
             getWindow().setAttributes(params);
-        }else if(screen.equals(Constants.SCREEN.LOADING)){
+        } else if (screen.equals(Constants.SCREEN.LOADING)) {
             WindowManager.LayoutParams params = getWindow().getAttributes();
-            params.height = Utils.convertDPToPixels(this,100);//220
-            params.width =  Utils.convertDPToPixels(this,100);
+            params.height = Utils.convertDPToPixels(this, 100);//220
+            params.width = Utils.convertDPToPixels(this, 100);
             params.gravity = Gravity.CENTER;
             getWindow().setAttributes(params);
-        }else{
+        } else {
             WindowManager.LayoutParams params = getWindow().getAttributes();
-            params.height = Utils.convertDPToPixels(this,280);//220
-            params.width =  Utils.convertDPToPixels(this,300);
+            params.height = Utils.convertDPToPixels(this, 280);//220
+            params.width = Utils.convertDPToPixels(this, 300);
             params.gravity = Gravity.CENTER;
             getWindow().setAttributes(params);
         }
 
     }
 
-    private void showScreen(){
+    private void showScreen() {
         screen = getIntent().getStringExtra("screen");
-        switch (screen){
+        switch (screen) {
             case Constants.SCREEN.CONNECT_VIEW:
                 replaceFragment(new ConnectWalletScreen());
                 break;
             case Constants.SCREEN.CONFIRM_SIGN:
-                replaceFragment(SignerScreen.NewInstance(getIntent().getStringExtra("type"),getIntent().getParcelableExtra("data")));
+                replaceFragment(SignerScreen.NewInstance(getIntent().getStringExtra("type"), getIntent().getParcelableExtra("data")));
+                break;
+            case Constants.SCREEN.BUY_NFT:
+                replaceFragment(BuyNftScreen.NewInstance(getIntent().getStringExtra("type"), getIntent().getStringExtra("currency"), getIntent().getLongExtra("listing_id", 0), getIntent().getDoubleExtra("price", 0)));
                 break;
             case Constants.SCREEN.WALLET:
                 replaceFragment(new WalletScreen());

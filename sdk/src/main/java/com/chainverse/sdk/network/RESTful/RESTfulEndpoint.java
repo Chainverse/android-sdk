@@ -8,11 +8,19 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface RESTfulEndpoint {
     @GET("/v1/user/{user_address}/game/{game_address}/items")
-    Observable<JsonElement> getItems(@Path("user_address") String  userAddress, @Path("game_address") String  gameAddress);
+    Observable<JsonElement> getItems(@Path("user_address") String userAddress, @Path("game_address") String gameAddress);
 
+    @GET("/v1/market/items")
+    Observable<JsonElement> getItemOnMarket(
+            @Query("game_address") String gameAddress,
+            @Query("page") int page,
+            @Query("page_size") int pageSize,
+            @Query("name") String name
+    );
 
     @POST("/v1/item")
     Observable<JsonElement> testBuy(@Body TestRaw body);

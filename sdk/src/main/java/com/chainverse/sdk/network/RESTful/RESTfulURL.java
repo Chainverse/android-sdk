@@ -42,6 +42,34 @@ public class RESTfulURL {
         return retrofit.create(RESTfulEndpoint .class);
     }
 
+    public static RESTfulEndpoint getInstanceMarket(){
+        Interceptor interceptor = new Interceptor() {
+            @Override
+            public okhttp3.Response intercept(Chain chain) throws IOException {
+                final Request request = chain.request().newBuilder()
+//                        .addHeader("X-User-Signature", EncryptPreferenceUtils.getInstance().getXUserSignature())
+//                        .addHeader("X-Signature-Ethers", "false")
+                        .build();
+
+                return chain.proceed(request);
+
+            }
+        };
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(interceptor)
+                .build();
+
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(Constants.URL.urlResfulMarket)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .build();
+        return retrofit.create(RESTfulEndpoint .class);
+    }
+
     public static RESTfulEndpoint getInstanceTest(){
         Interceptor interceptor = new Interceptor() {
             @Override
