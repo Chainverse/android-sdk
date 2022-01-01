@@ -1,6 +1,9 @@
 package com.chainverse.sdk.model.MarketItem;
 
-public class Currency {
+import java.io.Serializable;
+
+public class Currency implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String currency;
     private String symbol;
     private int decimal;

@@ -8,14 +8,15 @@
     android:clipChildren="true"
     android:clipToPadding="true"
     android:orientation="vertical"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
+    android:paddingLeft="12dp"
+    android:paddingRight="12dp"
     android:paddingBottom="15dp">
 
     <ImageView
         android:id="@+id/thumbnail"
         android:layout_width="match_parent"
         android:layout_height="153dp"
+        android:layout_marginTop="12dp"
         android:src="@drawable/photo_default"
         android:background="#EDE6E6"
         tools:srcCompat="@tools:sample/backgrounds/scenic" />

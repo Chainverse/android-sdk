@@ -33,6 +33,8 @@ android {
 dependencies {
     implementation fileTree(includes: ['*.aar'], dir: 'libs')
     implementation files('libs/wallet-core-2.6.16.aar')
+//    implementation files('libs/protobuf-javalite-3.19.1.jar')
+    compile 'com.google.protobuf:protobuf-java:3.12.0'
     compile 'androidx.appcompat:appcompat:1.0.0'
     compile 'com.google.android.material:material:1.0.0'
     compile 'com.squareup.retrofit2:retrofit:2.8.2'

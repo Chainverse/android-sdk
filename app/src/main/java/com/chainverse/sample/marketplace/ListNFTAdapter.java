@@ -77,11 +77,13 @@ public class ListNFTAdapter extends BaseAdapter {
 
         String categories = "";
 
-        for (Categories cate : item.getCategories()) {
-            if (categories.isEmpty()) {
-                categories += cate.getName();
-            } else {
-                categories += ", " + cate.getName();
+        if (item.getCategories() != null) {
+            for (Categories cate : item.getCategories()) {
+                if (categories.isEmpty()) {
+                    categories += cate.getName();
+                } else {
+                    categories += ", " + cate.getName();
+                }
             }
         }
         holder.categories.setText(categories);

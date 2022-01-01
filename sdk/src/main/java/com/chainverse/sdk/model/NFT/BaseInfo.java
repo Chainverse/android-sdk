@@ -1,8 +1,10 @@
 package com.chainverse.sdk.model.NFT;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 
-public class BaseInfo {
+public class BaseInfo implements Serializable {
+    private static final long serialVersionUID = 1L;
     private boolean isEnded;
     private String nft;
     private String owner;
