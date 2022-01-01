@@ -166,7 +166,17 @@ public class MarketPlaceActivity extends AppCompatActivity {
         protected void onPostExecute(ChainverseItemMarket nftInfo) {
             if(nftInfo != null && !nftInfo.getListingId().equals(BigInteger.ZERO)) {
                 Log.i(TAG, "Update information for the item");
-                listNFT.set(index, nftInfo);
+                ChainverseItemMarket updatedItem = listNFT.get(index);
+                updatedItem.setName(nftInfo.getName());
+                updatedItem.setImage_preview(nftInfo.getImage_preview());
+                updatedItem.setImage(nftInfo.getImage());
+                updatedItem.setAttributes(nftInfo.getAttributes());
+                updatedItem.setPrice(nftInfo.getPrice());
+                updatedItem.setAuctionInfo(nftInfo.getAuctionInfo());
+                updatedItem.setListingId(nftInfo.getListingId());
+                updatedItem.setListingInfo(nftInfo.getListingInfo());
+                updatedItem.setAuction(nftInfo.isAuction());
+                listNFT.set(index, updatedItem);
             } else {
                 Log.e(TAG,"Updated information for the item not found or invalid, remove it from list");
                 listNFT.remove(index);
