@@ -7,12 +7,14 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.chainverse.sample.R;
 import com.chainverse.sdk.ChainverseCallback;
@@ -26,42 +28,27 @@ import org.w3c.dom.Text;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Objects;
 
-public class DetailNFTActivity extends Activity {
+public class DetailNFTActivity extends AppCompatActivity {
     ChainverseItemMarket itemInfo;
 
     ImageView assetImage;
     TextView txtCategories, txtName, txtPrice, txtDesc;
     Button btnAction;
 
-    boolean isAuction;
-    Long tokenId;
-    String image;
-    String image_preview;
-    Double price;
-    String symbol;
-    String name;
-    String categories;
-    String currency;
-    Long listingId;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+
         setContentView(R.layout.detail_nft);
 
         Intent intent = getIntent();
 
-        isAuction = intent.getBooleanExtra("is_auction", false);
-        tokenId = intent.getLongExtra("token_id", 0);
-        image = intent.getStringExtra("asset_image");
-        image_preview = intent.getStringExtra("image_preview");
-        price = intent.getDoubleExtra("price", 0);
-        symbol = intent.getStringExtra("symbol_currency");
-        name = intent.getStringExtra("name");
-        categories = intent.getStringExtra("categories");
-        currency = intent.getStringExtra("currency");
-        listingId = intent.getLongExtra("listing_id", 0);
+        itemInfo = (ChainverseItemMarket) intent.getSerializableExtra("item");
+
+        setTitle(itemInfo.getName());
 
         assetImage = (ImageView) findViewById(R.id.imageView);
         txtCategories = (TextView) findViewById(R.id.txtCategories);
@@ -70,16 +57,15 @@ public class DetailNFTActivity extends Activity {
         txtDesc = (TextView) findViewById(R.id.txtPrice);
         btnAction = (Button) findViewById(R.id.button);
 
-        System.out.println(image + " " + image_preview);
-        if (image != null) {
-            new DownloadImageTask(assetImage).execute(image);
+        if (itemInfo.getImage() != null) {
+            new DownloadImageTask(assetImage).execute(itemInfo.getImage());
         }
 
-        txtName.setText(name);
-        txtPrice.setText(foo(price));
-        txtCategories.setText(categories);
+        txtName.setText(itemInfo.getName());
+        txtPrice.setText(foo(itemInfo.getPrice()));
+        txtCategories.setText(parseCategories(itemInfo.getCategories()));
 
-        if (isAuction) {
+        if (itemInfo.isAuction()) {
             btnAction.setText("Bid");
         } else {
             btnAction.setText("Buy now");
@@ -140,8 +126,8 @@ public class DetailNFTActivity extends Activity {
         btnAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (listingId != null) {
-                    ChainverseSDK.getInstance().buyNFT(currency, listingId, price, isAuction);
+                if (itemInfo.getListingId() != null) {
+                    ChainverseSDK.getInstance().buyNFT(itemInfo.getCurrency().getCurrency(), itemInfo.getListingId().longValue(), itemInfo.getPrice(), itemInfo.isAuction());
                 }
             }
         });
@@ -187,5 +173,20 @@ public class DetailNFTActivity extends Activity {
             newValue += String.valueOf(value).split("0.")[1];
         }
         return newValue;
+    }
+
+    private String parseCategories(ArrayList<Categories> cates) {
+        return "";
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            onBackPressed();
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
     }
 }

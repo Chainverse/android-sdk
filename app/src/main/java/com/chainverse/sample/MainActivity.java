@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
 //                System.out.println("Balance of token " + ChainverseSDK.getInstance().getBalanceToken("0x672021e3c741910896cad6D6121446a328ba5634"));
 
-                Log.e("onConnectSuccess", "" + address);
+                Log.i("onConnectSuccess", "" + address);
 //                ChainverseSDK.getInstance().getItems();
 //                ChainverseSDK.getInstance().getItemOnMarket(0, 20, "");
 //                ChainverseSDK.getInstance().getBalance();
@@ -106,12 +106,12 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onSignMessage(String signed) {
-                Log.e("onSignMessage", signed);
+                Log.i("onSignMessage", signed);
             }
 
             @Override
             public void onSignTransaction(String signed) {
-                Log.e("onSignTransaction", signed);
+                Log.i("onSignTransaction", signed);
             }
 
             @Override

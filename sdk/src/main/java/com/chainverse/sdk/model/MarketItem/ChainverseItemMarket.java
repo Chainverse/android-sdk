@@ -3,10 +3,12 @@ package com.chainverse.sdk.model.MarketItem;
 import com.chainverse.sdk.model.NFT.Auction;
 import com.chainverse.sdk.model.NFT.Listing;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
-public class ChainverseItemMarket {
+public class ChainverseItemMarket implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String attributes;
     private BigInteger token_id;
     private String name;

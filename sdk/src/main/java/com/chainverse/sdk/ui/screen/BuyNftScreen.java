@@ -202,7 +202,7 @@ public class BuyNftScreen extends Fragment implements View.OnClickListener {
                                 if (tx != null || !tx.isEmpty()) {
                                     btnAgree.setText("Buy now");
                                     tvData.setText("Do you want to sign to buy the NFT");
-                                    ispproved = true;
+                                    isApproved = true;
                                 }
                                 progress.dismiss();
                             }
