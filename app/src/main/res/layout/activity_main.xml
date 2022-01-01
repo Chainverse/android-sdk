@@ -51,6 +51,14 @@
         android:id="@+id/btnMarket"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         android:text="Marketplace" />
+
+    <Button
+        android:id="@+id/btnMyAsset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:text="My asssets" />
 
 </LinearLayout>

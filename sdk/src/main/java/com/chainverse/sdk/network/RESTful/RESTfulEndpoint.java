@@ -22,6 +22,9 @@ public interface RESTfulEndpoint {
             @Query("name") String name
     );
 
+    @GET("/v1/user/asset/tokens")
+    Observable<JsonElement> getMyAsset();
+
     @POST("/v1/item")
     Observable<JsonElement> testBuy(@Body TestRaw body);
 

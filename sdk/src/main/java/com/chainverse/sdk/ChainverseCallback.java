@@ -22,4 +22,6 @@ public interface ChainverseCallback {
     void onSignMessage(String signed);
 
     void onSignTransaction(String signed);
+
+    void onBuy(String tx);
 }

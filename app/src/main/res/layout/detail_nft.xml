@@ -9,6 +9,8 @@
         android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="250dp"
+        android:src="@drawable/photo_default"
+        android:background="#EDE6E6"
         tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
     <TextView

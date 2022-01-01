@@ -136,11 +136,17 @@ public class MarketPlaceActivity extends Activity {
             @Override
             public void onSignTransaction(String signed) {
             }
+
+            @Override
+            public void onBuy(String tx) {
+
+            }
         });
     }
 
     protected void getListNFTMarket() {
-        ChainverseSDK.getInstance().getItemOnMarket(0, 10, "");
+//        ChainverseSDK.getInstance().getMyAsset();
+        ChainverseSDK.getInstance().getItemOnMarket(0, 16, "");
     }
 
     protected class UpdateUI extends AsyncTask<ArrayList<ChainverseItemMarket>, NftProgress, Void> {

@@ -12,8 +12,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.chainverse.sample.marketplace.MarketPlaceActivity;
+import com.chainverse.sdk.Chainverse;
 import com.chainverse.sdk.ChainverseCallback;
 import com.chainverse.sdk.ChainverseError;
+import com.chainverse.sdk.common.WalletUtils;
 import com.chainverse.sdk.model.MarketItem.ChainverseItemMarket;
 import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.ChainverseUser;
@@ -36,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
         Button btnSend = (Button) findViewById(R.id.btnSendTransaction);
         Button btnLogout = (Button) findViewById(R.id.btnLogout);
         Button btnMarket = (Button) findViewById(R.id.btnMarket);
+        Button btnMyAsset = (Button) findViewById(R.id.btnMyAsset);
         TextView tvAddress = (TextView) findViewById(R.id.tvAddress);
         TextView tvBalance = (TextView) findViewById(R.id.tvBalance);
 
@@ -44,7 +47,11 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onInitSDKSuccess() {
-
+                btnMarket.setVisibility(View.VISIBLE);
+                String address = WalletUtils.getInstance().init(MainActivity.this).getAddress();
+//                if (address != null) {
+//                    btnMyAsset.setVisibility(View.VISIBLE);
+//                }
             }
 
             @Override
@@ -105,6 +112,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSignTransaction(String signed) {
                 Log.e("onSignTransaction", signed);
+            }
+
+            @Override
+            public void onBuy(String tx) {
+
             }
         });
         ChainverseSDK.getInstance().setScheme("trust-rn-example1://");

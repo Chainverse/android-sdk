@@ -15,6 +15,8 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.chainverse.sample.R;
+import com.chainverse.sdk.ChainverseCallback;
+import com.chainverse.sdk.ChainverseItem;
 import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.model.MarketItem.Categories;
 import com.chainverse.sdk.model.MarketItem.ChainverseItemMarket;
@@ -23,6 +25,7 @@ import org.w3c.dom.Text;
 
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.util.ArrayList;
 
 public class DetailNFTActivity extends Activity {
     ChainverseItemMarket itemInfo;
@@ -67,6 +70,7 @@ public class DetailNFTActivity extends Activity {
         txtDesc = (TextView) findViewById(R.id.txtPrice);
         btnAction = (Button) findViewById(R.id.button);
 
+        System.out.println(image + " " + image_preview);
         if (image != null) {
             new DownloadImageTask(assetImage).execute(image);
         }
@@ -81,11 +85,63 @@ public class DetailNFTActivity extends Activity {
             btnAction.setText("Buy now");
         }
 
+        ChainverseSDK.getInstance().init(this, new ChainverseCallback() {
+            @Override
+            public void onInitSDKSuccess() {
+
+            }
+
+            @Override
+            public void onError(int error) {
+
+            }
+
+            @Override
+            public void onItemUpdate(ChainverseItem item, int type) {
+
+            }
+
+            @Override
+            public void onGetItems(ArrayList<ChainverseItem> items) {
+
+            }
+
+            @Override
+            public void onGetItemMarket(ArrayList<ChainverseItemMarket> items) {
+
+            }
+
+            @Override
+            public void onConnectSuccess(String address) {
+
+            }
+
+            @Override
+            public void onLogout(String address) {
+
+            }
+
+            @Override
+            public void onSignMessage(String signed) {
+
+            }
+
+            @Override
+            public void onSignTransaction(String signed) {
+
+            }
+
+            @Override
+            public void onBuy(String tx) {
+                btnAction.setVisibility(View.GONE);
+            }
+        });
+
         btnAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (listingId != null) {
-                    ChainverseSDK.getInstance().buyNFT(currency, listingId, price);
+                    ChainverseSDK.getInstance().buyNFT(currency, listingId, price, isAuction);
                 }
             }
         });

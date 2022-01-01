@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.chainverse.sample.R;
+import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.model.MarketItem.Categories;
 import com.chainverse.sdk.model.MarketItem.ChainverseItemMarket;
 

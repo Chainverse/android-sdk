@@ -41,6 +41,7 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.RemoteFunctionCall;
+import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
@@ -54,6 +55,7 @@ import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.gas.DefaultGasProvider;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
@@ -275,7 +277,7 @@ public class ContractManager {
     }
 
     public String buyNFT(String currency, BigInteger listingId, BigInteger price) {
-        String tx = "";
+        String tx = null;
         try {
             String address = WalletUtils.getInstance().init(mContext).getAddress();
             Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
@@ -285,17 +287,6 @@ public class ContractManager {
 
             BigInteger nonce = ethGetTransactionCount.getTransactionCount();
 
-//            System.out.println(listingId + "  " + price);
-
-//            MarketServiceV1 market = MarketServiceV1.load(Constants.CONTRACT.MarketService, web3, credentials, new BigInteger("10000000000"), new BigInteger("80000"));
-//
-//            RemoteCall<TransactionReceipt> receiptRemoteCall = (RemoteCall<TransactionReceipt>) market.buy(listingId, price);
-//
-//            System.out.println("run here1");
-//            TransactionReceipt transactionReceipt = receiptRemoteCall.sendAsync().get();
-//            System.out.println("run here2");
-//            tx = transactionReceipt.getTransactionHash();
-//            System.out.println("run here3" + tx);
             Function function = new Function("buy", Arrays.asList(new Uint256(listingId), new Uint256(price)), Collections.emptyList());
 
             String functionEncoder = FunctionEncoder.encode(function);
@@ -310,12 +301,46 @@ public class ContractManager {
             RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, new BigInteger("10000000000"), new BigInteger("200000"), Constants.CONTRACT.MarketService, value, "0x" + functionEncoder);
             String signedTransaction = rawTransactionManager.sign(rawTransaction);
 
+            EthSendTransaction sendRawTransaction = web3.ethSendRawTransaction(signedTransaction).sendAsync().get();
+
+            tx = sendRawTransaction.getTransactionHash();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        return tx;
+    }
+
+    public String BidNFT(String currency, BigInteger listingId, BigInteger price) {
+        String tx = null;
+        try {
+            String address = WalletUtils.getInstance().init(mContext).getAddress();
+            Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
+
+            EthGetTransactionCount ethGetTransactionCount = web3.ethGetTransactionCount(
+                    address, DefaultBlockParameterName.LATEST).sendAsync().get();
+
+            BigInteger nonce = ethGetTransactionCount.getTransactionCount();
+
+            Function function = new Function("buy", Arrays.asList(new Uint256(listingId), new Uint256(price)), Collections.emptyList());
+
+            String functionEncoder = FunctionEncoder.encode(function);
+
+            RawTransactionManager rawTransactionManager = new RawTransactionManager(web3, credentials);
+
+            BigInteger value = BigInteger.ZERO;
+
+            if (currency.equals(Constants.CONTRACT.NativeCurrency)) {
+                value = price;
+            }
+            RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, new BigInteger("10000000000"), new BigInteger("200000"), Constants.CONTRACT.MarketService, value, "0x" + functionEncoder);
+            String signedTransaction = rawTransactionManager.sign(rawTransaction);
 
             EthSendTransaction sendRawTransaction = web3.ethSendRawTransaction(signedTransaction).sendAsync().get();
 
             tx = sendRawTransaction.getTransactionHash();
-
-            System.out.println("run hererere " + tx);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -380,19 +405,23 @@ public class ContractManager {
         try {
             String[] gateways = new String[]{"https://ipfs.io/ipfs/", "https://gateway.pinata.cloud/ipfs/"};
             int n = 0;
+            int indHttp = -1;
             boolean check = true;
 
             String url = "";
             String reIpfs = "/(ipfs:\\/\\/)|(ipfs\\/)/gm";
-            String reHttp = "/(http:\\/\\/)|(https:\\/\\/)/gm";
+            indHttp = hash.indexOf("https://");
+            if (indHttp < 0) {
+                indHttp = hash.indexOf("http://");
+            }
 
             while (check) {
-                String gateway = gateways[0];
-
-                if (hash.matches(reHttp)) {
+                String gateway = gateways[n];
+                if (indHttp >= 0) {
                     check = false;
-                    if (hash.matches("/\\?id=/") && !hash.isEmpty()) {
-                        url = hash.replace("/\\?id=/", "?id=" + hash);
+                    int indHash = hash.indexOf("\\?id=");
+                    if (indHash >= 0 && !hash.isEmpty()) {
+                        url = hash.replace("\\?id=", "?id=" + hash);
                     } else {
                         url = hash;
                     }
@@ -401,7 +430,6 @@ public class ContractManager {
                 } else {
                     url = gateway + hash;
                 }
-
 
                 String content = getUrlContents(url);
 
@@ -439,7 +467,7 @@ public class ContractManager {
             }
             bufferedReader.close();
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         return content.toString();
     }

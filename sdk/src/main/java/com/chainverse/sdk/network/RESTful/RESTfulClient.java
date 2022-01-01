@@ -19,6 +19,10 @@ public class RESTfulClient {
         return RESTfulURL.getInstanceMarket().getItemOnMarket(gameAddress, page, pageSize, name);
     }
 
+    public static Observable<JsonElement> getMyAsset() {
+        return RESTfulURL.getInstanceMarket().getMyAsset();
+    }
+
     public static Observable<JsonElement> testBuy() {
         TestRaw raw = new TestRaw();
         raw.setGame_contract(ChainverseSDK.gameAddress);
