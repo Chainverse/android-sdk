@@ -86,7 +86,7 @@ public class ChainverseSDKActivity extends AppCompatActivity {
                 replaceFragment(SignerScreen.NewInstance(getIntent().getStringExtra("type"), getIntent().getParcelableExtra("data")));
                 break;
             case Constants.SCREEN.BUY_NFT:
-                replaceFragment(BuyNftScreen.NewInstance(getIntent().getStringExtra("type"), getIntent().getStringExtra("currency"), getIntent().getLongExtra("listing_id", 0), getIntent().getDoubleExtra("price", 0)));
+                replaceFragment(BuyNftScreen.NewInstance(getIntent().getStringExtra("type"), getIntent().getStringExtra("currency"), getIntent().getLongExtra("listing_id", 0), getIntent().getDoubleExtra("price", 0),getIntent().getBooleanExtra("isAuction", false)));
                 break;
             case Constants.SCREEN.WALLET:
                 replaceFragment(new WalletScreen());

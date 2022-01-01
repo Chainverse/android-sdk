@@ -130,6 +130,11 @@ public class MarketPlaceActivity extends AppCompatActivity {
             @Override
             public void onSignTransaction(String signed) {
             }
+
+            @Override
+            public void onBuy(String tx) {
+
+            }
         });
     }
 

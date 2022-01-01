@@ -125,6 +125,11 @@ public class ChainverseSDK implements Chainverse {
         setupBouncyCastle();
     }
 
+    public void init(Activity activity, ChainverseCallback callback) {
+        this.mCallback = callback;
+        this.mContext = activity;
+    }
+
     private void receiverCreatedWallet() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Constants.ACTION.CREATED_WALLET);
@@ -206,6 +211,27 @@ public class ChainverseSDK implements Chainverse {
                 });
     }
 
+    public void getMyAsset() {
+        RESTfulClient.getMyAsset()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(jsonElement -> {
+                    if (Utils.getErrorCodeResponse(jsonElement) == 0) {
+                        Gson gson = new Gson();
+
+                        ArrayList<ChainverseItemMarket> items = gson.fromJson(jsonElement.getAsJsonObject().get("data").getAsJsonObject().get("rows"), new TypeToken<ArrayList<ChainverseItemMarket>>() {
+                        }.getType());
+                        System.out.println("run herer  " + items.size());
+//                        CallbackToGame.onGetItemMarket(items);
+                    } else {
+                        CallbackToGame.onError(ChainverseError.ERROR_REQUEST_ITEM);
+                    }
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    CallbackToGame.onError(ChainverseError.ERROR_REQUEST_ITEM);
+                });
+    }
+
     private void checkContract() {
         ContractManager checkContract = new ContractManager(mContext, new ContractManager.Listener() {
             @Override
@@ -245,6 +271,11 @@ public class ChainverseSDK implements Chainverse {
     private void doConnectSuccess() {
         if (isUserConnected()) {
             CallbackToGame.onConnectSuccess(encryptPreferenceUtils.getXUserAddress());
+            try {
+                EncryptPreferenceUtils.getInstance().init(mContext).setXUserSignature(WalletUtils.getInstance().init(mContext).signMessage("ChainVerse"));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             transferItemManager = new TransferItemManager(mContext);
             transferItemManager.on(new OnEmitterListenter() {
                 @Override
@@ -511,15 +542,17 @@ public class ChainverseSDK implements Chainverse {
     }
 
     @Override
-    public void buyNFT(String currency, Long listing_id, Double price) {
+    public void buyNFT(String currency, Long listing_id, Double price, boolean isAuction) {
         Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
         Bundle bundle = new Bundle();
         bundle.putString("screen", Constants.SCREEN.BUY_NFT);
         bundle.putString("currency", currency);
         bundle.putLong("listing_id", listing_id);
         bundle.putDouble("price", price);
+        bundle.putBoolean("isAuction", isAuction);
         intent.putExtra("type", "buyNFT");
         intent.putExtras(bundle);
+
         mContext.startActivity(intent);
     }
 

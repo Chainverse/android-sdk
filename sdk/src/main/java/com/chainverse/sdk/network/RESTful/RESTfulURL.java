@@ -43,12 +43,14 @@ public class RESTfulURL {
     }
 
     public static RESTfulEndpoint getInstanceMarket(){
+        System.out.println("address" + EncryptPreferenceUtils.getInstance().getXUserAddress());
+        System.out.println("signature" + EncryptPreferenceUtils.getInstance().getXUserSignature());
         Interceptor interceptor = new Interceptor() {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
                 final Request request = chain.request().newBuilder()
-//                        .addHeader("X-User-Signature", EncryptPreferenceUtils.getInstance().getXUserSignature())
-//                        .addHeader("X-Signature-Ethers", "false")
+                        .addHeader("x-address", EncryptPreferenceUtils.getInstance().getXUserAddress())
+                        .addHeader("x-signature", EncryptPreferenceUtils.getInstance().getXUserSignature())
                         .build();
 
                 return chain.proceed(request);

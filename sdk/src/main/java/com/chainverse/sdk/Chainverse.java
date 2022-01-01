@@ -162,5 +162,5 @@ public interface Chainverse {
      * @param price
      * return
      */
-    void buyNFT(String currency, Long listing_id, Double price);
+    void buyNFT(String currency, Long listing_id, Double price, boolean isAuction);
 }

@@ -17,6 +17,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.chainverse.sample.R;
+import com.chainverse.sdk.ChainverseCallback;
+import com.chainverse.sdk.ChainverseItem;
 import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.model.MarketItem.Categories;
 import com.chainverse.sdk.model.MarketItem.ChainverseItemMarket;
@@ -69,11 +71,63 @@ public class DetailNFTActivity extends AppCompatActivity {
             btnAction.setText("Buy now");
         }
 
+        ChainverseSDK.getInstance().init(this, new ChainverseCallback() {
+            @Override
+            public void onInitSDKSuccess() {
+
+            }
+
+            @Override
+            public void onError(int error) {
+
+            }
+
+            @Override
+            public void onItemUpdate(ChainverseItem item, int type) {
+
+            }
+
+            @Override
+            public void onGetItems(ArrayList<ChainverseItem> items) {
+
+            }
+
+            @Override
+            public void onGetItemMarket(ArrayList<ChainverseItemMarket> items) {
+
+            }
+
+            @Override
+            public void onConnectSuccess(String address) {
+
+            }
+
+            @Override
+            public void onLogout(String address) {
+
+            }
+
+            @Override
+            public void onSignMessage(String signed) {
+
+            }
+
+            @Override
+            public void onSignTransaction(String signed) {
+
+            }
+
+            @Override
+            public void onBuy(String tx) {
+                btnAction.setVisibility(View.GONE);
+            }
+        });
+
         btnAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (itemInfo.getListingId() != null) {
-                    ChainverseSDK.getInstance().buyNFT(itemInfo.getCurrency().getCurrency(), itemInfo.getListingId().longValue(), itemInfo.getPrice());
+                    ChainverseSDK.getInstance().buyNFT(itemInfo.getCurrency().getCurrency(), itemInfo.getListingId().longValue(), itemInfo.getPrice(), itemInfo.isAuction());
                 }
             }
         });
@@ -120,21 +174,18 @@ public class DetailNFTActivity extends AppCompatActivity {
         }
         return newValue;
     }
+
     private String parseCategories(ArrayList<Categories> cates) {
         return "";
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
+    public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == android.R.id.home)
-        {
+        if (id == android.R.id.home) {
             onBackPressed();
             return true;
-        }
-        else
-        {
+        } else {
             return super.onOptionsItemSelected(item);
         }
     }
