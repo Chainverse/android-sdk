@@ -152,7 +152,7 @@ public class MarketPlaceActivity extends AppCompatActivity {
         }
     }
 
-    class NftProgress extends  AsyncTask<Void, NftProgress, ChainverseItemMarket>{
+    class NftProgress extends AsyncTask<Void, NftProgress, ChainverseItemMarket> {
         private ChainverseItemMarket chainverseItemMarket;
         private int index;
 
@@ -169,11 +169,31 @@ public class MarketPlaceActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(ChainverseItemMarket nftInfo) {
-            if(nftInfo != null && !nftInfo.getListingId().equals(BigInteger.ZERO)) {
+            if (nftInfo != null && !nftInfo.getListingId().equals(BigInteger.ZERO)) {
                 Log.i(TAG, "Update information for the item");
-                listNFT.set(index, nftInfo);
+                if (nftInfo.getImage() != null)
+                    this.chainverseItemMarket.setImage(nftInfo.getImage());
+                if (nftInfo.getImage_preview() != null)
+                    this.chainverseItemMarket.setImage_preview(nftInfo.getImage_preview());
+                if (nftInfo.getName() != null)
+                    this.chainverseItemMarket.setName(nftInfo.getName());
+                if (nftInfo.getAttributes() != null) {
+                    this.chainverseItemMarket.setAttributes(nftInfo.getAttributes());
+                }
+                if (nftInfo.getListingId() != null) {
+                    this.chainverseItemMarket.setListingId(nftInfo.getListingId());
+                }
+                if (nftInfo.getPrice() != null)
+                    this.chainverseItemMarket.setPrice(nftInfo.getPrice());
+                if (nftInfo.getAuctionInfo() != null)
+                    this.chainverseItemMarket.setAuctionInfo(nftInfo.getAuctionInfo());
+                if (nftInfo.getListingInfo() != null)
+                    this.chainverseItemMarket.setListingInfo(nftInfo.getListingInfo());
+                if (nftInfo.isAuction() != null)
+                    this.chainverseItemMarket.setAuction(nftInfo.isAuction());
+                listNFT.set(index, this.chainverseItemMarket);
             } else {
-                Log.e(TAG,"Updated information for the item not found or invalid, remove it from list");
+                Log.e(TAG, "Updated information for the item not found or invalid, remove it from list");
                 listNFT.remove(index);
             }
             ((BaseAdapter) gridView.getAdapter()).notifyDataSetChanged();
@@ -182,16 +202,12 @@ public class MarketPlaceActivity extends AppCompatActivity {
 
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
+    public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == android.R.id.home)
-        {
+        if (id == android.R.id.home) {
             onBackPressed();
             return true;
-        }
-        else
-        {
+        } else {
             return super.onOptionsItemSelected(item);
         }
     }

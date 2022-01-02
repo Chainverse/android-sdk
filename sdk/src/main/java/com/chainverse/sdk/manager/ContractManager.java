@@ -20,6 +20,7 @@ import com.chainverse.sdk.common.Constants;
 import com.chainverse.sdk.common.Convert;
 import com.chainverse.sdk.common.WalletUtils;
 import com.chainverse.sdk.model.MarketItem.ChainverseItemMarket;
+import com.chainverse.sdk.model.MarketItem.Currency;
 import com.chainverse.sdk.model.NFT.Auction;
 import com.chainverse.sdk.model.NFT.Listing;
 import com.chainverse.sdk.model.NFT.NFT;
@@ -165,15 +166,19 @@ public class ContractManager {
     public ChainverseItemMarket getNFT(String nft, BigInteger tokenId) throws Exception {
         ChainverseItemMarket item = new ChainverseItemMarket();
 
+        System.out.println("ru nhere" + tokenId);
         try {
             Credentials dummyCredentials = Credentials.create(Keys.createEcKeyPair());
             MarketServiceV1 contract = MarketServiceV1.load(Constants.CONTRACT.MarketService, web3, dummyCredentials, new DefaultGasProvider());
             ERC721 contractERC721 = ERC721.load(nft, web3, dummyCredentials, new DefaultGasProvider());
             RemoteCall<String> remoteCallUri = contractERC721.tokenURI(tokenId);
             String uri = remoteCallUri.sendAsync().get();
+
+            System.out.println("run herer" + uri);
             String content = handleTokenUri(uri);
 //            String content = new DownloadContent().execute(uri).get();
 
+            item.setTokenId(tokenId);
             if (content != null && !content.isEmpty()) {
                 JSONObject json = new JSONObject(content);
 
