@@ -2,7 +2,7 @@ plugins {
     id 'com.android.library'
 }
 apply plugin: 'com.github.dcendents.android-maven'
-group = 'com.github.gmogame'
+group = 'com.github.chainverse'
 
 android {
     compileSdkVersion 30
@@ -31,10 +31,6 @@ android {
 }
 
 dependencies {
-    implementation fileTree(includes: ['*.aar'], dir: 'libs')
-    implementation files('libs/wallet-core-2.6.16.aar')
-//    implementation files('libs/protobuf-javalite-3.19.1.jar')
-    compile 'com.google.protobuf:protobuf-java:3.12.0'
     compile 'androidx.appcompat:appcompat:1.0.0'
     compile 'com.google.android.material:material:1.0.0'
     compile 'com.squareup.retrofit2:retrofit:2.8.2'
@@ -46,7 +42,7 @@ dependencies {
     compile 'io.reactivex:rxjava:1.1.0'
     compile 'org.web3j:core:4.8.7-android'
     compile 'io.socket:socket.io-client:2.0.1'
-//    compile "com.trustwallet:wallet-core:2.6.16"
+    compile "com.trustwallet:wallet-core:2.6.16"
     compile "androidx.security:security-crypto:1.1.0-alpha03"
 
 }
