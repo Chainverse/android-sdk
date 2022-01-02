@@ -80,7 +80,7 @@ public class ChainverseItemMarket implements Serializable {
         this.nft = nft;
     }
 
-    public boolean isAuction() {
+    public Boolean isAuction() {
         return auction;
     }
 

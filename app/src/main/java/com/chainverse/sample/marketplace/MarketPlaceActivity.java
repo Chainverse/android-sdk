@@ -152,7 +152,7 @@ public class MarketPlaceActivity extends AppCompatActivity {
         }
     }
 
-    class NftProgress extends  AsyncTask<Void, NftProgress, ChainverseItemMarket>{
+    class NftProgress extends AsyncTask<Void, NftProgress, ChainverseItemMarket> {
         private ChainverseItemMarket chainverseItemMarket;
         private int index;
 
@@ -169,7 +169,7 @@ public class MarketPlaceActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(ChainverseItemMarket nftInfo) {
-            if(nftInfo != null && !nftInfo.getListingId().equals(BigInteger.ZERO)) {
+            if (nftInfo != null && !nftInfo.getListingId().equals(BigInteger.ZERO)) {
                 Log.i(TAG, "Update information for the item");
                 ChainverseItemMarket updatedItem = listNFT.get(index);
                 updatedItem.setName(nftInfo.getName());
@@ -183,7 +183,7 @@ public class MarketPlaceActivity extends AppCompatActivity {
                 updatedItem.setAuction(nftInfo.isAuction());
                 listNFT.set(index, updatedItem);
             } else {
-                Log.e(TAG,"Updated information for the item not found or invalid, remove it from list");
+                Log.e(TAG, "Updated information for the item not found or invalid, remove it from list");
                 listNFT.remove(index);
             }
             ((BaseAdapter) gridView.getAdapter()).notifyDataSetChanged();
@@ -192,16 +192,12 @@ public class MarketPlaceActivity extends AppCompatActivity {
 
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
+    public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == android.R.id.home)
-        {
+        if (id == android.R.id.home) {
             onBackPressed();
             return true;
-        }
-        else
-        {
+        } else {
             return super.onOptionsItemSelected(item);
         }
     }

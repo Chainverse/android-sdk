@@ -20,6 +20,7 @@ import com.chainverse.sdk.common.Constants;
 import com.chainverse.sdk.common.Convert;
 import com.chainverse.sdk.common.WalletUtils;
 import com.chainverse.sdk.model.MarketItem.ChainverseItemMarket;
+import com.chainverse.sdk.model.MarketItem.Currency;
 import com.chainverse.sdk.model.NFT.Auction;
 import com.chainverse.sdk.model.NFT.Listing;
 import com.chainverse.sdk.model.NFT.NFT;
@@ -171,9 +172,11 @@ public class ContractManager {
             ERC721 contractERC721 = ERC721.load(nft, web3, dummyCredentials, new DefaultGasProvider());
             RemoteCall<String> remoteCallUri = contractERC721.tokenURI(tokenId);
             String uri = remoteCallUri.sendAsync().get();
+
             String content = handleTokenUri(uri);
 //            String content = new DownloadContent().execute(uri).get();
 
+            item.setTokenId(tokenId);
             if (content != null && !content.isEmpty()) {
                 JSONObject json = new JSONObject(content);
 
@@ -209,6 +212,8 @@ public class ContractManager {
             item.setAuctionInfo(auction);
             item.setListingInfo(listing);
             item.setAuction((auction.getId().equals(BigInteger.ZERO)) ? false : true);
+            item.setPrice(0.0);
+            item.setListingId(BigInteger.ZERO);
             if (!auction.getId().equals(BigInteger.ZERO)) {
                 BigDecimal price = org.web3j.utils.Convert.fromWei(new BigDecimal(auction.getBid()), org.web3j.utils.Convert.Unit.ETHER);
                 item.setListingId(auction.getId());
