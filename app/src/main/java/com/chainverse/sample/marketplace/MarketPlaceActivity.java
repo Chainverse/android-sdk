@@ -171,27 +171,17 @@ public class MarketPlaceActivity extends AppCompatActivity {
         protected void onPostExecute(ChainverseItemMarket nftInfo) {
             if (nftInfo != null && !nftInfo.getListingId().equals(BigInteger.ZERO)) {
                 Log.i(TAG, "Update information for the item");
-                if (nftInfo.getImage() != null)
-                    this.chainverseItemMarket.setImage(nftInfo.getImage());
-                if (nftInfo.getImage_preview() != null)
-                    this.chainverseItemMarket.setImage_preview(nftInfo.getImage_preview());
-                if (nftInfo.getName() != null)
-                    this.chainverseItemMarket.setName(nftInfo.getName());
-                if (nftInfo.getAttributes() != null) {
-                    this.chainverseItemMarket.setAttributes(nftInfo.getAttributes());
-                }
-                if (nftInfo.getListingId() != null) {
-                    this.chainverseItemMarket.setListingId(nftInfo.getListingId());
-                }
-                if (nftInfo.getPrice() != null)
-                    this.chainverseItemMarket.setPrice(nftInfo.getPrice());
-                if (nftInfo.getAuctionInfo() != null)
-                    this.chainverseItemMarket.setAuctionInfo(nftInfo.getAuctionInfo());
-                if (nftInfo.getListingInfo() != null)
-                    this.chainverseItemMarket.setListingInfo(nftInfo.getListingInfo());
-                if (nftInfo.isAuction() != null)
-                    this.chainverseItemMarket.setAuction(nftInfo.isAuction());
-                listNFT.set(index, this.chainverseItemMarket);
+                ChainverseItemMarket updatedItem = listNFT.get(index);
+                updatedItem.setName(nftInfo.getName());
+                updatedItem.setImage_preview(nftInfo.getImage_preview());
+                updatedItem.setImage(nftInfo.getImage());
+                updatedItem.setAttributes(nftInfo.getAttributes());
+                updatedItem.setPrice(nftInfo.getPrice());
+                updatedItem.setAuctionInfo(nftInfo.getAuctionInfo());
+                updatedItem.setListingId(nftInfo.getListingId());
+                updatedItem.setListingInfo(nftInfo.getListingInfo());
+                updatedItem.setAuction(nftInfo.isAuction());
+                listNFT.set(index, updatedItem);
             } else {
                 Log.e(TAG, "Updated information for the item not found or invalid, remove it from list");
                 listNFT.remove(index);

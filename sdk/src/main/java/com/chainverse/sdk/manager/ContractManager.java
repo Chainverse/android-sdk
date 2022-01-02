@@ -166,7 +166,6 @@ public class ContractManager {
     public ChainverseItemMarket getNFT(String nft, BigInteger tokenId) throws Exception {
         ChainverseItemMarket item = new ChainverseItemMarket();
 
-        System.out.println("ru nhere" + tokenId);
         try {
             Credentials dummyCredentials = Credentials.create(Keys.createEcKeyPair());
             MarketServiceV1 contract = MarketServiceV1.load(Constants.CONTRACT.MarketService, web3, dummyCredentials, new DefaultGasProvider());
@@ -174,7 +173,6 @@ public class ContractManager {
             RemoteCall<String> remoteCallUri = contractERC721.tokenURI(tokenId);
             String uri = remoteCallUri.sendAsync().get();
 
-            System.out.println("run herer" + uri);
             String content = handleTokenUri(uri);
 //            String content = new DownloadContent().execute(uri).get();
 
@@ -214,6 +212,8 @@ public class ContractManager {
             item.setAuctionInfo(auction);
             item.setListingInfo(listing);
             item.setAuction((auction.getId().equals(BigInteger.ZERO)) ? false : true);
+            item.setPrice(0.0);
+            item.setListingId(BigInteger.ZERO);
             if (!auction.getId().equals(BigInteger.ZERO)) {
                 BigDecimal price = org.web3j.utils.Convert.fromWei(new BigDecimal(auction.getBid()), org.web3j.utils.Convert.Unit.ETHER);
                 item.setListingId(auction.getId());
