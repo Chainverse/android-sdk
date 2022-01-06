@@ -1,157 +1,182 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-xmlns:app="http://schemas.android.com/apk/res-auto"
-android:orientation="vertical"
-tools:context=".ui.screen.ConnectWalletScreen"
-android:background="@color/ChainverseColorPrimary">
-
-<LinearLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
-
-        <Button
-            android:id="@+id/chainverse_button_close"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:drawableLeft="@drawable/chainverse_ic_back"
-            android:drawablePadding="15dp"
-            android:background="@android:color/transparent"
-            android:text=""
-            android:textColor="#FFFFFF"
-            android:textAllCaps="false"/>
-
-    </LinearLayout>
-
+    android:background="@color/ChainverseColorPrimary"
+    android:orientation="vertical"
+    tools:context=".ui.screen.ConnectWalletScreen">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="@drawable/chainverse_background_container">
+        android:orientation="vertical">
 
-        <androidx.core.widget.NestedScrollView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <LinearLayout
+            android:layout_height="70dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/chainverse_button_close"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:background="@android:color/transparent"
+                android:drawableLeft="@drawable/chainverse_ic_back"
+                android:drawablePadding="15dp"
+                android:text=""
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF" />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/chainverse_background_container"
+            android:orientation="vertical">
+
+            <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:layout_marginBottom="20dp">
+                android:layout_height="match_parent">
+
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center_horizontal"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginRight="20dp"
-                    android:layout_marginTop="20dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="This is your address (click to copy)"
-                        android:textSize="15dp"
-                        android:textColor="#4D4D4D"
-                        android:layout_gravity="left"/>
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="20dp"
+                    android:orientation="vertical">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/chainverse_background_private_key"
-                        android:padding="10dp"
-                        android:layout_marginTop="10dp"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginRight="20dp"
+                        android:gravity="center_horizontal"
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/chainverse_tv_address"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="left"
+                            android:text="This is your address (click to copy)"
+                            android:textColor="#4D4D4D"
+                            android:textSize="15dp" />
+
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:background="@null"
-                            android:text=""
-                            android:gravity="top"
-                            android:textColor="#4D4D4D"
-                            android:textStyle="bold"
-                            android:textSize="15dp" />
+                            android:layout_marginTop="10dp"
+                            android:background="@drawable/chainverse_background_private_key"
+                            android:orientation="vertical"
+                            android:padding="10dp">
+
+                            <TextView
+                                android:id="@+id/chainverse_tv_address"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="@null"
+                                android:gravity="top"
+                                android:text=""
+                                android:textColor="#4D4D4D"
+                                android:textSize="15dp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/chainverse_view_copied"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginTop="26dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:visibility="gone">
+
+                            <ImageButton
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@android:color/transparent"
+                                android:src="@drawable/chainverse_ic_checked"
+                                android:visibility="visible" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="10dp"
+                                android:text="The address was copied"
+                                android:textColor="#077DC5"
+                                android:textSize="15dp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:layout_marginTop="16dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="left"
+                                android:text="Asset value"
+                                android:textColor="#4D4D4D"
+                                android:textSize="15dp" />
+
+                            <TextView
+                                android:id="@+id/txtBalance"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:textStyle="bold"
+                                android:text="BNB: 0\nUSDT: 0\nBUSD: 0\nCVT:0" />
+                        </LinearLayout>
+
                     </LinearLayout>
 
-                    <LinearLayout
-                        android:id="@+id/chainverse_view_copied"
+
+                    <View
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
+                        android:layout_height="1dp"
                         android:layout_marginTop="26dp"
-                        android:layout_gravity="center_horizontal"
-                        android:gravity="center_vertical"
-                        android:visibility="gone">
-                        <ImageButton
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/chainverse_ic_checked"
-                            android:background="@android:color/transparent"
-                            android:visibility="visible"/>
+                        android:background="#DADEE4" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="The address was copied"
-                            android:textSize="15dp"
-                            android:textColor="#077DC5"
-                            android:layout_marginLeft="10dp"/>
-                    </LinearLayout>
+                    <Button
+                        android:id="@+id/chainverse_button_recovery_phrase"
+                        style="?android:attr/borderlessButtonStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="26dp"
+                        android:layout_marginRight="20dp"
+                        android:background="@drawable/chainverse_background_button_wallet_info"
+                        android:text="Secret Recovery Phrase"
+                        android:textAllCaps="false"
+                        android:textColor="@color/ChainverseColorPrimary"
+                        android:textSize="16dp"
+                        android:visibility="visible" />
+
+                    <Button
+                        android:id="@+id/chainverse_button_export_private_key"
+                        style="?android:attr/borderlessButtonStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginRight="20dp"
+                        android:background="@drawable/chainverse_background_button_wallet_info"
+                        android:text="Export Private Key"
+                        android:textAllCaps="false"
+                        android:textColor="@color/ChainverseColorPrimary"
+                        android:textSize="16dp" />
 
                 </LinearLayout>
+            </androidx.core.widget.NestedScrollView>
+        </LinearLayout>
 
-
-                <View
-                    android:layout_width="wrap_content"
-                    android:layout_height="1dp"
-                    android:background="#DADEE4"
-                    android:layout_marginTop="26dp"/>
-
-                <Button
-                    android:id="@+id/chainverse_button_recovery_phrase"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginRight="20dp"
-                    android:layout_marginTop="26dp"
-                    android:background="@drawable/chainverse_background_button_wallet_info"
-                    android:text="Secret Recovery Phrase"
-                    android:textColor="@color/ChainverseColorPrimary"
-                    android:textSize="16dp"
-                    android:textAllCaps="false"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:visibility="visible"/>
-
-                <Button
-                    android:id="@+id/chainverse_button_export_private_key"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginRight="20dp"
-                    android:layout_marginTop="10dp"
-                    android:background="@drawable/chainverse_background_button_wallet_info"
-                    android:text="Export Private Key"
-                    android:textColor="@color/ChainverseColorPrimary"
-                    android:textSize="16dp"
-                    android:textAllCaps="false"
-                    style="?android:attr/borderlessButtonStyle"/>
-
-            </LinearLayout>
-        </androidx.core.widget.NestedScrollView>
     </LinearLayout>
-
-</LinearLayout>
 
 </RelativeLayout>
 

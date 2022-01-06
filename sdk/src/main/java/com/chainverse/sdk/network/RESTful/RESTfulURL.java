@@ -43,8 +43,9 @@ public class RESTfulURL {
     }
 
     public static RESTfulEndpoint getInstanceMarket(){
-        System.out.println("address" + EncryptPreferenceUtils.getInstance().getXUserAddress());
-        System.out.println("signature" + EncryptPreferenceUtils.getInstance().getXUserSignature());
+
+        System.out.println(" nonce data " + EncryptPreferenceUtils.getInstance().getNonceSignature());
+
         Interceptor interceptor = new Interceptor() {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {

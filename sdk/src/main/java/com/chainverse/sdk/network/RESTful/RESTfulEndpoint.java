@@ -25,6 +25,9 @@ public interface RESTfulEndpoint {
     @GET("/v1/user/asset/tokens")
     Observable<JsonElement> getMyAsset();
 
+    @POST("/v1/user/nonce")
+    Observable<JsonElement> getNonce();
+
     @POST("/v1/item")
     Observable<JsonElement> testBuy(@Body TestRaw body);
 

@@ -15,6 +15,8 @@ public interface ChainverseCallback {
 
     void onGetItemMarket(ArrayList<ChainverseItemMarket> items);
 
+    void onGetMyAssets(ArrayList<ChainverseItemMarket> items);
+
     void onConnectSuccess(String address);
 
     void onLogout(String address);

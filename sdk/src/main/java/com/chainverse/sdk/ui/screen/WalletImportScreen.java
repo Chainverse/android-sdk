@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+
 import androidx.fragment.app.Fragment;
 
 import android.text.Editable;
@@ -27,10 +28,11 @@ import com.chainverse.sdk.listener.OnWalletListener;
 import com.chainverse.sdk.ui.ChainverseSDKActivity;
 
 
-public class WalletImportScreen extends Fragment implements View.OnClickListener{
+public class WalletImportScreen extends Fragment implements View.OnClickListener {
     private Button btnClose, btnImport, btnPaste;
     private EditText edtPhrase;
     private TextView tvError;
+
     public WalletImportScreen() {
         // Required empty public constructor
     }
@@ -45,7 +47,7 @@ public class WalletImportScreen extends Fragment implements View.OnClickListener
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View mParent =  inflater.inflate(R.layout.chainverse_screen_wallet_import, container, false);
+        View mParent = inflater.inflate(R.layout.chainverse_screen_wallet_import, container, false);
         btnClose = mParent.findViewById(R.id.chainverse_button_close);
         btnImport = mParent.findViewById(R.id.chainverse_button_import);
         btnPaste = mParent.findViewById(R.id.chainverse_button_paste);
@@ -80,17 +82,17 @@ public class WalletImportScreen extends Fragment implements View.OnClickListener
     }
 
     private void hideKeyboard() {
-        InputMethodManager inputMethodManager =(InputMethodManager)getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+        InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(getView().getRootView().getWindowToken(), 0);
     }
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == R.id.chainverse_button_close){
+        if (v.getId() == R.id.chainverse_button_close) {
             getActivity().finish();
-        }else if(v.getId() == R.id.chainverse_button_import){
+        } else if (v.getId() == R.id.chainverse_button_import) {
             Intent intent = new Intent(getContext(), ChainverseSDKActivity.class);
-            intent.putExtra("screen",Constants.SCREEN.LOADING);
+            intent.putExtra("screen", Constants.SCREEN.LOADING);
             getActivity().startActivity(intent);
 
             new Handler().postDelayed(new Runnable() {
@@ -104,7 +106,7 @@ public class WalletImportScreen extends Fragment implements View.OnClickListener
 
                         @Override
                         public void onImported() {
-                            BroadcastUtil.send(getContext(),Constants.ACTION.DIMISS_LOADING);
+                            BroadcastUtil.send(getContext(), Constants.ACTION.DIMISS_LOADING);
 
                             String xUserAddress = WalletUtils.getInstance().init(getContext()).getAddress();
                             EncryptPreferenceUtils.getInstance().init(getContext()).setXUserAddress(xUserAddress);
@@ -114,7 +116,7 @@ public class WalletImportScreen extends Fragment implements View.OnClickListener
                                 e.printStackTrace();
                             }
 
-                            BroadcastUtil.send(getContext(),Constants.ACTION.CREATED_WALLET);
+                            BroadcastUtil.send(getContext(), Constants.ACTION.CREATED_WALLET);
 
                             Intent intentAlert = new Intent(getContext(), ChainverseSDKActivity.class);
                             intentAlert.putExtra("screen", Constants.SCREEN.ALERT);
@@ -125,7 +127,7 @@ public class WalletImportScreen extends Fragment implements View.OnClickListener
 
                         @Override
                         public void onImportedFailed() {
-                            BroadcastUtil.send(getContext(),Constants.ACTION.DIMISS_LOADING);
+                            BroadcastUtil.send(getContext(), Constants.ACTION.DIMISS_LOADING);
                             tvError.setVisibility(View.VISIBLE);
                         }
                     });
@@ -133,7 +135,7 @@ public class WalletImportScreen extends Fragment implements View.OnClickListener
             }, 500);
 
 
-        }else if(v.getId() == R.id.chainverse_button_paste){
+        } else if (v.getId() == R.id.chainverse_button_paste) {
             try {
                 ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
                 CharSequence textToPaste = clipboard.getPrimaryClip().getItemAt(0).getText();

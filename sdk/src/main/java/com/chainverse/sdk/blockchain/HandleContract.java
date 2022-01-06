@@ -7,10 +7,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.AbiTypes;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.StaticArray;
 import org.web3j.abi.datatypes.StaticStruct;
+import org.web3j.abi.datatypes.StructType;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
@@ -37,6 +40,9 @@ import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.DefaultGasProvider;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.GenericDeclaration;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -155,11 +161,12 @@ public class HandleContract extends Contract {
                     output = nonpayable(abi.getString("name"), inputParams, outputParams);
                 }
                 if (abi.getString("stateMutability").equals(VIEW) && abi.has("outputs")) {
-                    if (abi.getJSONArray("outputs").length() == 1) {
-                        output = view(abi.getString("name"), inputParams, outputParams);
-                    } else {
-                        output = executeCallMultipleValueTuple(abi.getString("name"), inputParams, outputParams);
-                    }
+//                    if (abi.getJSONArray("outputs").length() == 1) {
+//                        output = view(abi.getString("name"), inputParams, outputParams);
+//                    } else {
+//                        output = executeCallMultipleValueTuple(abi.getString("name"), inputParams, outputParams);
+//                    }
+                    output = excuteCallMulti(abi.getString("name"), inputParams);
                 }
             }
         } catch (JSONException e) {
@@ -188,6 +195,36 @@ public class HandleContract extends Contract {
                     public Tuple call() throws Exception {
                         List results = executeCallMultipleValueReturn(function);
                         return getTuple(outputs.size(), results);
+                    }
+                });
+    }
+
+    protected RemoteFunctionCall excuteCallMulti(String func, List inputs) {
+
+        System.out.println("run herere" + func);
+        List<List<TypeReference<?>>> outputParameters = new ArrayList();
+
+        List auction = new ArrayList();
+        auction.add(new TypeReference<Bool>() {
+        });
+        auction.add(new TypeReference<Address>() {
+        });
+        auction.add(new TypeReference<Address>() {
+        });
+        auction.add(new TypeReference<Uint256>() {
+        });
+
+        outputParameters.add(auction);
+
+        final Function function = new Function(func, inputs, auction);
+        return new RemoteFunctionCall(function,
+                new Callable() {
+                    @Override
+                    public Tuple2 call() throws Exception {
+                        List results = executeCallMultipleValueReturn(function);
+                        return new Tuple2(
+                                results.get(0),
+                                results.get(1));
                     }
                 });
     }
@@ -358,6 +395,42 @@ public class HandleContract extends Contract {
                 return new Tuple10(results.get(0).getValue(), results.get(1).getValue(), results.get(2).getValue(), results.get(3).getValue(), results.get(4).getValue(), results.get(5).getValue(), results.get(6).getValue(), results.get(7).getValue(), results.get(8).getValue(), results.get(9).getValue());
             default:
                 return new Tuple2(results.get(0).getValue(), results.get(1).getValue());
+        }
+    }
+
+    class StaticStruct extends StaticArray<Type> implements StructType {
+
+        private final List<Class<Type>> itemTypes = new ArrayList<>();
+
+        @SuppressWarnings("unchecked")
+        public StaticStruct(List<Type> values) {
+            super(Type.class, values.size(), values);
+            for (Type value : values) {
+                itemTypes.add((Class<Type>) value.getClass());
+            }
+        }
+
+        @SafeVarargs
+        public StaticStruct(Type... values) {
+            this(Arrays.asList(values));
+        }
+
+        @Override
+        public String getTypeAsString() {
+            final StringBuilder type = new StringBuilder("(");
+            for (int i = 0; i < itemTypes.size(); ++i) {
+                final Class<Type> cls = itemTypes.get(i);
+                if (StructType.class.isAssignableFrom(cls)) {
+                    type.append(getValue().get(i).getTypeAsString());
+                } else {
+                    type.append(AbiTypes.getTypeAString(cls));
+                }
+                if (i < itemTypes.size() - 1) {
+                    type.append(",");
+                }
+            }
+            type.append(")");
+            return type.toString();
         }
     }
 }

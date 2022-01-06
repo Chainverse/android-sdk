@@ -3,10 +3,13 @@ package com.chainverse.sdk;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.view.WindowManager;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.chainverse.sdk.base.web3.BaseWeb3;
@@ -33,11 +36,13 @@ import com.chainverse.sdk.wallet.trust.TrustConnect;
 import com.chainverse.sdk.wallet.trust.TrustResult;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.json.JSONObject;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
@@ -119,6 +124,7 @@ public class ChainverseSDK implements Chainverse {
         this.gameAddress = gameAddress;
         this.developerAddress = developerAddress;
         encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(mContext);
+
         exceptionSDK();
         checkContract();
         receiverCreatedWallet();
@@ -127,6 +133,10 @@ public class ChainverseSDK implements Chainverse {
 
     public void init(Activity activity, ChainverseCallback callback) {
         this.mCallback = callback;
+        this.mContext = activity;
+    }
+
+    public void init(Activity activity) {
         this.mContext = activity;
     }
 
@@ -175,6 +185,7 @@ public class ChainverseSDK implements Chainverse {
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(jsonElement -> {
+                        System.out.println("get game item" + jsonElement);
                         if (Utils.getErrorCodeResponse(jsonElement) == 0) {
                             Gson gson = new Gson();
                             ArrayList<ChainverseItem> items = gson.fromJson(jsonElement.getAsJsonObject().get("items"), new TypeToken<ArrayList<ChainverseItem>>() {
@@ -219,10 +230,10 @@ public class ChainverseSDK implements Chainverse {
                     if (Utils.getErrorCodeResponse(jsonElement) == 0) {
                         Gson gson = new Gson();
 
+                        System.out.println("my assset " + jsonElement);
                         ArrayList<ChainverseItemMarket> items = gson.fromJson(jsonElement.getAsJsonObject().get("data").getAsJsonObject().get("rows"), new TypeToken<ArrayList<ChainverseItemMarket>>() {
                         }.getType());
-                        System.out.println("run herer  " + items.size());
-//                        CallbackToGame.onGetItemMarket(items);
+                        CallbackToGame.onGetMyAssets(items);
                     } else {
                         CallbackToGame.onError(ChainverseError.ERROR_REQUEST_ITEM);
                     }
@@ -270,12 +281,36 @@ public class ChainverseSDK implements Chainverse {
 
     private void doConnectSuccess() {
         if (isUserConnected()) {
-            CallbackToGame.onConnectSuccess(encryptPreferenceUtils.getXUserAddress());
+
+//            RESTfulClient.getNonce()
+//                    .subscribeOn(Schedulers.io())
+//                    .observeOn(AndroidSchedulers.mainThread())
+//                    .subscribe(jsonElement -> {
+//                        JsonObject res = jsonElement.getAsJsonObject();
+//                        System.out.println("asdfsadf " + res.has("data"));
+//                        if (res.has("data")) {
+//                            String message = res.getAsJsonObject("data").get("message").getAsString();
+//                            try {
+//                                System.out.println("run herer111");
+//                                EncryptPreferenceUtils encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(mContext);
+//                                encryptPreferenceUtils.setNonceSignature(res.getAsJsonObject("data").toString());
+//                                encryptPreferenceUtils.setXUserSignatureMarket(WalletUtils.getInstance().init(mContext).signMessage(message));
+//                            } catch (Exception e) {
+//                                e.printStackTrace();
+//                            }
+//                        }
+//                        System.out.println("run herer111");
+//                    }, throwable -> {
+//                        System.out.println("error get nonce " + throwable);
+//                    });
+
             try {
-                EncryptPreferenceUtils.getInstance().init(mContext).setXUserSignature(WalletUtils.getInstance().init(mContext).signMessage("ChainVerse"));
+                encryptPreferenceUtils.setXUserSignatureMarket(WalletUtils.getInstance().init(mContext).signMessage("ChainVerse"));
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            CallbackToGame.onConnectSuccess(encryptPreferenceUtils.getXUserAddress());
+
             transferItemManager = new TransferItemManager(mContext);
             transferItemManager.on(new OnEmitterListenter() {
                 @Override
@@ -482,9 +517,34 @@ public class ChainverseSDK implements Chainverse {
 
     @Override
     public void showWalletInfoView() {
-        Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
-        intent.putExtra("screen", Constants.SCREEN.WALLET_INFO);
-        mContext.startActivity(intent);
+        if (isUserConnected()) {
+            Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
+            intent.putExtra("screen", Constants.SCREEN.WALLET_INFO);
+            mContext.startActivity(intent);
+        } else {
+            try {
+                AlertDialog alertDialog = new AlertDialog.Builder(mContext).create();
+                alertDialog.setTitle("Đăng nhập!");
+                alertDialog.setMessage("Bạn chưa đăng nhập");
+                alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Đăng nhập",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                showConnectWalletView();
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
+            } catch (WindowManager.BadTokenException e) {
+                System.out.println("error " + e);
+            }
+        }
+
     }
 
     @Override
@@ -513,7 +573,7 @@ public class ChainverseSDK implements Chainverse {
 //
 //            System.out.println("ruybn erer " + info.currency);
             HandleContract handleContract = HandleContract.load(Constants.CONTRACT.MarketService, Constants.TEST_ABI, web3, dummyCredentials);
-            RemoteFunctionCall<Tuple5> output = handleContract.callFunc("nfts", Arrays.asList("0x2bB0966B95Bf340C76a10b4D2e6364Da5A303F15"));
+            RemoteFunctionCall<Tuple2> output = handleContract.callFunc("nfts", Arrays.asList("0x2bB0966B95Bf340C76a10b4D2e6364Da5A303F15"));
 //
             Boolean param = (Boolean) output.sendAsync().get().component1();
             System.out.println("run here " + param);
@@ -543,17 +603,37 @@ public class ChainverseSDK implements Chainverse {
 
     @Override
     public void buyNFT(String currency, Long listing_id, Double price, boolean isAuction) {
-        Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putString("screen", Constants.SCREEN.BUY_NFT);
-        bundle.putString("currency", currency);
-        bundle.putLong("listing_id", listing_id);
-        bundle.putDouble("price", price);
-        bundle.putBoolean("isAuction", isAuction);
-        intent.putExtra("type", "buyNFT");
-        intent.putExtras(bundle);
+        if (isUserConnected()) {
+            Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putString("screen", Constants.SCREEN.BUY_NFT);
+            bundle.putString("currency", currency);
+            bundle.putLong("listing_id", listing_id);
+            bundle.putDouble("price", price);
+            bundle.putBoolean("isAuction", isAuction);
+            intent.putExtra("type", "buyNFT");
+            intent.putExtras(bundle);
 
-        mContext.startActivity(intent);
+            mContext.startActivity(intent);
+        } else {
+            AlertDialog alertDialog = new AlertDialog.Builder(mContext).create();
+            alertDialog.setTitle("Đăng nhập!");
+            alertDialog.setMessage("Bạn cần đăng nhập để mua");
+            alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Đăng nhập",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            showConnectWalletView();
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
+        }
     }
 
     public void approvedToken(BigInteger amout) {

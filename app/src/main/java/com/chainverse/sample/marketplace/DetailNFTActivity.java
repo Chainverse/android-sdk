@@ -98,6 +98,11 @@ public class DetailNFTActivity extends AppCompatActivity {
             }
 
             @Override
+            public void onGetMyAssets(ArrayList<ChainverseItemMarket> items) {
+
+            }
+
+            @Override
             public void onConnectSuccess(String address) {
 
             }

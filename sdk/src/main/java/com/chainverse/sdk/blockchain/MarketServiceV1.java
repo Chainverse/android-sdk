@@ -1065,7 +1065,7 @@ public class MarketServiceV1 extends Contract {
                     public Tuple2<Auction, Listing> call() throws Exception {
                         List<Type> results = executeCallMultipleValueReturn(function);
                         return new Tuple2<Auction, Listing>(
-                                (Auction) results.get(0), 
+                                (Auction) results.get(0),
                                 (Listing) results.get(1));
                     }
                 });

@@ -48,6 +48,12 @@ public class CallbackToGame {
         }
     }
 
+    public static void onGetMyAssets(ArrayList<ChainverseItemMarket> items) {
+        if (ChainverseSDK.mCallback != null) {
+            ChainverseSDK.mCallback.onGetMyAssets(items);
+        }
+    }
+
     public static void onItemUpdate(ChainverseItem item, int type) {
         if (ChainverseSDK.mCallback != null) {
             ChainverseSDK.mCallback.onItemUpdate(item, type);

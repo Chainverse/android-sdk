@@ -199,7 +199,7 @@ public class WalletVerifyScreen extends Fragment implements View.OnClickListener
                                 String xUserAddress = WalletUtils.getInstance().init(getContext()).getAddress();
                                 EncryptPreferenceUtils.getInstance().init(getContext()).setXUserAddress(xUserAddress);
                                 try {
-                                    EncryptPreferenceUtils.getInstance().init(getContext()).setXUserSignature(WalletUtils.getInstance().init(getContext()).signMessage("ChainVerse"));
+                                    EncryptPreferenceUtils.getInstance().init(getContext()).setXUserSignature(WalletUtils.getInstance().init(getContext()).signMessage("chainverse"));
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }

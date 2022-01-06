@@ -27,7 +27,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     String developerAddress = "0x6A6c53a166DDDbE7049982864d21C75AB18fc50C";
-    String gameAddress = "0x81d64E03ee22C4500b71c2A6d4Bd789BaEBA31ac";
+    String gameAddress = "0x13f1A9097A7Cd7BeBC5Ad5c79160db3067FEf20E";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,11 +47,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onInitSDKSuccess() {
-                btnMarket.setVisibility(View.VISIBLE);
-                String address = WalletUtils.getInstance().init(MainActivity.this).getAddress();
-//                if (address != null) {
-//                    btnMyAsset.setVisibility(View.VISIBLE);
-//                }
+
             }
 
             @Override
@@ -82,6 +78,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onGetItemMarket(ArrayList<ChainverseItemMarket> items) {
             }
+
+            @Override
+            public void onGetMyAssets(ArrayList<ChainverseItemMarket> items) { }
 
             @Override
             public void onConnectSuccess(String address) {

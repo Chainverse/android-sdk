@@ -69,6 +69,12 @@ public class ListNFTAdapter extends BaseAdapter {
 
         ChainverseItemMarket item = this.data.get(i);
 
+        setProperties(item);
+
+        return view;
+    }
+
+    private void setProperties(ChainverseItemMarket item) {
         holder.name.setText(item.getName() + " #" + item.getTokenId());
         holder.txtPrice.setText(foo(item.getPrice()));
         setIconToken(item);
@@ -88,8 +94,6 @@ public class ListNFTAdapter extends BaseAdapter {
             }
         }
         holder.categories.setText(categories);
-
-        return view;
     }
 
     static class ViewHolder {

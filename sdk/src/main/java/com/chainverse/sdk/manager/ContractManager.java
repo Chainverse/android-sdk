@@ -101,8 +101,9 @@ public class ContractManager {
         BigDecimal balance = new BigDecimal(0);
         try {
             EthCall ethCall = BaseWeb3.getInstance().init(mContext).callFunction(contractAddress, "balanceOf", Arrays.asList(new Address(owner)));
+
             if (ethCall != null && ethCall.getResult() != null) {
-                BigDecimal value = new BigDecimal(new BigInteger("00000000000000000000000000000000000000000000021e19e0c9bab2400000", 16));
+                BigDecimal value = new BigDecimal(new BigInteger(ethCall.getResult().replace("0x", ""), 16));
                 balance = org.web3j.utils.Convert.fromWei(value, org.web3j.utils.Convert.Unit.ETHER);
             }
             return balance;

@@ -2,6 +2,7 @@ package com.chainverse.sdk.ui.screen;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -11,6 +12,8 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.annotation.UiThread;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import com.chainverse.sdk.ChainverseSDK;
@@ -39,6 +42,7 @@ public class BuyNftScreen extends Fragment implements View.OnClickListener {
     Double price;
     String address;
     ProgressDialog progress;
+    EncryptPreferenceUtils encryptPreferenceUtils;
 
     public BuyNftScreen() {
         // Required empty public constructor
@@ -67,6 +71,7 @@ public class BuyNftScreen extends Fragment implements View.OnClickListener {
         price = args.getDouble("price");
         isAuction = args.getBoolean("isAuction");
         address = WalletUtils.getInstance().init(this.getContext()).getAddress();
+        encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(this.getContext());
 
     }
 
@@ -82,10 +87,22 @@ public class BuyNftScreen extends Fragment implements View.OnClickListener {
         txtLoading = mParent.findViewById(R.id.txtLoading);
         txtError = mParent.findViewById(R.id.txtError);
 
-//        progress = new ProgressDialog(this.getContext());
+        progress = new ProgressDialog(this.getContext());
+        progress.show();
 
-        checkApproved();
-        checkBalance();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                BuyNftScreen.this.getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        checkApproved();
+                        checkBalance();
+                        progress.dismiss();
+                    }
+                });
+            }
+        }).start();
 
         btnAgree.setOnClickListener(this);
         btnCancel.setOnClickListener(this);
@@ -149,7 +166,7 @@ public class BuyNftScreen extends Fragment implements View.OnClickListener {
     }
 
     public Boolean isUserConnected() {
-        if (!EncryptPreferenceUtils.getInstance().init(this.getContext()).getXUserSignature().isEmpty()) {
+        if (!encryptPreferenceUtils.getXUserSignature().isEmpty()) {
             return true;
         }
         return false;
@@ -160,7 +177,7 @@ public class BuyNftScreen extends Fragment implements View.OnClickListener {
         int id = view.getId();
         if (id == R.id.chainverse_button_agree_buy) {
             if (!isUserConnected()) {
-                txtError.setText("you don't have any wallet");
+                txtError.setText("Chưa đăng nhập");
             } else {
                 if (isEnough) {
                     Double priceFormat = price * Math.pow(10, 18);

@@ -34,8 +34,8 @@ public class MarketPlaceActivity extends AppCompatActivity {
 
     private String developerAddress;
     private String gameAddress;
+    private String type;
     private final static String TAG = "MarketPlaceActivity";
-
     ArrayList<ChainverseItemMarket> listNFT = new ArrayList<>();
 
     GridView gridView;
@@ -45,7 +45,6 @@ public class MarketPlaceActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-        setTitle("Market Place");
 
         setContentView(R.layout.market_place);
 
@@ -57,9 +56,12 @@ public class MarketPlaceActivity extends AppCompatActivity {
 
         developerAddress = intent.getStringExtra("developerAddress");
         gameAddress = intent.getStringExtra("gameAddress");
+        type = intent.getStringExtra("type");
+
+        setTitle("Market Place");
+        getListNFTMarket();
 
         listenerSDK(developerAddress, gameAddress);
-        getListNFTMarket();
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -91,6 +93,10 @@ public class MarketPlaceActivity extends AppCompatActivity {
         ChainverseSDK.getInstance().getItemOnMarket(0, 10, "");
     }
 
+    protected void getListMyAssets() {
+        ChainverseSDK.getInstance().getMyAsset();
+    }
+
     protected void listenerSDK(String developerAddress, String gameAddress) {
         ChainverseSDK.getInstance().init(developerAddress, gameAddress, this, new ChainverseCallback() {
 
@@ -112,7 +118,12 @@ public class MarketPlaceActivity extends AppCompatActivity {
 
             @Override
             public void onGetItemMarket(ArrayList<ChainverseItemMarket> items) {
+                System.out.println("run herere " + items);
                 onReceivedMarketItems(items);
+            }
+
+            @Override
+            public void onGetMyAssets(ArrayList<ChainverseItemMarket> items) {
             }
 
             @Override
