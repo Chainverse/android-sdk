@@ -32,6 +32,7 @@ android {
 }
 
 dependencies {
+    implementation files('libs/wallet-core-2.6.16.jar')
     compile 'androidx.appcompat:appcompat:1.0.0'
     compile 'com.google.android.material:material:1.0.0'
     compile 'com.squareup.retrofit2:retrofit:2.8.2'
@@ -62,7 +63,7 @@ afterEvaluate {
                 // You can then customize attributes of the publication as shown below.
                 groupId = 'com.github.Chainverse'
                 artifactId = 'android-sdk'
-                version = 'v1.0.10'
+                version = 'v1.0.11'
             }
         }
     }
