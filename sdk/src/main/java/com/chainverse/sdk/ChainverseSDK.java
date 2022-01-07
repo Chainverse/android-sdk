@@ -27,6 +27,7 @@ import com.chainverse.sdk.manager.ContractManager;
 import com.chainverse.sdk.manager.TransferItemManager;
 import com.chainverse.sdk.model.MarketItem.ChainverseItemMarket;
 import com.chainverse.sdk.model.NFT.NFT;
+import com.chainverse.sdk.model.service.ChainverseService;
 import com.chainverse.sdk.network.RESTful.RESTfulClient;
 import com.chainverse.sdk.ui.ChainverseSDKActivity;
 import com.chainverse.sdk.model.SignerData;
@@ -125,19 +126,24 @@ public class ChainverseSDK implements Chainverse {
         this.developerAddress = developerAddress;
         encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(mContext);
 
+        getServiceByGame();
         exceptionSDK();
         checkContract();
         receiverCreatedWallet();
         setupBouncyCastle();
     }
 
-    public void init(Activity activity, ChainverseCallback callback) {
-        this.mCallback = callback;
+    public void init(String developerAddress, String gameAddress, Activity activity) {
         this.mContext = activity;
-    }
+        this.gameAddress = gameAddress;
+        this.developerAddress = developerAddress;
+        encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(mContext);
 
-    public void init(Activity activity) {
-        this.mContext = activity;
+        getServiceByGame();
+        exceptionSDK();
+        checkContract();
+        receiverCreatedWallet();
+        setupBouncyCastle();
     }
 
     private void receiverCreatedWallet() {
@@ -240,6 +246,30 @@ public class ChainverseSDK implements Chainverse {
                 }, throwable -> {
                     throwable.printStackTrace();
                     CallbackToGame.onError(ChainverseError.ERROR_REQUEST_ITEM);
+                });
+    }
+
+    protected void getServiceByGame() {
+        RESTfulClient.getServiceByGame(gameAddress)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(jsonElement -> {
+                    if (Utils.getErrorCodeResponse(jsonElement) == 0) {
+                        Gson gson = new Gson();
+
+                        ChainverseService service = gson.fromJson(jsonElement.getAsJsonObject().get("data"), new TypeToken<ChainverseService>() {
+                        }.getType());
+                        if (service != null) {
+                            encryptPreferenceUtils.setService(service);
+                        } else {
+                            CallbackToGame.onError(ChainverseError.ERROR_SERVICE_NOT_FOUND);
+                        }
+                    } else {
+                        CallbackToGame.onError(ChainverseError.ERROR_SERVICE_NOT_FOUND);
+                    }
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    CallbackToGame.onError(ChainverseError.ERROR_SERVICE_NOT_FOUND);
                 });
     }
 
@@ -572,11 +602,11 @@ public class ChainverseSDK implements Chainverse {
 //            MarketServiceV1.Auction info = (MarketServiceV1.Auction) output.sendAsync().get().component1();
 //
 //            System.out.println("ruybn erer " + info.currency);
-            HandleContract handleContract = HandleContract.load(Constants.CONTRACT.MarketService, Constants.TEST_ABI, web3, dummyCredentials);
-            RemoteFunctionCall<Tuple2> output = handleContract.callFunc("nfts", Arrays.asList("0x2bB0966B95Bf340C76a10b4D2e6364Da5A303F15"));
-//
-            Boolean param = (Boolean) output.sendAsync().get().component1();
-            System.out.println("run here " + param);
+//            HandleContract handleContract = HandleContract.load(Constants.CONTRACT.MarketService, Constants.TEST_ABI, web3, dummyCredentials);
+//            RemoteFunctionCall<Tuple2> output = handleContract.callFunc("nfts", Arrays.asList("0x2bB0966B95Bf340C76a10b4D2e6364Da5A303F15"));
+////
+//            Boolean param = (Boolean) output.sendAsync().get().component1();
+//            System.out.println("run here " + param);
 //            String uri = output.sendAsync();
 
         } catch (InvalidAlgorithmParameterException e) {
@@ -604,17 +634,22 @@ public class ChainverseSDK implements Chainverse {
     @Override
     public void buyNFT(String currency, Long listing_id, Double price, boolean isAuction) {
         if (isUserConnected()) {
-            Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
-            Bundle bundle = new Bundle();
-            bundle.putString("screen", Constants.SCREEN.BUY_NFT);
-            bundle.putString("currency", currency);
-            bundle.putLong("listing_id", listing_id);
-            bundle.putDouble("price", price);
-            bundle.putBoolean("isAuction", isAuction);
-            intent.putExtra("type", "buyNFT");
-            intent.putExtras(bundle);
+            ChainverseService chainverseService = encryptPreferenceUtils.getService();
+            if (chainverseService != null) {
+                Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("screen", Constants.SCREEN.BUY_NFT);
+                bundle.putString("currency", currency);
+                bundle.putLong("listing_id", listing_id);
+                bundle.putDouble("price", price);
+                bundle.putBoolean("isAuction", isAuction);
+                intent.putExtra("type", "buyNFT");
+                intent.putExtras(bundle);
 
-            mContext.startActivity(intent);
+                mContext.startActivity(intent);
+            } else {
+                CallbackToGame.onError(ChainverseError.ERROR_SERVICE_NOT_FOUND);
+            }
         } else {
             AlertDialog alertDialog = new AlertDialog.Builder(mContext).create();
             alertDialog.setTitle("Đăng nhập!");
@@ -636,35 +671,22 @@ public class ChainverseSDK implements Chainverse {
         }
     }
 
-    public void approvedToken(BigInteger amout) {
-        String address = WalletUtils.getInstance().init(mContext).getAddress();
-
+    public String sellNFT(String nft, BigInteger tokenId, double price, String currency) throws Exception {
+        String tx = null;
+        ContractManager contractManager = new ContractManager(mContext);
         try {
-            Web3j web3 = Web3j.build(new HttpService(Constants.URL.urlBlockchain));
+//            String allowence = contractManager.allowenceNFT("0x7eAdaF22D3a4C10E0bA1aC692654b80954084bdD", new BigInteger("288"));
+//
+//            System.out.println(allowence);
 
-            Credentials credential = WalletUtils.getInstance().init(mContext).getCredential();
-//            Credentials dummyCredentials = Credentials.create(Keys.createEcKeyPair());
-
-            RawTransactionManager rawTransactionManager = new RawTransactionManager(web3, credential, 97);
-
-            ERC20 erc20 = ERC20.load("0x672021e3c741910896cad6D6121446a328ba5634", web3, credential, new BigInteger("10000000000"), new BigInteger("80000"));
-
-            RemoteFunctionCall<TransactionReceipt> receiptRemoteFunctionCall = (RemoteFunctionCall<TransactionReceipt>) erc20.approve(Constants.CONTRACT.MarketService, new BigInteger("10"));
-            TransactionReceipt receipt = receiptRemoteFunctionCall.sendAsync().get();
-
-            String tx = receipt.getTransactionHash();
-
-            System.out.println(tx);
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
+//            contractManager.approveNFT("0x7eAdaF22D3a4C10E0bA1aC692654b80954084bdD", new BigInteger("288"));
+            tx = contractManager.list(nft, tokenId, price, currency);
+//            contractManager.unlist(new BigInteger("320"));
         } catch (Exception e) {
-            e.printStackTrace();
+            throw e;
         }
 
-
+        return tx;
     }
 
     private void setupBouncyCastle() {

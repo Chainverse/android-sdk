@@ -12,8 +12,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import androidx.annotation.UiThread;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import com.chainverse.sdk.ChainverseSDK;
@@ -72,7 +70,6 @@ public class BuyNftScreen extends Fragment implements View.OnClickListener {
         isAuction = args.getBoolean("isAuction");
         address = WalletUtils.getInstance().init(this.getContext()).getAddress();
         encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(this.getContext());
-
     }
 
     @Override
@@ -134,7 +131,6 @@ public class BuyNftScreen extends Fragment implements View.OnClickListener {
     }
 
     private void checkApproved() {
-        System.out.println(currency);
         if (currency.equals(Constants.CONTRACT.NativeCurrency)) {
             isApproved = true;
             if (isAuction) {
@@ -180,14 +176,17 @@ public class BuyNftScreen extends Fragment implements View.OnClickListener {
                 txtError.setText("Chưa đăng nhập");
             } else {
                 if (isEnough) {
-                    Double priceFormat = price * Math.pow(10, 18);
+                    Context context = this.getContext();
+                    ContractManager contractManager = new ContractManager(context);
+
+                    int decimals = contractManager.decimals(currency);
+                    Double priceFormat = price * Math.pow(10, decimals);
                     progress = new ProgressDialog(this.getContext());
                     progress.setTitle("Loading");
                     progress.setMessage("Wait while loading...");
 
                     progress.show();
 
-                    Context context = this.getContext();
                     final Handler handler = new Handler();
                     handler.postDelayed(new Runnable() {
                         @Override
@@ -198,7 +197,15 @@ public class BuyNftScreen extends Fragment implements View.OnClickListener {
                                 if (isAuction) {
                                     txtLoading.setText("Updating...");
                                 } else {
-                                    tx = new ContractManager(context).buyNFT(currency, BigInteger.valueOf(listingId), BigDecimal.valueOf(priceFormat).toBigInteger());
+                                    try {
+                                        tx = contractManager.buyNFT(currency, BigInteger.valueOf(listingId), BigDecimal.valueOf(priceFormat).toBigInteger());
+                                    } catch (Exception e) {
+                                        System.out.println(e.getLocalizedMessage());
+                                        txtLoading.setVisibility(View.GONE);
+                                        txtError.setText("Transaction Error: " + e.getLocalizedMessage());
+                                        txtError.setVisibility(View.VISIBLE);
+                                        tvData.setVisibility(View.GONE);
+                                    }
                                 }
                                 if (tx != null) {
                                     tvData.setText("Your transaction: " + tx);
@@ -207,11 +214,6 @@ public class BuyNftScreen extends Fragment implements View.OnClickListener {
                                     if (ChainverseSDK.getInstance().mCallback != null) {
                                         ChainverseSDK.getInstance().mCallback.onBuy(tx);
                                     }
-                                } else {
-                                    txtLoading.setVisibility(View.GONE);
-                                    txtError.setText("Transaction Error!");
-                                    txtError.setVisibility(View.VISIBLE);
-                                    tvData.setVisibility(View.GONE);
                                 }
                                 progress.dismiss();
                             } else {

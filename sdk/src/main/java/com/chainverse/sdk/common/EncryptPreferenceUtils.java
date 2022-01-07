@@ -6,12 +6,16 @@ import android.content.SharedPreferences;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKeys;
 
+import com.chainverse.sdk.model.service.ChainverseService;
+import com.google.gson.Gson;
+
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 
 public class EncryptPreferenceUtils {
     public static final String NAME = "chainverse_secret_shared_prefs";
+    public static final String SERVICE = "SERVICE";
     public static final String KEY_1 = "CHAINVERSE_SDK_KEY_1";
     public static final String KEY_2 = "CHAINVERSE_SDK_KEY_2";
     public static final String KEY_3 = "CHAINVERSE_SDK_KEY_3";
@@ -132,5 +136,22 @@ public class EncryptPreferenceUtils {
         preferences.edit().remove(KEY_3).commit();
     }
 
+    public synchronized void setService(ChainverseService chainverseService) {
+        Gson gson = new Gson();
+        String value = gson.toJson(chainverseService);
+        editor.putString(SERVICE, value);
+        editor.commit();
+    }
+
+    public synchronized ChainverseService getService() {
+        Gson gson = new Gson();
+        String value = preferences.getString(SERVICE, "");
+        ChainverseService chainverseService = gson.fromJson(value, ChainverseService.class);
+        return chainverseService;
+    }
+
+    public synchronized void clearService() {
+        preferences.edit().remove(SERVICE).commit();
+    }
 
 }

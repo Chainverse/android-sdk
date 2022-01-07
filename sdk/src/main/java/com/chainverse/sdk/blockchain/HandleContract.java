@@ -66,6 +66,7 @@ public class HandleContract extends Contract {
     // State Mutability
     private static final String CONSTRUCTOR = "constructor";
     private static final String NONPAYABLE = "nonpayable";
+    private static final String PAYABLE = "payable";
     private static final String VIEW = "view";
 
     // Function type
@@ -138,6 +139,7 @@ public class HandleContract extends Contract {
                 e.printStackTrace();
             }
         }
+
         return remoteCall;
     }
 
@@ -157,16 +159,15 @@ public class HandleContract extends Contract {
             }
 
             if (abi.has("type") && abi.getString("type").equals(FUNCTION)) {
-                if (abi.getString("stateMutability").equals(NONPAYABLE)) {
+                if (abi.getString("stateMutability").equals(NONPAYABLE) || abi.getString("stateMutability").equals(PAYABLE)) {
                     output = nonpayable(abi.getString("name"), inputParams, outputParams);
                 }
                 if (abi.getString("stateMutability").equals(VIEW) && abi.has("outputs")) {
-//                    if (abi.getJSONArray("outputs").length() == 1) {
-//                        output = view(abi.getString("name"), inputParams, outputParams);
-//                    } else {
-//                        output = executeCallMultipleValueTuple(abi.getString("name"), inputParams, outputParams);
-//                    }
-                    output = excuteCallMulti(abi.getString("name"), inputParams);
+                    if (abi.getJSONArray("outputs").length() == 1) {
+                        output = view(abi.getString("name"), inputParams, outputParams);
+                    } else {
+                        output = executeCallMultipleValueTuple(abi.getString("name"), inputParams, outputParams);
+                    }
                 }
             }
         } catch (JSONException e) {

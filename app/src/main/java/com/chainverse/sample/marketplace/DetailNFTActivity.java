@@ -16,6 +16,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.chainverse.sample.MainActivity;
 import com.chainverse.sample.R;
 import com.chainverse.sdk.ChainverseCallback;
 import com.chainverse.sdk.ChainverseItem;
@@ -61,9 +62,9 @@ public class DetailNFTActivity extends AppCompatActivity {
             new DownloadImageTask(assetImage).execute(itemInfo.getImage());
         }
 
-        txtName.setText(itemInfo.getName());
-        txtPrice.setText(foo(itemInfo.getPrice()));
-        txtCategories.setText(parseCategories(itemInfo.getCategories()));
+//        txtName.setText(itemInfo.getName());
+//        txtPrice.setText(foo(itemInfo.getPrice()));
+//        txtCategories.setText(parseCategories(itemInfo.getCategories()));
 
         if (itemInfo.isAuction()) {
             btnAction.setText("Bid");
@@ -71,7 +72,7 @@ public class DetailNFTActivity extends AppCompatActivity {
             btnAction.setText("Buy now");
         }
 
-        ChainverseSDK.getInstance().init(this, new ChainverseCallback() {
+        ChainverseSDK.getInstance().init(MainActivity.CONTRACT.developerAddress, MainActivity.CONTRACT.gameAddress, this, new ChainverseCallback() {
             @Override
             public void onInitSDKSuccess() {
 

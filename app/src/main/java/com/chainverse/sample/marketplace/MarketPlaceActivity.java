@@ -18,6 +18,7 @@ import android.widget.ProgressBar;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.chainverse.sample.MainActivity;
 import com.chainverse.sample.R;
 import com.chainverse.sdk.ChainverseCallback;
 import com.chainverse.sdk.ChainverseItem;
@@ -54,8 +55,8 @@ public class MarketPlaceActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
 
-        developerAddress = intent.getStringExtra("developerAddress");
-        gameAddress = intent.getStringExtra("gameAddress");
+        developerAddress =  MainActivity.CONTRACT.developerAddress;
+        gameAddress = MainActivity.CONTRACT.gameAddress;
         type = intent.getStringExtra("type");
 
         setTitle("Market Place");

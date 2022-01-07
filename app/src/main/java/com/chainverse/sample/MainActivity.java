@@ -24,10 +24,12 @@ import com.chainverse.sdk.ChainverseItem;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
 
-    String developerAddress = "0x6A6c53a166DDDbE7049982864d21C75AB18fc50C";
-    String gameAddress = "0x13f1A9097A7Cd7BeBC5Ad5c79160db3067FEf20E";
+public class MainActivity extends AppCompatActivity {
+    public interface CONTRACT {
+        public static final String developerAddress = "0x6A6c53a166DDDbE7049982864d21C75AB18fc50C";
+        public static final String gameAddress = "0x13f1A9097A7Cd7BeBC5Ad5c79160db3067FEf20E";
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         TextView tvBalance = (TextView) findViewById(R.id.tvBalance);
 
 
-        ChainverseSDK.getInstance().init(developerAddress, gameAddress, this, new ChainverseCallback() {
+        ChainverseSDK.getInstance().init(CONTRACT.developerAddress, CONTRACT.gameAddress, this, new ChainverseCallback() {
 
             @Override
             public void onInitSDKSuccess() {
@@ -80,7 +82,8 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onGetMyAssets(ArrayList<ChainverseItemMarket> items) { }
+            public void onGetMyAssets(ArrayList<ChainverseItemMarket> items) {
+            }
 
             @Override
             public void onConnectSuccess(String address) {
@@ -166,10 +169,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 //                ChainverseSDK.getInstance().callContract();
-                Intent intent = new Intent(MainActivity.this, MarketPlaceActivity.class);
-                intent.putExtra("developerAddress", developerAddress);
-                intent.putExtra("gameAddress", gameAddress);
-                startActivity(intent);
+                ChainverseSDK.getInstance().sellNFT();
+//                Intent intent = new Intent(MainActivity.this, MarketPlaceActivity.class);
+//                startActivity(intent);
             }
         });
     }

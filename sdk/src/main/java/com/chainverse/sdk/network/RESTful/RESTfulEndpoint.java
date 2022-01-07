@@ -25,6 +25,9 @@ public interface RESTfulEndpoint {
     @GET("/v1/user/asset/tokens")
     Observable<JsonElement> getMyAsset();
 
+    @GET("/v1/sdk/game/{game_address}")
+    Observable<JsonElement> getServiceByGame(@Path("game_address") String gameAddress);
+
     @POST("/v1/user/nonce")
     Observable<JsonElement> getNonce();
 
