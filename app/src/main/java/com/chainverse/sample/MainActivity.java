@@ -169,9 +169,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 //                ChainverseSDK.getInstance().callContract();
-                ChainverseSDK.getInstance().sellNFT();
-//                Intent intent = new Intent(MainActivity.this, MarketPlaceActivity.class);
-//                startActivity(intent);
+//                ChainverseSDK.getInstance().sellNFT();
+                Intent intent = new Intent(MainActivity.this, MarketPlaceActivity.class);
+                startActivity(intent);
             }
         });
     }

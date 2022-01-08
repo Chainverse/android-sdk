@@ -103,7 +103,7 @@ public class WalletInfoScreen extends Fragment implements View.OnClickListener {
         @Override
         protected BigDecimal doInBackground(Void... voids) {
             BigDecimal balance;
-            if (tokenAddress == Constants.CONTRACT.NativeCurrency) {
+            if (tokenAddress == Constants.TOKEN_SUPPORTED.NativeCurrency) {
                 balance = ChainverseSDK.getInstance().getBalance();
             } else {
                 balance = ChainverseSDK.getInstance().getBalanceToken(tokenAddress);
@@ -114,7 +114,7 @@ public class WalletInfoScreen extends Fragment implements View.OnClickListener {
         @Override
         protected void onPostExecute(BigDecimal bigDecimal) {
             switch (tokenAddress) {
-                case Constants.CONTRACT.NativeCurrency:
+                case Constants.TOKEN_SUPPORTED.NativeCurrency:
                     bnb = bigDecimal;
                     break;
                 case Constants.TOKEN_SUPPORTED.USDT:

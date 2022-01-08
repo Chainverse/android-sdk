@@ -2,7 +2,6 @@ package com.chainverse.sdk.manager;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.chainverse.sdk.ChainverseError;
 import com.chainverse.sdk.ChainverseSDK;
@@ -10,7 +9,6 @@ import com.chainverse.sdk.base.web3.BaseWeb3;
 import com.chainverse.sdk.blockchain.ERC20;
 import com.chainverse.sdk.blockchain.ERC721;
 import com.chainverse.sdk.blockchain.HandleContract;
-import com.chainverse.sdk.blockchain.MarketServiceV1;
 import com.chainverse.sdk.common.CallbackToGame;
 import com.chainverse.sdk.common.Constants;
 import com.chainverse.sdk.common.Convert;
@@ -23,6 +21,7 @@ import com.chainverse.sdk.model.service.Service;
 
 import org.json.JSONObject;
 import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.generated.Uint256;
@@ -33,7 +32,6 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.RemoteFunctionCall;
-import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
@@ -101,7 +99,7 @@ public class ContractManager {
 
     public int decimals(String currency) {
         int decimals = 18;
-        if (currency.equals(Constants.CONTRACT.NativeCurrency)) {
+        if (currency.equals(Constants.TOKEN_SUPPORTED.NativeCurrency)) {
             return decimals;
         }
         try {
@@ -179,71 +177,79 @@ public class ContractManager {
      */
     public ChainverseItemMarket getNFT(String nft, BigInteger tokenId) throws Exception {
         ChainverseItemMarket item = new ChainverseItemMarket();
+        Service service = new ServiceManager(mContext).getService(Constants.CONTRACT.MarketService);
 
-        try {
-            Credentials dummyCredentials = Credentials.create(Keys.createEcKeyPair());
-            MarketServiceV1 contract = MarketServiceV1.load(Constants.CONTRACT.MarketService, web3, dummyCredentials, new DefaultGasProvider());
-            ERC721 contractERC721 = ERC721.load(nft, web3, dummyCredentials, new DefaultGasProvider());
-            RemoteCall<String> remoteCallUri = contractERC721.tokenURI(tokenId);
-            String uri = remoteCallUri.sendAsync().get();
+        if (service != null) {
+            try {
+                Credentials dummyCredentials = Credentials.create(Keys.createEcKeyPair());
+                HandleContract handleContract = HandleContract.load(Constants.CONTRACT.MarketService, service.getAbi(), web3, dummyCredentials, new DefaultGasProvider());
+                ERC721 contractERC721 = ERC721.load(nft, web3, dummyCredentials, new DefaultGasProvider());
+                RemoteCall<String> remoteCallUri = contractERC721.tokenURI(tokenId);
+                String uri = remoteCallUri.sendAsync().get();
 
-            String content = handleTokenUri(uri);
-//            String content = new DownloadContent().execute(uri).get();
+                String content = handleTokenUri(uri);
 
-            item.setTokenId(tokenId);
-            if (content != null && !content.isEmpty()) {
-                JSONObject json = new JSONObject(content);
+                item.setTokenId(tokenId);
+                if (content != null && !content.isEmpty()) {
+                    JSONObject json = new JSONObject(content);
 
-                String image = "";
-                String asset = "";
+                    String image = "";
+                    String asset = "";
 
-                if (json.has("image")) {
-                    image = (String) json.get("image");
+                    if (json.has("image")) {
+                        image = (String) json.get("image");
+                    }
+                    if (json.has("asset")) {
+                        asset = (String) json.get("asset");
+                    }
+
+                    item.setImage(image);
+                    item.setImage_preview((!asset.isEmpty()) ? asset : image);
+                    item.setName((String) json.get("name"));
+                    item.setAttributes(content);
                 }
-                if (json.has("asset")) {
-                    asset = (String) json.get("asset");
+
+                RemoteFunctionCall<Tuple2<HandleContract.Auction, HandleContract.Listing>> data = handleContract.callFunc(
+                        "getByNFT",
+                        Arrays.asList(nft, tokenId),
+                        Arrays.asList(new TypeReference<HandleContract.Auction>() {}, new TypeReference<HandleContract.Listing>(){}));
+
+                HandleContract.Auction auctionInfo = data.sendAsync().get().component1();
+                HandleContract.Listing listingInfo = data.sendAsync().get().component2();
+
+                int feeAuction = Integer.parseInt(auctionInfo.fee.toString(), 8);
+                BigInteger bidDuration = new BigInteger(auctionInfo.bidDuration.toString(), 18);
+                BigInteger bidEnd = new BigInteger(auctionInfo.end.toString(), 18);
+                Auction auction = new Auction(auctionInfo.isEnded, auctionInfo.nft, auctionInfo.owner, auctionInfo.currency, auctionInfo.tokenId, feeAuction, auctionInfo.id, auctionInfo.winner, auctionInfo.bid, bidDuration, bidEnd);
+
+                int feeListing = Integer.parseInt(listingInfo.fee.toString(), 8);
+                Listing listing = new Listing(listingInfo.isEnded, listingInfo.nft, listingInfo.owner, listingInfo.currency, listingInfo.tokenId, feeListing, listingInfo.id, listingInfo.price);
+
+                item.setAuctionInfo(auction);
+                item.setListingInfo(listing);
+                item.setAuction((auction.getId().equals(BigInteger.ZERO)) ? false : true);
+                item.setPrice(0.0);
+                item.setListingId(BigInteger.ZERO);
+                if (!auction.getId().equals(BigInteger.ZERO)) {
+                    BigDecimal price = org.web3j.utils.Convert.fromWei(new BigDecimal(auction.getBid()), org.web3j.utils.Convert.Unit.ETHER);
+                    item.setListingId(auction.getId());
+                    item.setPrice(Double.parseDouble(price.toString()));
+                }
+                if (!listing.getId().equals(BigInteger.ZERO) && listing.getPrice() != null) {
+                    BigDecimal price = org.web3j.utils.Convert.fromWei(new BigDecimal(listing.getPrice()), org.web3j.utils.Convert.Unit.ETHER);
+                    item.setListingId(listing.getId());
+                    item.setPrice(Double.parseDouble(price.toString()));
                 }
 
-                item.setImage(image);
-                item.setImage_preview((!asset.isEmpty()) ? asset : image);
-                item.setName((String) json.get("name"));
-                item.setAttributes(content);
+                return item;
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw e;
             }
-
-            RemoteFunctionCall<Tuple2<MarketServiceV1.Auction, MarketServiceV1.Listing>> data = contract.getByNFT(nft, tokenId);
-
-            MarketServiceV1.Auction auctionInfo = data.sendAsync().get().component1();
-            MarketServiceV1.Listing listingInfo = data.sendAsync().get().component2();
-
-            int feeAuction = Integer.parseInt(auctionInfo.fee.toString(), 8);
-            BigInteger bidDuration = new BigInteger(auctionInfo.bidDuration.toString(), 18);
-            BigInteger bidEnd = new BigInteger(auctionInfo.end.toString(), 18);
-            Auction auction = new Auction(auctionInfo.isEnded, auctionInfo.nft, auctionInfo.owner, auctionInfo.currency, auctionInfo.tokenId, feeAuction, auctionInfo.id, auctionInfo.winner, auctionInfo.bid, bidDuration, bidEnd);
-
-            int feeListing = Integer.parseInt(listingInfo.fee.toString(), 8);
-            Listing listing = new Listing(listingInfo.isEnded, listingInfo.nft, listingInfo.owner, listingInfo.currency, listingInfo.tokenId, feeListing, listingInfo.id, listingInfo.price);
-
-            item.setAuctionInfo(auction);
-            item.setListingInfo(listing);
-            item.setAuction((auction.getId().equals(BigInteger.ZERO)) ? false : true);
-            item.setPrice(0.0);
-            item.setListingId(BigInteger.ZERO);
-            if (!auction.getId().equals(BigInteger.ZERO)) {
-                BigDecimal price = org.web3j.utils.Convert.fromWei(new BigDecimal(auction.getBid()), org.web3j.utils.Convert.Unit.ETHER);
-                item.setListingId(auction.getId());
-                item.setPrice(Double.parseDouble(price.toString()));
-            }
-            if (!listing.getId().equals(BigInteger.ZERO) && listing.getPrice() != null) {
-                BigDecimal price = org.web3j.utils.Convert.fromWei(new BigDecimal(listing.getPrice()), org.web3j.utils.Convert.Unit.ETHER);
-                item.setListingId(listing.getId());
-                item.setPrice(Double.parseDouble(price.toString()));
-            }
-
-            return item;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+        } else {
+            throw new Exception("Service is not supported");
         }
+
     }
 
     public BigInteger allowance(String token, String owner, String spender) {
@@ -308,7 +314,7 @@ public class ContractManager {
 
                 BigInteger value = BigInteger.ZERO;
 
-                if (currency.equals(Constants.CONTRACT.NativeCurrency)) {
+                if (currency.equals(Constants.TOKEN_SUPPORTED.NativeCurrency)) {
                     value = price;
                 }
                 RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, new BigInteger("10000000000"), new BigInteger("200000"), Constants.CONTRACT.MarketService, value, "0x" + functionEncoder);
@@ -350,7 +356,7 @@ public class ContractManager {
 
                 BigInteger value = BigInteger.ZERO;
 
-                if (currency.equals(Constants.CONTRACT.NativeCurrency)) {
+                if (currency.equals(Constants.TOKEN_SUPPORTED.NativeCurrency)) {
                     value = price;
                 }
                 RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, new BigInteger("10000000000"), new BigInteger("800000"), Constants.CONTRACT.MarketService, value, "0x" + functionEncoder);

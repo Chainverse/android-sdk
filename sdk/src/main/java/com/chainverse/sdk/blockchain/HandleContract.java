@@ -1,32 +1,22 @@
 package com.chainverse.sdk.blockchain;
 
-import com.chainverse.sdk.ChainverseError;
-
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.AbiTypes;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.StaticArray;
 import org.web3j.abi.datatypes.StaticStruct;
-import org.web3j.abi.datatypes.StructType;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
-import org.web3j.crypto.Keys;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.RemoteFunctionCall;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tuples.Tuple;
-import org.web3j.tuples.generated.Tuple1;
 import org.web3j.tuples.generated.Tuple10;
-import org.web3j.tuples.generated.Tuple16;
 import org.web3j.tuples.generated.Tuple2;
 import org.web3j.tuples.generated.Tuple3;
 import org.web3j.tuples.generated.Tuple4;
@@ -40,15 +30,8 @@ import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.DefaultGasProvider;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.GenericDeclaration;
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -143,6 +126,30 @@ public class HandleContract extends Contract {
         return remoteCall;
     }
 
+    public RemoteFunctionCall callFunc(String func, List inputs, List<TypeReference<?>> outputParameters) {
+        RemoteFunctionCall remoteCall = null;
+        if (!_abi.isEmpty()) {
+            try {
+                JSONArray abis = new JSONArray(_abi);
+                int i = 0;
+                while (i < abis.length()) {
+                    JSONObject abi = abis.getJSONObject(i);
+                    if (abi.has("name") && abi.getString("name").toUpperCase().equals(func.toUpperCase())) {
+                        break;
+                    }
+                    i++;
+                }
+                if (i < abis.length()) {
+                    remoteCall = handleFunction(abis.getJSONObject(i), inputs, outputParameters);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return remoteCall;
+    }
+
     protected RemoteFunctionCall handleFunction(JSONObject abi, List inputs) {
         List inputParams = new ArrayList();
         List outputParams = Collections.emptyList();
@@ -176,18 +183,45 @@ public class HandleContract extends Contract {
         return output;
     }
 
-    protected RemoteFunctionCall nonpayable(String func, List inputs, List output) {
+    protected RemoteFunctionCall handleFunction(JSONObject abi, List inputs, List<TypeReference<?>> outputParameters) {
+        List inputParams = new ArrayList();
+        RemoteFunctionCall output = null;
+        try {
+            if (abi.has("inputs")) {
+                JSONArray inputObject = abi.getJSONArray("inputs");
+                inputParams = handleInput(inputObject, inputs);
+            }
+
+            if (abi.has("type") && abi.getString("type").equals(FUNCTION)) {
+                if (abi.getString("stateMutability").equals(NONPAYABLE) || abi.getString("stateMutability").equals(PAYABLE)) {
+                    output = nonpayable(abi.getString("name"), inputParams, outputParameters);
+                }
+                if (abi.getString("stateMutability").equals(VIEW) && abi.has("outputs")) {
+                    if (abi.getJSONArray("outputs").length() == 1) {
+                        output = view(abi.getString("name"), inputParams, outputParameters);
+                    } else {
+                        output = executeCallMultipleValueTuple(abi.getString("name"), inputParams, outputParameters);
+                    }
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return output;
+    }
+
+    protected RemoteFunctionCall nonpayable(String func, List inputs, List<TypeReference<?>> output) {
         final Function function = new Function(func, inputs, output);
         return executeRemoteCallTransaction(function);
     }
 
-    protected RemoteFunctionCall view(String func, List inputs, List output) {
+    protected RemoteFunctionCall view(String func, List inputs, List<TypeReference<?>> output) {
         TypeReference type = (TypeReference) output.get(0);
         final Function function = new Function(func, inputs, output);
         return executeRemoteCallSingleValueReturn(function, getClassType(type));
     }
 
-    protected RemoteFunctionCall executeCallMultipleValueTuple(String func, List inputs, List outputs) {
+    protected RemoteFunctionCall executeCallMultipleValueTuple(String func, List inputs, List<TypeReference<?>> outputs) {
         final Function function = new Function(func, inputs, outputs);
 
         return new RemoteFunctionCall(function,
@@ -196,36 +230,6 @@ public class HandleContract extends Contract {
                     public Tuple call() throws Exception {
                         List results = executeCallMultipleValueReturn(function);
                         return getTuple(outputs.size(), results);
-                    }
-                });
-    }
-
-    protected RemoteFunctionCall excuteCallMulti(String func, List inputs) {
-
-        System.out.println("run herere" + func);
-        List<List<TypeReference<?>>> outputParameters = new ArrayList();
-
-        List auction = new ArrayList();
-        auction.add(new TypeReference<Bool>() {
-        });
-        auction.add(new TypeReference<Address>() {
-        });
-        auction.add(new TypeReference<Address>() {
-        });
-        auction.add(new TypeReference<Uint256>() {
-        });
-
-        outputParameters.add(auction);
-
-        final Function function = new Function(func, inputs, auction);
-        return new RemoteFunctionCall(function,
-                new Callable() {
-                    @Override
-                    public Tuple2 call() throws Exception {
-                        List results = executeCallMultipleValueReturn(function);
-                        return new Tuple2(
-                                results.get(0),
-                                results.get(1));
                     }
                 });
     }
@@ -377,61 +381,151 @@ public class HandleContract extends Contract {
 
         switch (size) {
             case 2:
-                return new Tuple2(results.get(0).getValue(), results.get(1).getValue());
+                return new Tuple2(results.get(0), results.get(1));
             case 3:
-                return new Tuple3(results.get(0).getValue(), results.get(1).getValue(), results.get(2).getValue());
+                return new Tuple3(results.get(0), results.get(1), results.get(2));
             case 4:
-                return new Tuple4(results.get(0).getValue(), results.get(1).getValue(), results.get(2).getValue(), results.get(3).getValue());
+                return new Tuple4(results.get(0), results.get(1), results.get(2), results.get(3));
             case 5:
-                return new Tuple5(results.get(0).getValue(), results.get(1).getValue(), results.get(2).getValue(), results.get(3).getValue(), results.get(4).getValue());
+                return new Tuple5(results.get(0), results.get(1), results.get(2), results.get(3), results.get(4));
             case 6:
-                return new Tuple6(results.get(0).getValue(), results.get(1).getValue(), results.get(2).getValue(), results.get(3).getValue(), results.get(4).getValue(), results.get(5).getValue());
+                return new Tuple6(results.get(0), results.get(1), results.get(2), results.get(3), results.get(4), results.get(5));
             case 7:
-                return new Tuple7(results.get(0).getValue(), results.get(1).getValue(), results.get(2).getValue(), results.get(3).getValue(), results.get(4).getValue(), results.get(5).getValue(), results.get(6).getValue());
+                return new Tuple7(results.get(0), results.get(1), results.get(2), results.get(3), results.get(4), results.get(5), results.get(6));
             case 8:
-                return new Tuple8(results.get(0).getValue(), results.get(1).getValue(), results.get(2).getValue(), results.get(3).getValue(), results.get(4).getValue(), results.get(5).getValue(), results.get(6).getValue(), results.get(7).getValue());
+                return new Tuple8(results.get(0), results.get(1), results.get(2), results.get(3), results.get(4), results.get(5), results.get(6), results.get(7));
             case 9:
-                return new Tuple9(results.get(0).getValue(), results.get(1).getValue(), results.get(2).getValue(), results.get(3).getValue(), results.get(4).getValue(), results.get(5).getValue(), results.get(6).getValue(), results.get(7).getValue(), results.get(8).getValue());
+                return new Tuple9(results.get(0), results.get(1), results.get(2), results.get(3), results.get(4), results.get(5), results.get(6), results.get(7), results.get(8));
             case 10:
-                return new Tuple10(results.get(0).getValue(), results.get(1).getValue(), results.get(2).getValue(), results.get(3).getValue(), results.get(4).getValue(), results.get(5).getValue(), results.get(6).getValue(), results.get(7).getValue(), results.get(8).getValue(), results.get(9).getValue());
+                return new Tuple10(results.get(0), results.get(1), results.get(2), results.get(3), results.get(4), results.get(5), results.get(6), results.get(7), results.get(8), results.get(9));
             default:
-                return new Tuple2(results.get(0).getValue(), results.get(1).getValue());
+                return new Tuple2(results.get(0), results.get(1));
         }
     }
 
-    class StaticStruct extends StaticArray<Type> implements StructType {
+    public static class NFT extends StaticStruct {
+        public Boolean isSupport;
 
-        private final List<Class<Type>> itemTypes = new ArrayList<>();
+        public BigInteger listingFee;
 
-        @SuppressWarnings("unchecked")
-        public StaticStruct(List<Type> values) {
-            super(Type.class, values.size(), values);
-            for (Type value : values) {
-                itemTypes.add((Class<Type>) value.getClass());
-            }
+        public BigInteger auctionFee;
+
+        public String nftTeam;
+
+        public BigInteger percentNFTTeam;
+
+        public NFT(Boolean isSupport, BigInteger listingFee, BigInteger auctionFee, String nftTeam, BigInteger percentNFTTeam) {
+            super(new org.web3j.abi.datatypes.Bool(isSupport), new org.web3j.abi.datatypes.generated.Uint256(listingFee), new org.web3j.abi.datatypes.generated.Uint256(auctionFee), new org.web3j.abi.datatypes.Address(nftTeam), new org.web3j.abi.datatypes.generated.Uint256(percentNFTTeam));
+            this.isSupport = isSupport;
+            this.listingFee = listingFee;
+            this.auctionFee = auctionFee;
+            this.nftTeam = nftTeam;
+            this.percentNFTTeam = percentNFTTeam;
         }
 
-        @SafeVarargs
-        public StaticStruct(Type... values) {
-            this(Arrays.asList(values));
+        public NFT(Bool isSupport, Uint256 listingFee, Uint256 auctionFee, Address nftTeam, Uint256 percentNFTTeam) {
+            super(isSupport, listingFee, auctionFee, nftTeam, percentNFTTeam);
+            this.isSupport = isSupport.getValue();
+            this.listingFee = listingFee.getValue();
+            this.auctionFee = auctionFee.getValue();
+            this.nftTeam = nftTeam.getValue();
+            this.percentNFTTeam = percentNFTTeam.getValue();
+        }
+    }
+
+    public static class Auction extends StaticStruct {
+        public Boolean isEnded;
+
+        public String nft;
+
+        public String winner;
+
+        public String owner;
+
+        public String currency;
+
+        public BigInteger tokenId;
+
+        public BigInteger fee;
+
+        public BigInteger bid;
+
+        public BigInteger bidDuration;
+
+        public BigInteger end;
+
+        public BigInteger id;
+
+        public Auction(Boolean isEnded, String nft, String winner, String owner, String currency, BigInteger tokenId, BigInteger fee, BigInteger bid, BigInteger bidDuration, BigInteger end, BigInteger id) {
+            super(new org.web3j.abi.datatypes.Bool(isEnded), new org.web3j.abi.datatypes.Address(nft), new org.web3j.abi.datatypes.Address(winner), new org.web3j.abi.datatypes.Address(owner), new org.web3j.abi.datatypes.Address(currency), new org.web3j.abi.datatypes.generated.Uint256(tokenId), new org.web3j.abi.datatypes.generated.Uint256(fee), new org.web3j.abi.datatypes.generated.Uint256(bid), new org.web3j.abi.datatypes.generated.Uint256(bidDuration), new org.web3j.abi.datatypes.generated.Uint256(end), new org.web3j.abi.datatypes.generated.Uint256(id));
+            this.isEnded = isEnded;
+            this.nft = nft;
+            this.winner = winner;
+            this.owner = owner;
+            this.currency = currency;
+            this.tokenId = tokenId;
+            this.fee = fee;
+            this.bid = bid;
+            this.bidDuration = bidDuration;
+            this.end = end;
+            this.id = id;
         }
 
-        @Override
-        public String getTypeAsString() {
-            final StringBuilder type = new StringBuilder("(");
-            for (int i = 0; i < itemTypes.size(); ++i) {
-                final Class<Type> cls = itemTypes.get(i);
-                if (StructType.class.isAssignableFrom(cls)) {
-                    type.append(getValue().get(i).getTypeAsString());
-                } else {
-                    type.append(AbiTypes.getTypeAString(cls));
-                }
-                if (i < itemTypes.size() - 1) {
-                    type.append(",");
-                }
-            }
-            type.append(")");
-            return type.toString();
+        public Auction(Bool isEnded, Address nft, Address winner, Address owner, Address currency, Uint256 tokenId, Uint256 fee, Uint256 bid, Uint256 bidDuration, Uint256 end, Uint256 id) {
+            super(isEnded, nft, winner, owner, currency, tokenId, fee, bid, bidDuration, end, id);
+            this.isEnded = isEnded.getValue();
+            this.nft = nft.getValue();
+            this.winner = winner.getValue();
+            this.owner = owner.getValue();
+            this.currency = currency.getValue();
+            this.tokenId = tokenId.getValue();
+            this.fee = fee.getValue();
+            this.bid = bid.getValue();
+            this.bidDuration = bidDuration.getValue();
+            this.end = end.getValue();
+            this.id = id.getValue();
+        }
+    }
+
+    public static class Listing extends StaticStruct {
+        public Boolean isEnded;
+
+        public String nft;
+
+        public String currency;
+
+        public String owner;
+
+        public BigInteger tokenId;
+
+        public BigInteger fee;
+
+        public BigInteger price;
+
+        public BigInteger id;
+
+        public Listing(Boolean isEnded, String nft, String currency, String owner, BigInteger tokenId, BigInteger fee, BigInteger price, BigInteger id) {
+            super(new org.web3j.abi.datatypes.Bool(isEnded), new org.web3j.abi.datatypes.Address(nft), new org.web3j.abi.datatypes.Address(currency), new org.web3j.abi.datatypes.Address(owner), new org.web3j.abi.datatypes.generated.Uint256(tokenId), new org.web3j.abi.datatypes.generated.Uint256(fee), new org.web3j.abi.datatypes.generated.Uint256(price), new org.web3j.abi.datatypes.generated.Uint256(id));
+            this.isEnded = isEnded;
+            this.nft = nft;
+            this.currency = currency;
+            this.owner = owner;
+            this.tokenId = tokenId;
+            this.fee = fee;
+            this.price = price;
+            this.id = id;
+        }
+
+        public Listing(Bool isEnded, Address nft, Address currency, Address owner, Uint256 tokenId, Uint256 fee, Uint256 price, Uint256 id) {
+            super(isEnded, nft, currency, owner, tokenId, fee, price, id);
+            this.isEnded = isEnded.getValue();
+            this.nft = nft.getValue();
+            this.currency = currency.getValue();
+            this.owner = owner.getValue();
+            this.tokenId = tokenId.getValue();
+            this.fee = fee.getValue();
+            this.price = price.getValue();
+            this.id = id.getValue();
         }
     }
 }

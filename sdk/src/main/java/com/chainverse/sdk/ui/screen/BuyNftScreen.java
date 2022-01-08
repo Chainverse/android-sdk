@@ -110,7 +110,7 @@ public class BuyNftScreen extends Fragment implements View.OnClickListener {
     private void checkBalance() {
         BigDecimal balance = null;
         try {
-            if (currency.equals(Constants.CONTRACT.NativeCurrency)) {
+            if (currency.equals(Constants.TOKEN_SUPPORTED.NativeCurrency)) {
 
                 balance = BaseWeb3.getInstance().getBalance(address);
             } else {
@@ -131,7 +131,7 @@ public class BuyNftScreen extends Fragment implements View.OnClickListener {
     }
 
     private void checkApproved() {
-        if (currency.equals(Constants.CONTRACT.NativeCurrency)) {
+        if (currency.equals(Constants.TOKEN_SUPPORTED.NativeCurrency)) {
             isApproved = true;
             if (isAuction) {
                 tvData.setText("Bid NFT");
