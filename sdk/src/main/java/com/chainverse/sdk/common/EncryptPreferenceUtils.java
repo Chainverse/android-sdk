@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKeys;
 
+import com.chainverse.sdk.model.MessageNonce;
 import com.chainverse.sdk.model.service.ChainverseService;
 import com.google.gson.Gson;
 
@@ -97,30 +98,22 @@ public class EncryptPreferenceUtils {
         preferences.edit().remove(KEY_2).commit();
     }
 
-    public synchronized void setXUserSignatureMarket(String value) {
+    public synchronized void setXUserMessageNonce(MessageNonce message) {
+        Gson gson = new Gson();
+        String value = gson.toJson(message);
         editor.putString(KEY_5, value);
         editor.commit();
     }
 
-    public synchronized String getXUserSignatureMarket() {
-        return preferences.getString(KEY_5, "");
+    public synchronized MessageNonce getXUserMessageNonce() {
+        Gson gson = new Gson();
+        String value = preferences.getString(KEY_5, "");
+        MessageNonce messageNonce = gson.fromJson(value, MessageNonce.class);
+        return messageNonce;
     }
 
-    public synchronized void clearXUserSignatureMarket() {
+    public synchronized void clearXUserMessageNonce() {
         preferences.edit().remove(KEY_5).commit();
-    }
-
-    public synchronized void setNonceSignature(String value) {
-        editor.putString(KEY_6, value);
-        editor.commit();
-    }
-
-    public synchronized String getNonceSignature() {
-        return preferences.getString(KEY_6, "");
-    }
-
-    public synchronized void clearNonceSignature() {
-        preferences.edit().remove(KEY_6).commit();
     }
 
     public synchronized void setConnectWallet(String value) {

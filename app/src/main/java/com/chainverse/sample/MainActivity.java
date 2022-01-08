@@ -168,10 +168,10 @@ public class MainActivity extends AppCompatActivity {
         btnMarket.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                ChainverseSDK.getInstance().callContract();
+                ChainverseSDK.getInstance().getMyAsset();
 //                ChainverseSDK.getInstance().sellNFT();
-                Intent intent = new Intent(MainActivity.this, MarketPlaceActivity.class);
-                startActivity(intent);
+//                Intent intent = new Intent(MainActivity.this, MarketPlaceActivity.class);
+//                startActivity(intent);
             }
         });
     }

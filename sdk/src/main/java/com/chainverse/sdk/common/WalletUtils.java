@@ -10,9 +10,12 @@ import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Sign;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import wallet.core.java.AnySigner;
 import wallet.core.jni.CoinType;
@@ -120,16 +123,40 @@ public class WalletUtils {
         System.arraycopy(sigData.getS(), 0, sig, 32, 32);
         System.arraycopy(sigData.getV(), 0, sig, 64, 1);
 //
-        String signature = String.format("0x%s",Utils.byteToHexString(sig));
+        String signature = String.format("0x%s", Utils.byteToHexString(sig));
         return signature;
     }
 
-    byte[] concat(byte[]...arrays)
-    {
+    public String signPersonalMessage(String message) {
+        String signature = "";
+        String seedPhrase = getMnemonic();
+        String passphrase = "";
+        HDWallet wallet = new HDWallet(seedPhrase, passphrase);
+        CoinType coinType = CoinType.ETHEREUM;
+        PrivateKey privateKey = wallet.getKeyForCoin(coinType);
+
+        String signMessage = "\u0019Ethereum Signed Message:\n" + message.length() + message;
+
+        byte[] hash = signMessage.getBytes();
+
+        Credentials credentials = Credentials.create(Utils.byteToHexString(privateKey.data()));
+        Sign.SignatureData sigData = Sign.signMessage(hash, credentials.getEcKeyPair());
+
+        byte[] sig = new byte[65];
+
+        System.arraycopy(sigData.getR(), 0, sig, 0, 32);
+        System.arraycopy(sigData.getS(), 0, sig, 32, 32);
+        System.arraycopy(sigData.getV(), 0, sig, 64, 1);
+
+        signature = String.format("0x%s", Utils.byteToHexString(sig));
+
+        return signature;
+    }
+
+    byte[] concat(byte[]... arrays) {
         // Determine the length of the result array
         int totalLength = 0;
-        for (int i = 0; i < arrays.length; i++)
-        {
+        for (int i = 0; i < arrays.length; i++) {
             totalLength += arrays[i].length;
         }
 
@@ -138,8 +165,7 @@ public class WalletUtils {
 
         // copy the source arrays into the result array
         int currentIndex = 0;
-        for (int i = 0; i < arrays.length; i++)
-        {
+        for (int i = 0; i < arrays.length; i++) {
             System.arraycopy(arrays[i], 0, result, currentIndex, arrays[i].length);
             currentIndex += arrays[i].length;
         }

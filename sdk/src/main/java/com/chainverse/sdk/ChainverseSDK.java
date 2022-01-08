@@ -23,6 +23,7 @@ import com.chainverse.sdk.listener.OnEmitterListenter;
 import com.chainverse.sdk.manager.ContractManager;
 import com.chainverse.sdk.manager.TransferItemManager;
 import com.chainverse.sdk.model.MarketItem.ChainverseItemMarket;
+import com.chainverse.sdk.model.MessageNonce;
 import com.chainverse.sdk.model.NFT.NFT;
 import com.chainverse.sdk.model.service.ChainverseService;
 import com.chainverse.sdk.network.RESTful.RESTfulClient;
@@ -308,34 +309,37 @@ public class ChainverseSDK implements Chainverse {
 
     private void doConnectSuccess() {
         if (isUserConnected()) {
+            RESTfulClient.getNonce()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(jsonElement -> {
+                        System.out.println("jsonElement" + jsonElement);
+                        if (Utils.getErrorCodeResponse(jsonElement) == 0) {
+                            Gson gson = new Gson();
+                            MessageNonce messageNonce = gson.fromJson(jsonElement.getAsJsonObject().get("data"), new TypeToken<MessageNonce>() {
+                            }.getType());
 
-//            RESTfulClient.getNonce()
-//                    .subscribeOn(Schedulers.io())
-//                    .observeOn(AndroidSchedulers.mainThread())
-//                    .subscribe(jsonElement -> {
-//                        JsonObject res = jsonElement.getAsJsonObject();
-//                        System.out.println("asdfsadf " + res.has("data"));
-//                        if (res.has("data")) {
-//                            String message = res.getAsJsonObject("data").get("message").getAsString();
-//                            try {
-//                                System.out.println("run herer111");
-//                                EncryptPreferenceUtils encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(mContext);
-//                                encryptPreferenceUtils.setNonceSignature(res.getAsJsonObject("data").toString());
-//                                encryptPreferenceUtils.setXUserSignatureMarket(WalletUtils.getInstance().init(mContext).signMessage(message));
-//                            } catch (Exception e) {
-//                                e.printStackTrace();
-//                            }
-//                        }
-//                        System.out.println("run herer111");
-//                    }, throwable -> {
-//                        System.out.println("error get nonce " + throwable);
-//                    });
+                            try {
+                                WalletUtils walletUtils = new WalletUtils().init(mContext);
+                                EncryptPreferenceUtils encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(mContext);
 
-            try {
-                encryptPreferenceUtils.setXUserSignatureMarket(WalletUtils.getInstance().init(mContext).signMessage("ChainVerse"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+                                encryptPreferenceUtils.clearXUserMessageNonce();
+
+                                String messageSigned = walletUtils.signPersonalMessage(messageNonce.getMessage());
+
+                                messageNonce.setMessage(messageSigned);
+
+                                System.out.println("run here" + messageNonce.getNonce());
+                                encryptPreferenceUtils.setXUserMessageNonce(messageNonce);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }, throwable -> {
+                        System.out.println("error get nonce " + throwable);
+                    });
+
+            WalletUtils walletUtils = new WalletUtils().init(mContext);
             CallbackToGame.onConnectSuccess(encryptPreferenceUtils.getXUserAddress());
 
             transferItemManager = new TransferItemManager(mContext);

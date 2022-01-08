@@ -2,6 +2,8 @@ package com.chainverse.sdk.network.RESTful;
 
 import com.chainverse.sdk.common.Constants;
 import com.chainverse.sdk.common.EncryptPreferenceUtils;
+import com.chainverse.sdk.common.WalletUtils;
+import com.chainverse.sdk.model.MessageNonce;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -14,7 +16,7 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RESTfulURL {
-    public static RESTfulEndpoint getInstance(){
+    public static RESTfulEndpoint getInstance() {
         Interceptor interceptor = new Interceptor() {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
@@ -39,19 +41,24 @@ public class RESTfulURL {
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
-        return retrofit.create(RESTfulEndpoint .class);
+        return retrofit.create(RESTfulEndpoint.class);
     }
 
-    public static RESTfulEndpoint getInstanceMarket(){
-
-        System.out.println(" nonce data " + EncryptPreferenceUtils.getInstance().getNonceSignature());
+    public static RESTfulEndpoint getInstanceMarket() {
 
         Interceptor interceptor = new Interceptor() {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
+                MessageNonce messageNonce = EncryptPreferenceUtils.getInstance().getXUserMessageNonce();
+
+                String nonce = messageNonce != null && messageNonce.getNonce() != null ? String.valueOf(messageNonce.getNonce()) : "";
+                String time = messageNonce != null && messageNonce.getTime() != null ? String.valueOf(messageNonce.getTime()) : "";
+                String signature = messageNonce != null && messageNonce.getMessage() != null ? String.valueOf(messageNonce.getMessage()) : "";
                 final Request request = chain.request().newBuilder()
                         .addHeader("x-address", EncryptPreferenceUtils.getInstance().getXUserAddress())
-                        .addHeader("x-signature", EncryptPreferenceUtils.getInstance().getXUserSignature())
+                        .addHeader("x-signature", signature)
+                        .addHeader("x-nonce", nonce)
+                        .addHeader("x-time", time)
                         .build();
 
                 return chain.proceed(request);
@@ -70,10 +77,10 @@ public class RESTfulURL {
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
-        return retrofit.create(RESTfulEndpoint .class);
+        return retrofit.create(RESTfulEndpoint.class);
     }
 
-    public static RESTfulEndpoint getInstanceTest(){
+    public static RESTfulEndpoint getInstanceTest() {
         Interceptor interceptor = new Interceptor() {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
@@ -100,6 +107,6 @@ public class RESTfulURL {
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
-        return retrofit.create(RESTfulEndpoint .class);
+        return retrofit.create(RESTfulEndpoint.class);
     }
 }
