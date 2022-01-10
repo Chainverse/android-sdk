@@ -15,7 +15,9 @@ import com.chainverse.sdk.common.Convert;
 import com.chainverse.sdk.common.WalletUtils;
 import com.chainverse.sdk.model.MarketItem.ChainverseItemMarket;
 import com.chainverse.sdk.model.NFT.Auction;
+import com.chainverse.sdk.model.NFT.InfoSell;
 import com.chainverse.sdk.model.NFT.Listing;
+import com.chainverse.sdk.model.NFT.NFT;
 import com.chainverse.sdk.model.service.Service;
 
 
@@ -175,8 +177,8 @@ public class ContractManager {
      * @return
      * @throws Exception
      */
-    public ChainverseItemMarket getNFT(String nft, BigInteger tokenId) throws Exception {
-        ChainverseItemMarket item = new ChainverseItemMarket();
+    public NFT getNFT(String nft, BigInteger tokenId) throws Exception {
+        NFT item = new NFT();
         Service service = new ServiceManager(mContext).getService(Constants.CONTRACT.MarketService);
 
         if (service != null) {
@@ -204,7 +206,7 @@ public class ContractManager {
                     }
 
                     item.setImage(image);
-                    item.setImage_preview((!asset.isEmpty()) ? asset : image);
+                    item.setImagePreview((!asset.isEmpty()) ? asset : image);
                     item.setName((String) json.get("name"));
                     item.setAttributes(content);
                 }
@@ -212,7 +214,9 @@ public class ContractManager {
                 RemoteFunctionCall<Tuple2<HandleContract.Auction, HandleContract.Listing>> data = handleContract.callFunc(
                         "getByNFT",
                         Arrays.asList(nft, tokenId),
-                        Arrays.asList(new TypeReference<HandleContract.Auction>() {}, new TypeReference<HandleContract.Listing>(){}));
+                        Arrays.asList(new TypeReference<HandleContract.Auction>() {
+                        }, new TypeReference<HandleContract.Listing>() {
+                        }));
 
                 HandleContract.Auction auctionInfo = data.sendAsync().get().component1();
                 HandleContract.Listing listingInfo = data.sendAsync().get().component2();
@@ -225,21 +229,25 @@ public class ContractManager {
                 int feeListing = Integer.parseInt(listingInfo.fee.toString(), 8);
                 Listing listing = new Listing(listingInfo.isEnded, listingInfo.nft, listingInfo.owner, listingInfo.currency, listingInfo.tokenId, feeListing, listingInfo.id, listingInfo.price);
 
-                item.setAuctionInfo(auction);
-                item.setListingInfo(listing);
-                item.setAuction((auction.getId().equals(BigInteger.ZERO)) ? false : true);
-                item.setPrice(0.0);
-                item.setListingId(BigInteger.ZERO);
+                item.setAuction(auction);
+                item.setListing(listing);
+
+                InfoSell infoSell = new InfoSell();
+                infoSell.setIsAuction((auction.getId().equals(BigInteger.ZERO)) ? false : true);
+                infoSell.setPrice(0.0);
+                infoSell.setListingId(BigInteger.ZERO);
                 if (!auction.getId().equals(BigInteger.ZERO)) {
                     BigDecimal price = org.web3j.utils.Convert.fromWei(new BigDecimal(auction.getBid()), org.web3j.utils.Convert.Unit.ETHER);
-                    item.setListingId(auction.getId());
-                    item.setPrice(Double.parseDouble(price.toString()));
+                    infoSell.setListingId(auction.getId());
+                    infoSell.setPrice(Double.parseDouble(price.toString()));
                 }
                 if (!listing.getId().equals(BigInteger.ZERO) && listing.getPrice() != null) {
                     BigDecimal price = org.web3j.utils.Convert.fromWei(new BigDecimal(listing.getPrice()), org.web3j.utils.Convert.Unit.ETHER);
-                    item.setListingId(listing.getId());
-                    item.setPrice(Double.parseDouble(price.toString()));
+                    infoSell.setListingId(listing.getId());
+                    infoSell.setPrice(Double.parseDouble(price.toString()));
                 }
+
+                item.setInfoSell(infoSell);
 
                 return item;
             } catch (Exception e) {

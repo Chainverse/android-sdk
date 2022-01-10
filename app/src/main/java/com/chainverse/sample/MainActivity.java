@@ -12,15 +12,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.chainverse.sample.marketplace.MarketPlaceActivity;
-import com.chainverse.sdk.Chainverse;
 import com.chainverse.sdk.ChainverseCallback;
 import com.chainverse.sdk.ChainverseError;
-import com.chainverse.sdk.common.WalletUtils;
 import com.chainverse.sdk.model.MarketItem.ChainverseItemMarket;
 import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.ChainverseUser;
 import com.chainverse.sdk.common.LogUtil;
 import com.chainverse.sdk.ChainverseItem;
+import com.chainverse.sdk.model.NFT.NFT;
 
 import java.util.ArrayList;
 
@@ -82,7 +81,17 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onGetMyAssets(ArrayList<ChainverseItemMarket> items) {
+            public void onGetListItemMarket(ArrayList<NFT> items) {
+
+            }
+
+            @Override
+            public void onGetMyAssets(ArrayList<NFT> items) {
+            }
+
+            @Override
+            public void onGetDetailItem(NFT nft) {
+
             }
 
             @Override
@@ -168,10 +177,11 @@ public class MainActivity extends AppCompatActivity {
         btnMarket.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ChainverseSDK.getInstance().getMyAsset();
+//                ChainverseSDK.getInstance().buyNFT(Constants.TOKEN_SUPPORTED.CVT, 335l,4.0, false);
+//                ChainverseSDK.getInstance().getMyAsset();
 //                ChainverseSDK.getInstance().sellNFT();
-//                Intent intent = new Intent(MainActivity.this, MarketPlaceActivity.class);
-//                startActivity(intent);
+                Intent intent = new Intent(MainActivity.this, MarketPlaceActivity.class);
+                startActivity(intent);
             }
         });
     }

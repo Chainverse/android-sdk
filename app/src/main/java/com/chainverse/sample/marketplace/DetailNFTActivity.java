@@ -23,6 +23,7 @@ import com.chainverse.sdk.ChainverseItem;
 import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.model.MarketItem.Categories;
 import com.chainverse.sdk.model.MarketItem.ChainverseItemMarket;
+import com.chainverse.sdk.model.NFT.NFT;
 
 import org.w3c.dom.Text;
 
@@ -99,7 +100,17 @@ public class DetailNFTActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onGetMyAssets(ArrayList<ChainverseItemMarket> items) {
+            public void onGetListItemMarket(ArrayList<NFT> items) {
+
+            }
+
+            @Override
+            public void onGetMyAssets(ArrayList<NFT> items) {
+
+            }
+
+            @Override
+            public void onGetDetailItem(NFT nft) {
 
             }
 

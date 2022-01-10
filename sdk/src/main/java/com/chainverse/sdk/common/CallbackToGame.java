@@ -4,6 +4,7 @@ package com.chainverse.sdk.common;
 import com.chainverse.sdk.model.MarketItem.ChainverseItemMarket;
 import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.ChainverseItem;
+import com.chainverse.sdk.model.NFT.NFT;
 
 import java.util.ArrayList;
 
@@ -48,7 +49,7 @@ public class CallbackToGame {
         }
     }
 
-    public static void onGetMyAssets(ArrayList<ChainverseItemMarket> items) {
+    public static void onGetMyAssets(ArrayList<NFT> items) {
         if (ChainverseSDK.mCallback != null) {
             ChainverseSDK.mCallback.onGetMyAssets(items);
         }
@@ -57,6 +58,18 @@ public class CallbackToGame {
     public static void onItemUpdate(ChainverseItem item, int type) {
         if (ChainverseSDK.mCallback != null) {
             ChainverseSDK.mCallback.onItemUpdate(item, type);
+        }
+    }
+
+    public static void onGetListItemMarket(ArrayList<NFT> items) {
+        if (ChainverseSDK.mCallback != null) {
+            ChainverseSDK.mCallback.onGetListItemMarket(items);
+        }
+    }
+
+    public static void onGetDetailItem(NFT nft) {
+        if (ChainverseSDK.mCallback != null) {
+            ChainverseSDK.mCallback.onGetDetailItem(nft);
         }
     }
 }

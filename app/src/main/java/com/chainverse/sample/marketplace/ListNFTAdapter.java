@@ -1,7 +1,6 @@
 package com.chainverse.sample.marketplace;
 
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -14,23 +13,20 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.chainverse.sample.R;
-import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.model.MarketItem.Categories;
-import com.chainverse.sdk.model.MarketItem.ChainverseItemMarket;
+import com.chainverse.sdk.model.MarketItem.Currency;
+import com.chainverse.sdk.model.NFT.NFT;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Array;
-import java.text.DecimalFormat;
 import java.util.List;
 
 public class ListNFTAdapter extends BaseAdapter {
-    private List<ChainverseItemMarket> data;
+    private List<NFT> data;
     private LayoutInflater layoutInflater;
     private Context context;
     ViewHolder holder;
 
-    public ListNFTAdapter(Context aContext, List<ChainverseItemMarket> listData) {
+    public ListNFTAdapter(Context aContext, List<NFT> listData) {
         this.context = aContext;
         this.data = listData;
         layoutInflater = LayoutInflater.from(aContext);
@@ -67,19 +63,20 @@ public class ListNFTAdapter extends BaseAdapter {
             holder = (ViewHolder) view.getTag();
         }
 
-        ChainverseItemMarket item = this.data.get(i);
+        NFT item = this.data.get(i);
 
         setProperties(item);
 
         return view;
     }
 
-    private void setProperties(ChainverseItemMarket item) {
+    private void setProperties(NFT item) {
         holder.name.setText(item.getName() + " #" + item.getTokenId());
-        holder.txtPrice.setText(foo(item.getPrice()));
+        holder.txtPrice.setText(foo(item.getInfoSell().getPrice()));
         setIconToken(item);
-        if (item.getImage_preview() != null) {
-            new DownloadImageTask(holder.thumbnail).execute(item.getImage());
+
+        if (item.getImagePreview() != null) {
+            new DownloadImageTask(holder.thumbnail).execute(item.getImagePreview());
         }
 
         String categories = "";
@@ -101,9 +98,10 @@ public class ListNFTAdapter extends BaseAdapter {
         TextView categories, name, txtPrice;
     }
 
-    private void setIconToken(ChainverseItemMarket item) {
-        if (item.getCurrency() != null) {
-            switch (item.getCurrency().getSymbol().toLowerCase()) {
+    private void setIconToken(NFT item) {
+        if (item.getInfoSell() != null && item.getInfoSell().getCurrencyInfo() != null) {
+            Currency currency = item.getInfoSell().getCurrencyInfo();
+            switch (currency.getSymbol().toLowerCase()) {
                 case "usdt":
                     holder.iconToken.setImageResource(R.drawable.usdt);
                     break;

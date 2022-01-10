@@ -24,7 +24,9 @@ import com.chainverse.sdk.manager.ContractManager;
 import com.chainverse.sdk.manager.TransferItemManager;
 import com.chainverse.sdk.model.MarketItem.ChainverseItemMarket;
 import com.chainverse.sdk.model.MessageNonce;
+import com.chainverse.sdk.model.NFT.InfoSell;
 import com.chainverse.sdk.model.NFT.NFT;
+import com.chainverse.sdk.model.Params.FilterMarket;
 import com.chainverse.sdk.model.service.ChainverseService;
 import com.chainverse.sdk.network.RESTful.RESTfulClient;
 import com.chainverse.sdk.ui.ChainverseSDKActivity;
@@ -34,56 +36,25 @@ import com.chainverse.sdk.wallet.chainverse.ChainverseResult;
 import com.chainverse.sdk.wallet.trust.TrustConnect;
 import com.chainverse.sdk.wallet.trust.TrustResult;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.json.JSONObject;
-import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
-import org.web3j.crypto.Credentials;
-import org.web3j.crypto.Keys;
-import org.web3j.crypto.Wallet;
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.RemoteCall;
-import org.web3j.protocol.core.RemoteFunctionCall;
-import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthCall;
-import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
-import org.web3j.protocol.core.methods.response.EthSendTransaction;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.protocol.http.HttpService;
-import org.web3j.tuples.Tuple;
-import org.web3j.tuples.generated.Tuple2;
-import org.web3j.tuples.generated.Tuple5;
-import org.web3j.tx.Contract;
-import org.web3j.tx.RawTransactionManager;
-import org.web3j.tx.gas.ContractGasProvider;
-import org.web3j.tx.gas.DefaultGasProvider;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
-import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import wallet.core.jni.HDWallet;
 
 
 public class ChainverseSDK implements Chainverse {
@@ -226,17 +197,51 @@ public class ChainverseSDK implements Chainverse {
                 });
     }
 
+    public void getListItemOnMarket(FilterMarket filterMarket) {
+        RESTfulClient.getListItemOnMarket(ChainverseSDK.gameAddress, filterMarket).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(jsonElement -> {
+                    if (Utils.getErrorCodeResponse(jsonElement) == 0) {
+                        ArrayList<NFT> items = new ArrayList<>();
+                        JsonArray data = jsonElement.getAsJsonObject().get("data").getAsJsonObject().get("rows").getAsJsonArray();
+                        for (JsonElement el : data) {
+                            Gson gson = new Gson();
+
+                            NFT item = gson.fromJson(el, NFT.class);
+                            InfoSell infoSell = gson.fromJson(el.getAsJsonObject().get("auctions").getAsJsonArray().get(0), InfoSell.class);
+                            item.setInfoSell(infoSell);
+
+                            items.add(item);
+                        }
+
+                        CallbackToGame.onGetListItemMarket(items);
+                    } else {
+                        CallbackToGame.onError(ChainverseError.ERROR_REQUEST_ITEM);
+                    }
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    CallbackToGame.onError(ChainverseError.ERROR_REQUEST_ITEM);
+                });
+    }
+
     public void getMyAsset() {
-        RESTfulClient.getMyAsset()
+        RESTfulClient.getMyAsset(ChainverseSDK.gameAddress)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(jsonElement -> {
                     if (Utils.getErrorCodeResponse(jsonElement) == 0) {
-                        Gson gson = new Gson();
+                        ArrayList<NFT> items = new ArrayList<>();
+                        JsonArray data = jsonElement.getAsJsonObject().get("data").getAsJsonArray();
+                        for (JsonElement el : data) {
+                            Gson gson = new Gson();
+                            NFT item = gson.fromJson(el, NFT.class);
+                            if(el.getAsJsonObject().has("auctions")) {
+                                InfoSell infoSell = gson.fromJson(el.getAsJsonObject().get("auctions").getAsJsonArray().get(0), InfoSell.class);
+                                item.setInfoSell(infoSell);
+                            }
+                            items.add(item);
+                        }
 
-                        System.out.println("my assset " + jsonElement);
-                        ArrayList<ChainverseItemMarket> items = gson.fromJson(jsonElement.getAsJsonObject().get("data").getAsJsonObject().get("rows"), new TypeToken<ArrayList<ChainverseItemMarket>>() {
-                        }.getType());
                         CallbackToGame.onGetMyAssets(items);
                     } else {
                         CallbackToGame.onError(ChainverseError.ERROR_REQUEST_ITEM);
@@ -269,6 +274,37 @@ public class ChainverseSDK implements Chainverse {
                     throwable.printStackTrace();
                     CallbackToGame.onError(ChainverseError.ERROR_SERVICE_NOT_FOUND);
                 });
+    }
+
+    public void getDetailNFT(String nft, BigInteger tokenId) {
+        RESTfulClient.getDetailNFT(nft, tokenId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(jsonElement -> {
+                    if (Utils.getErrorCodeResponse(jsonElement) == 0) {
+                        Gson gson = new Gson();
+                        NFT infoNft = gson.fromJson(jsonElement.getAsJsonObject().get("data"), NFT.class);
+                        InfoSell infoSell = gson.fromJson(jsonElement.getAsJsonObject().get("data").getAsJsonObject().get("auctions").getAsJsonArray().get(0), InfoSell.class);
+                        infoNft.setInfoSell(infoSell);
+                        CallbackToGame.onGetDetailItem(infoNft);
+                    } else {
+                        CallbackToGame.onError(ChainverseError.ERROR_REQUEST_ITEM);
+                    }
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    CallbackToGame.onError(ChainverseError.ERROR_REQUEST_ITEM);
+                });
+    }
+
+    public NFT getNFT(String nft, BigInteger tokenId) {
+        try {
+            ContractManager contract = new ContractManager(mContext);
+            NFT nftInfo = contract.getNFT(nft, tokenId);
+            return nftInfo;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private void checkContract() {
@@ -309,37 +345,39 @@ public class ChainverseSDK implements Chainverse {
 
     private void doConnectSuccess() {
         if (isUserConnected()) {
-            RESTfulClient.getNonce()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(jsonElement -> {
-                        System.out.println("jsonElement" + jsonElement);
-                        if (Utils.getErrorCodeResponse(jsonElement) == 0) {
-                            Gson gson = new Gson();
-                            MessageNonce messageNonce = gson.fromJson(jsonElement.getAsJsonObject().get("data"), new TypeToken<MessageNonce>() {
-                            }.getType());
-
-                            try {
-                                WalletUtils walletUtils = new WalletUtils().init(mContext);
-                                EncryptPreferenceUtils encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(mContext);
-
-                                encryptPreferenceUtils.clearXUserMessageNonce();
-
-                                String messageSigned = walletUtils.signPersonalMessage(messageNonce.getMessage());
-
-                                messageNonce.setMessage(messageSigned);
-
-                                System.out.println("run here" + messageNonce.getNonce());
-                                encryptPreferenceUtils.setXUserMessageNonce(messageNonce);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }, throwable -> {
-                        System.out.println("error get nonce " + throwable);
-                    });
-
+//            RESTfulClient.getNonce()
+//                    .subscribeOn(Schedulers.io())
+//                    .observeOn(AndroidSchedulers.mainThread())
+//                    .subscribe(jsonElement -> {
+//                        if (Utils.getErrorCodeResponse(jsonElement) == 0) {
+//                            Gson gson = new Gson();
+//                            MessageNonce messageNonce = gson.fromJson(jsonElement.getAsJsonObject().get("data"), new TypeToken<MessageNonce>() {
+//                            }.getType());
+//
+//                            try {
+//                                WalletUtils walletUtils = new WalletUtils().init(mContext);
+//                                EncryptPreferenceUtils encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(mContext);
+//
+//                                encryptPreferenceUtils.clearXUserMessageNonce();
+//
+//                                String messageSigned = walletUtils.signPersonalMessage(messageNonce.getMessage());
+//
+//                                messageNonce.setMessage(messageSigned);
+//
+//                                encryptPreferenceUtils.setXUserMessageNonce(messageNonce);
+//                            } catch (Exception e) {
+//                                e.printStackTrace();
+//                            }
+//                        }
+//                    }, throwable -> {
+//                        System.out.println("error get nonce " + throwable);
+//                    });
             WalletUtils walletUtils = new WalletUtils().init(mContext);
+            MessageNonce messageNonce = new MessageNonce();
+            String messageSigned = walletUtils.signPersonalMessage("ChainVerse");
+            messageNonce.setMessage(messageSigned);
+            encryptPreferenceUtils.setXUserMessageNonce(messageNonce);
+
             CallbackToGame.onConnectSuccess(encryptPreferenceUtils.getXUserAddress());
 
             transferItemManager = new TransferItemManager(mContext);
@@ -589,17 +627,6 @@ public class ChainverseSDK implements Chainverse {
                 }, throwable -> {
                     throwable.printStackTrace();
                 });
-    }
-
-    public ChainverseItemMarket getNFT(String nft, BigInteger tokenId) {
-        try {
-            ContractManager contract = new ContractManager(mContext);
-            ChainverseItemMarket nftInfo = contract.getNFT(nft, tokenId);
-            return nftInfo;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     @Override

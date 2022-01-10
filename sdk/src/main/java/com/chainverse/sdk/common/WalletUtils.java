@@ -104,25 +104,17 @@ public class WalletUtils {
         CoinType coinType = CoinType.ETHEREUM;
         PrivateKey secretPrivateKey = wallet.getKeyForCoin(coinType);
 
-//        byte[] signPersonal = concat("\\x19Ethereum Signed Message:\\n".getBytes(), String.valueOf(message.length()).getBytes(),message.getBytes());
-//        byte[] signData = secretPrivateKey.sign(signPersonal, coinType.curve());
-//
-//        String sign = new String(signData);
-//
-//        System.out.println(" sign " + sign);
-//
-////        String signature = Hex.en
         Credentials credentials = Credentials.create(Utils.byteToHexString(secretPrivateKey.data()));
         String rawMessage = message;
         byte[] hexMessage = message.getBytes();
         Sign.SignatureData sigData = Sign.signMessage(hexMessage, credentials.getEcKeyPair());
-//
+
         byte[] sig = new byte[65];
 
         System.arraycopy(sigData.getR(), 0, sig, 0, 32);
         System.arraycopy(sigData.getS(), 0, sig, 32, 32);
         System.arraycopy(sigData.getV(), 0, sig, 64, 1);
-//
+
         String signature = String.format("0x%s", Utils.byteToHexString(sig));
         return signature;
     }
@@ -151,26 +143,6 @@ public class WalletUtils {
         signature = String.format("0x%s", Utils.byteToHexString(sig));
 
         return signature;
-    }
-
-    byte[] concat(byte[]... arrays) {
-        // Determine the length of the result array
-        int totalLength = 0;
-        for (int i = 0; i < arrays.length; i++) {
-            totalLength += arrays[i].length;
-        }
-
-        // create the result array
-        byte[] result = new byte[totalLength];
-
-        // copy the source arrays into the result array
-        int currentIndex = 0;
-        for (int i = 0; i < arrays.length; i++) {
-            System.arraycopy(arrays[i], 0, result, currentIndex, arrays[i].length);
-            currentIndex += arrays[i].length;
-        }
-
-        return result;
     }
 
     public String signTransaction(String chainId, String gasPrice, String gasLimit, String toAddress, String amount) throws Exception {

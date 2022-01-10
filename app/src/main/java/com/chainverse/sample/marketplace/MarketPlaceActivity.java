@@ -25,6 +25,9 @@ import com.chainverse.sdk.ChainverseItem;
 import com.chainverse.sdk.model.MarketItem.Categories;
 import com.chainverse.sdk.model.MarketItem.ChainverseItemMarket;
 import com.chainverse.sdk.ChainverseSDK;
+import com.chainverse.sdk.model.NFT.InfoSell;
+import com.chainverse.sdk.model.NFT.NFT;
+import com.chainverse.sdk.model.Params.FilterMarket;
 
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -37,7 +40,7 @@ public class MarketPlaceActivity extends AppCompatActivity {
     private String gameAddress;
     private String type;
     private final static String TAG = "MarketPlaceActivity";
-    ArrayList<ChainverseItemMarket> listNFT = new ArrayList<>();
+    ArrayList<NFT> listNFT = new ArrayList<>();
 
     GridView gridView;
     ProgressBar loadingBar;
@@ -55,7 +58,7 @@ public class MarketPlaceActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
 
-        developerAddress =  MainActivity.CONTRACT.developerAddress;
+        developerAddress = MainActivity.CONTRACT.developerAddress;
         gameAddress = MainActivity.CONTRACT.gameAddress;
         type = intent.getStringExtra("type");
 
@@ -91,7 +94,10 @@ public class MarketPlaceActivity extends AppCompatActivity {
     }
 
     protected void getListNFTMarket() {
-        ChainverseSDK.getInstance().getItemOnMarket(0, 10, "");
+        FilterMarket filterMarket = new FilterMarket();
+        filterMarket.setPageSize(20);
+        filterMarket.setPage(0);
+        ChainverseSDK.getInstance().getListItemOnMarket(filterMarket);
     }
 
     protected void getListMyAssets() {
@@ -119,12 +125,21 @@ public class MarketPlaceActivity extends AppCompatActivity {
 
             @Override
             public void onGetItemMarket(ArrayList<ChainverseItemMarket> items) {
-                System.out.println("run herere " + items);
+//                System.out.println("run herere " + items);
+            }
+
+            @Override
+            public void onGetListItemMarket(ArrayList<NFT> items) {
                 onReceivedMarketItems(items);
             }
 
             @Override
-            public void onGetMyAssets(ArrayList<ChainverseItemMarket> items) {
+            public void onGetMyAssets(ArrayList<NFT> items) {
+            }
+
+            @Override
+            public void onGetDetailItem(NFT nft) {
+
             }
 
             @Override
@@ -150,7 +165,7 @@ public class MarketPlaceActivity extends AppCompatActivity {
         });
     }
 
-    void onReceivedMarketItems(ArrayList<ChainverseItemMarket> items) {
+    void onReceivedMarketItems(ArrayList<NFT> items) {
         Log.i(TAG, "onReceivedMarket Items");
         loadingBar.setVisibility(View.GONE);
         listNFT = items;
@@ -158,41 +173,46 @@ public class MarketPlaceActivity extends AppCompatActivity {
         gridView.setAdapter(adapter);
         // Get more info
         for (int i = 0; i < items.size(); i++) {
-            ChainverseItemMarket item = items.get(i);
+            NFT item = items.get(i);
             NftProgress nftProgress = new NftProgress(item, i);
             nftProgress.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }
 
-    class NftProgress extends AsyncTask<Void, NftProgress, ChainverseItemMarket> {
-        private ChainverseItemMarket chainverseItemMarket;
+    class NftProgress extends AsyncTask<Void, NftProgress, NFT> {
+        private NFT nft;
         private int index;
 
-        public NftProgress(ChainverseItemMarket chainverseItemMarket, int index) {
-            this.chainverseItemMarket = chainverseItemMarket;
+        public NftProgress(NFT nft, int index) {
+            this.nft = nft;
             this.index = index;
         }
 
         @Override
-        protected ChainverseItemMarket doInBackground(Void... voids) {
-            ChainverseItemMarket nftInfo = ChainverseSDK.getInstance().getNFT(chainverseItemMarket.getNft(), chainverseItemMarket.getTokenId());
+        protected NFT doInBackground(Void... voids) {
+            NFT nftInfo = ChainverseSDK.getInstance().getNFT(nft.getNft(), nft.getTokenId());
             return nftInfo;
         }
 
         @Override
-        protected void onPostExecute(ChainverseItemMarket nftInfo) {
-            if (nftInfo != null && !nftInfo.getListingId().equals(BigInteger.ZERO)) {
-                Log.i(TAG, "Update information for the item");
-                ChainverseItemMarket updatedItem = listNFT.get(index);
+        protected void onPostExecute(NFT nftInfo) {
+            if (nftInfo != null && nftInfo.getInfoSell() != null && !nftInfo.getInfoSell().getListingId().equals(BigInteger.ZERO)) {
+                InfoSell infoSell = new InfoSell();
+
+                NFT updatedItem = listNFT.get(index);
                 updatedItem.setName(nftInfo.getName());
-                updatedItem.setImage_preview(nftInfo.getImage_preview());
+                updatedItem.setImagePreview(nftInfo.getImagePreview());
                 updatedItem.setImage(nftInfo.getImage());
                 updatedItem.setAttributes(nftInfo.getAttributes());
-                updatedItem.setPrice(nftInfo.getPrice());
-                updatedItem.setAuctionInfo(nftInfo.getAuctionInfo());
-                updatedItem.setListingId(nftInfo.getListingId());
-                updatedItem.setListingInfo(nftInfo.getListingInfo());
-                updatedItem.setAuction(nftInfo.isAuction());
+                updatedItem.setAuction(nftInfo.getAuction());
+                updatedItem.setListing(nftInfo.getListing());
+
+                infoSell.setListingId(nftInfo.getInfoSell().getListingId());
+                infoSell.setPrice(nftInfo.getInfoSell().getPrice());
+                infoSell.setIsAuction(nftInfo.getInfoSell().isAuction());
+                infoSell.setCurrencyInfo(nft.getInfoSell().getCurrencyInfo());
+
+                updatedItem.setInfoSell(infoSell);
                 listNFT.set(index, updatedItem);
             } else {
                 Log.e(TAG, "Updated information for the item not found or invalid, remove it from list");

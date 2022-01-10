@@ -1,7 +1,9 @@
 package com.chainverse.sdk;
 
 import com.chainverse.sdk.model.MarketItem.ChainverseItemMarket;
+import com.chainverse.sdk.model.NFT.NFT;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 
 public interface ChainverseCallback {
@@ -15,7 +17,11 @@ public interface ChainverseCallback {
 
     void onGetItemMarket(ArrayList<ChainverseItemMarket> items);
 
-    void onGetMyAssets(ArrayList<ChainverseItemMarket> items);
+    void onGetListItemMarket(ArrayList<NFT> items);
+
+    void onGetMyAssets(ArrayList<NFT> items);
+
+    void onGetDetailItem(NFT nft);
 
     void onConnectSuccess(String address);
 
@@ -27,3 +33,4 @@ public interface ChainverseCallback {
 
     void onBuy(String tx);
 }
+
