@@ -13,7 +13,6 @@ import com.chainverse.sdk.common.CallbackToGame;
 import com.chainverse.sdk.common.Constants;
 import com.chainverse.sdk.common.Convert;
 import com.chainverse.sdk.common.WalletUtils;
-import com.chainverse.sdk.model.MarketItem.ChainverseItemMarket;
 import com.chainverse.sdk.model.NFT.Auction;
 import com.chainverse.sdk.model.NFT.InfoSell;
 import com.chainverse.sdk.model.NFT.Listing;

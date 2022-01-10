@@ -48,15 +48,6 @@ public interface Chainverse {
     void getItems();
 
     /**
-     * return list item on market by game
-     *
-     * @param page
-     * @param pageSize
-     * @param name
-     */
-    void getItemOnMarket(int page, int pageSize, String name);
-
-    /**
      * return version
      *
      * @return

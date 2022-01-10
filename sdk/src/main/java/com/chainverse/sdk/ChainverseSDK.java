@@ -22,7 +22,6 @@ import com.chainverse.sdk.common.WalletUtils;
 import com.chainverse.sdk.listener.OnEmitterListenter;
 import com.chainverse.sdk.manager.ContractManager;
 import com.chainverse.sdk.manager.TransferItemManager;
-import com.chainverse.sdk.model.MarketItem.ChainverseItemMarket;
 import com.chainverse.sdk.model.MessageNonce;
 import com.chainverse.sdk.model.NFT.InfoSell;
 import com.chainverse.sdk.model.NFT.NFT;
@@ -175,26 +174,6 @@ public class ChainverseSDK implements Chainverse {
                         CallbackToGame.onError(ChainverseError.ERROR_REQUEST_ITEM);
                     });
         }
-    }
-
-    public void getItemOnMarket(int page, int pageSize, String name) {
-        RESTfulClient.getItemOnMarket(ChainverseSDK.gameAddress, page, pageSize, name)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(jsonElement -> {
-                    if (Utils.getErrorCodeResponse(jsonElement) == 0) {
-                        Gson gson = new Gson();
-
-                        ArrayList<ChainverseItemMarket> items = gson.fromJson(jsonElement.getAsJsonObject().get("data").getAsJsonObject().get("rows"), new TypeToken<ArrayList<ChainverseItemMarket>>() {
-                        }.getType());
-                        CallbackToGame.onGetItemMarket(items);
-                    } else {
-                        CallbackToGame.onError(ChainverseError.ERROR_REQUEST_ITEM);
-                    }
-                }, throwable -> {
-                    throwable.printStackTrace();
-                    CallbackToGame.onError(ChainverseError.ERROR_REQUEST_ITEM);
-                });
     }
 
     public void getListItemOnMarket(FilterMarket filterMarket) {

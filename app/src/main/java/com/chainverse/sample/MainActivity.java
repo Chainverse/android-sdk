@@ -14,7 +14,6 @@ import android.widget.Toast;
 import com.chainverse.sample.marketplace.MarketPlaceActivity;
 import com.chainverse.sdk.ChainverseCallback;
 import com.chainverse.sdk.ChainverseError;
-import com.chainverse.sdk.model.MarketItem.ChainverseItemMarket;
 import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.ChainverseUser;
 import com.chainverse.sdk.common.LogUtil;
@@ -75,10 +74,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onGetItems(ArrayList<ChainverseItem> items) {
-            }
-
-            @Override
-            public void onGetItemMarket(ArrayList<ChainverseItemMarket> items) {
             }
 
             @Override

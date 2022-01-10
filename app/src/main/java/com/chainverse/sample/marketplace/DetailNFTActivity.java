@@ -21,7 +21,6 @@ import com.chainverse.sdk.ChainverseCallback;
 import com.chainverse.sdk.ChainverseItem;
 import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.model.MarketItem.Categories;
-import com.chainverse.sdk.model.MarketItem.ChainverseItemMarket;
 import com.chainverse.sdk.model.NFT.NFT;
 
 import org.w3c.dom.Text;
@@ -90,11 +89,6 @@ public class DetailNFTActivity extends AppCompatActivity {
 
             @Override
             public void onGetItems(ArrayList<ChainverseItem> items) {
-
-            }
-
-            @Override
-            public void onGetItemMarket(ArrayList<ChainverseItemMarket> items) {
 
             }
 

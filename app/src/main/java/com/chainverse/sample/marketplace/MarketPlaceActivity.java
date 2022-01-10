@@ -23,7 +23,6 @@ import com.chainverse.sample.R;
 import com.chainverse.sdk.ChainverseCallback;
 import com.chainverse.sdk.ChainverseItem;
 import com.chainverse.sdk.model.MarketItem.Categories;
-import com.chainverse.sdk.model.MarketItem.ChainverseItemMarket;
 import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.model.NFT.InfoSell;
 import com.chainverse.sdk.model.NFT.NFT;
@@ -121,11 +120,6 @@ public class MarketPlaceActivity extends AppCompatActivity {
 
             @Override
             public void onGetItems(ArrayList<ChainverseItem> items) {
-            }
-
-            @Override
-            public void onGetItemMarket(ArrayList<ChainverseItemMarket> items) {
-//                System.out.println("run herere " + items);
             }
 
             @Override
