@@ -26,19 +26,19 @@ public interface RESTfulEndpoint {
             @Query("name") String name
     );
 
-    @GET("/v1/sdk/user/{nft}/tokens")
+    @GET("/v1/sdk/user/{nft}/items")
     Observable<JsonElement> getMyAsset(@Path("nft") String gameAddress);
 
-    @GET("/v1/sdk/market/{nft}/tokens")
+    @GET("/v1/sdk/market/{nft}/items")
     Observable<JsonElement> getListItemOnMarket(
             @Path("nft") String gameAddress,
             @QueryMap Map<String, String> options
     );
 
-    @GET("/v1/sdk/market/token/{nft}/{token_id}")
+    @GET("/v1/sdk/market/item/{nft}/{item_id}")
     Observable<JsonElement> getDetailNFT(
             @Path("nft") String nft,
-            @Path("token_id") BigInteger tokenId
+            @Path("item_id") BigInteger tokenId
     );
 
     @GET("/v1/sdk/game/{game_address}")

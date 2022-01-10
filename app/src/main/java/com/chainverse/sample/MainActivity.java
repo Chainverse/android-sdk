@@ -21,6 +21,7 @@ import com.chainverse.sdk.common.LogUtil;
 import com.chainverse.sdk.ChainverseItem;
 import com.chainverse.sdk.model.NFT.NFT;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 
 
@@ -87,11 +88,12 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onGetMyAssets(ArrayList<NFT> items) {
+
             }
 
             @Override
             public void onGetDetailItem(NFT nft) {
-
+                System.out.println(nft.getTokenId());
             }
 
             @Override
