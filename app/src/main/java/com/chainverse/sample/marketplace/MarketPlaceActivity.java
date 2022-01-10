@@ -70,7 +70,7 @@ public class MarketPlaceActivity extends AppCompatActivity {
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                ChainverseItemMarket item = (ChainverseItemMarket) gridView.getItemAtPosition(i);
+                NFT item = (NFT) gridView.getItemAtPosition(i);
 
                 String categories = "";
                 if (item.getCategories() != null) {
@@ -86,7 +86,7 @@ public class MarketPlaceActivity extends AppCompatActivity {
 
                 Intent intent = new Intent(MarketPlaceActivity.this, DetailNFTActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putSerializable("item", item);
+                bundle.putSerializable("item", (Serializable) item);
                 intent.putExtras(bundle);
                 startActivity(intent);
             }

@@ -1,6 +1,9 @@
 package com.chainverse.sdk.model.service;
 
-public class Network {
+import java.io.Serializable;
+
+public class Network implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String name;
     private String network;
     private String chain_id;

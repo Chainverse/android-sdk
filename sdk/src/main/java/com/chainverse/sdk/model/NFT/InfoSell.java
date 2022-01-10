@@ -2,9 +2,11 @@ package com.chainverse.sdk.model.NFT;
 
 import com.chainverse.sdk.model.MarketItem.Currency;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 
-public class InfoSell {
+public class InfoSell implements Serializable {
+    private static final long serialVersionUID = 1L;
     private BigInteger listing_id;
     private Double price;
     private Boolean is_auction;

@@ -1,6 +1,5 @@
 package com.chainverse.sample.marketplace;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -33,7 +32,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class DetailNFTActivity extends AppCompatActivity {
-    ChainverseItemMarket itemInfo;
+    NFT itemInfo;
 
     ImageView assetImage;
     TextView txtCategories, txtName, txtPrice, txtDesc;
@@ -48,7 +47,7 @@ public class DetailNFTActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
 
-        itemInfo = (ChainverseItemMarket) intent.getSerializableExtra("item");
+        itemInfo = (NFT) intent.getSerializableExtra("item");
 
         setTitle(itemInfo.getName());
 
@@ -67,7 +66,7 @@ public class DetailNFTActivity extends AppCompatActivity {
 //        txtPrice.setText(foo(itemInfo.getPrice()));
 //        txtCategories.setText(parseCategories(itemInfo.getCategories()));
 
-        if (itemInfo.isAuction()) {
+        if (itemInfo.getInfoSell().isAuction()) {
             btnAction.setText("Bid");
         } else {
             btnAction.setText("Buy now");
@@ -143,8 +142,12 @@ public class DetailNFTActivity extends AppCompatActivity {
         btnAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (itemInfo.getListingId() != null) {
-                    ChainverseSDK.getInstance().buyNFT(itemInfo.getCurrency().getCurrency(), itemInfo.getListingId().longValue(), itemInfo.getPrice(), itemInfo.isAuction());
+                if (itemInfo.getInfoSell().getListingId() != null) {
+                    ChainverseSDK.getInstance().buyNFT(
+                            itemInfo.getInfoSell().getCurrencyInfo().getCurrency(),
+                            itemInfo.getInfoSell().getListingId().longValue(),
+                            itemInfo.getInfoSell().getPrice(),
+                            itemInfo.getInfoSell().isAuction());
                 }
             }
         });
