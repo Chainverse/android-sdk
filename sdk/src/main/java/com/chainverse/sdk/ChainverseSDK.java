@@ -19,14 +19,17 @@ import com.chainverse.sdk.common.EncryptPreferenceUtils;
 import com.chainverse.sdk.common.LogUtil;
 import com.chainverse.sdk.common.Utils;
 import com.chainverse.sdk.common.WalletUtils;
+import com.chainverse.sdk.listener.Action;
 import com.chainverse.sdk.listener.OnEmitterListenter;
 import com.chainverse.sdk.manager.ContractManager;
 import com.chainverse.sdk.manager.TransferItemManager;
+import com.chainverse.sdk.model.MarketItem.Currency;
 import com.chainverse.sdk.model.MessageNonce;
 import com.chainverse.sdk.model.NFT.InfoSell;
 import com.chainverse.sdk.model.NFT.NFT;
 import com.chainverse.sdk.model.Params.FilterMarket;
 import com.chainverse.sdk.model.service.ChainverseService;
+import com.chainverse.sdk.model.service.Token;
 import com.chainverse.sdk.network.RESTful.RESTfulClient;
 import com.chainverse.sdk.ui.ChainverseSDKActivity;
 import com.chainverse.sdk.model.SignerData;
@@ -214,7 +217,7 @@ public class ChainverseSDK implements Chainverse {
                         for (JsonElement el : data) {
                             Gson gson = new Gson();
                             NFT item = gson.fromJson(el, NFT.class);
-                            if(el.getAsJsonObject().has("auctions")) {
+                            if (el.getAsJsonObject().has("auctions")) {
                                 InfoSell infoSell = gson.fromJson(el.getAsJsonObject().get("auctions").getAsJsonArray().get(0), InfoSell.class);
                                 item.setInfoSell(infoSell);
                             }
@@ -322,41 +325,39 @@ public class ChainverseSDK implements Chainverse {
         return true;
     }
 
+    private void setAccessToken() {
+        RESTfulClient.getNonce()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(jsonElement -> {
+                    if (Utils.getErrorCodeResponse(jsonElement) == 0) {
+                        Gson gson = new Gson();
+                        MessageNonce messageNonce = gson.fromJson(jsonElement.getAsJsonObject().get("data"), new TypeToken<MessageNonce>() {
+                        }.getType());
+
+                        try {
+                            WalletUtils walletUtils = new WalletUtils().init(mContext);
+                            EncryptPreferenceUtils encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(mContext);
+
+                            encryptPreferenceUtils.clearXUserMessageNonce();
+
+                            String messageSigned = walletUtils.signPersonalMessage(messageNonce.getMessage());
+
+                            messageNonce.setMessage(messageSigned);
+
+                            encryptPreferenceUtils.setXUserMessageNonce(messageNonce);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, throwable -> {
+                    System.out.println("error get nonce " + throwable);
+                });
+    }
+
     private void doConnectSuccess() {
         if (isUserConnected()) {
-//            RESTfulClient.getNonce()
-//                    .subscribeOn(Schedulers.io())
-//                    .observeOn(AndroidSchedulers.mainThread())
-//                    .subscribe(jsonElement -> {
-//                        if (Utils.getErrorCodeResponse(jsonElement) == 0) {
-//                            Gson gson = new Gson();
-//                            MessageNonce messageNonce = gson.fromJson(jsonElement.getAsJsonObject().get("data"), new TypeToken<MessageNonce>() {
-//                            }.getType());
-//
-//                            try {
-//                                WalletUtils walletUtils = new WalletUtils().init(mContext);
-//                                EncryptPreferenceUtils encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(mContext);
-//
-//                                encryptPreferenceUtils.clearXUserMessageNonce();
-//
-//                                String messageSigned = walletUtils.signPersonalMessage(messageNonce.getMessage());
-//
-//                                messageNonce.setMessage(messageSigned);
-//
-//                                encryptPreferenceUtils.setXUserMessageNonce(messageNonce);
-//                            } catch (Exception e) {
-//                                e.printStackTrace();
-//                            }
-//                        }
-//                    }, throwable -> {
-//                        System.out.println("error get nonce " + throwable);
-//                    });
-            WalletUtils walletUtils = new WalletUtils().init(mContext);
-            MessageNonce messageNonce = new MessageNonce();
-            String messageSigned = walletUtils.signPersonalMessage("ChainVerse");
-            messageNonce.setMessage(messageSigned);
-            encryptPreferenceUtils.setXUserMessageNonce(messageNonce);
-
+            setAccessToken();
             CallbackToGame.onConnectSuccess(encryptPreferenceUtils.getXUserAddress());
 
             transferItemManager = new TransferItemManager(mContext);
@@ -450,7 +451,6 @@ public class ChainverseSDK implements Chainverse {
             chainverse.connect(mContext);
         }
     }
-
 
     @Override
     public void logout() {
@@ -608,6 +608,41 @@ public class ChainverseSDK implements Chainverse {
                 });
     }
 
+    public void publishNFT(String nft, BigInteger tokenId, Action.publishNFT publishNFT) {
+        RESTfulClient.publishNFT(nft, tokenId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(jsonElement -> {
+                    if (Utils.getErrorCodeResponse(jsonElement) == 0) {
+                        publishNFT.onSuccess();
+                    } else {
+                        Gson gson = new Gson();
+                        String message = gson.fromJson(jsonElement.getAsJsonObject().get("message"), String.class);
+                        publishNFT.onError(message);
+                    }
+                }, throwable -> {
+                    publishNFT.onError(throwable.getMessage());
+                });
+    }
+
+    public ArrayList<Currency> getListCurrencies() {
+        ChainverseService chainverseService = encryptPreferenceUtils.getService();
+        ArrayList<Token> tokens = chainverseService.getTokens();
+        ArrayList<Currency> currencies = new ArrayList<>();
+
+        for (Token token : tokens) {
+            Currency currency = new Currency();
+            currency.setCurrency(token.getAddress());
+            currency.setSymbol(token.getSymbol());
+            currency.setName(token.getName());
+            currency.setDecimal(token.getDecimals());
+
+            currencies.add(currency);
+        }
+
+        return currencies;
+    }
+
     @Override
     public void buyNFT(String currency, Long listing_id, Double price, boolean isAuction) {
         if (isUserConnected()) {
@@ -648,11 +683,67 @@ public class ChainverseSDK implements Chainverse {
         }
     }
 
+    public BigInteger isApproved(String token, String owner, String spender) {
+        BigInteger allowence = BigInteger.ZERO;
+        ContractManager contractManager = new ContractManager(mContext);
+
+        allowence = contractManager.allowance(token, owner, spender);
+
+        return allowence;
+    }
+
+    public String approveToken(String token, String spender, double amount) throws Exception {
+        String tx;
+        ContractManager contractManager = new ContractManager(mContext);
+        try {
+            tx = contractManager.approved(token, spender, amount);
+        } catch (Exception e) {
+            throw e;
+        }
+        return tx;
+    }
+
+    public String buyNFT(String currency, BigInteger listingId, double price) throws Exception {
+        String tx;
+        ContractManager contractManager = new ContractManager(mContext);
+        try {
+            tx = contractManager.buyNFT(currency, listingId, price);
+        } catch (Exception e) {
+            throw e;
+        }
+
+        return tx;
+    }
+
+    public String bidNFT(String currency, BigInteger listingId, double price) throws Exception {
+        String tx;
+        ContractManager contractManager = new ContractManager(mContext);
+        try {
+            tx = contractManager.bidNFT(currency, listingId, price);
+        } catch (Exception e) {
+            throw e;
+        }
+
+        return tx;
+    }
+
     public String sellNFT(String nft, BigInteger tokenId, double price, String currency) throws Exception {
-        String tx = null;
+        String tx;
         ContractManager contractManager = new ContractManager(mContext);
         try {
             tx = contractManager.list(nft, tokenId, price, currency);
+        } catch (Exception e) {
+            throw e;
+        }
+
+        return tx;
+    }
+
+    public String cancelSellNFT(BigInteger listingId) throws Exception {
+        String tx;
+        ContractManager contractManager = new ContractManager(mContext);
+        try {
+            tx = contractManager.unlist(listingId);
         } catch (Exception e) {
             throw e;
         }

@@ -47,6 +47,10 @@ public class RESTfulClient {
         return RESTfulURL.getInstanceMarket().getNonce();
     }
 
+    public static Observable<JsonElement> publishNFT(String nft, BigInteger tokenId) {
+        return RESTfulURL.getInstanceMarket().publish(nft, tokenId);
+    }
+
     public static Observable<JsonElement> getServiceByGame(String gameAddress) {
         return RESTfulURL.getInstanceMarket().getServiceByGame(gameAddress);
     }

@@ -16,10 +16,17 @@ import com.chainverse.sdk.ChainverseCallback;
 import com.chainverse.sdk.ChainverseError;
 import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.ChainverseUser;
+import com.chainverse.sdk.common.Constants;
 import com.chainverse.sdk.common.LogUtil;
 import com.chainverse.sdk.ChainverseItem;
+import com.chainverse.sdk.listener.Action;
+import com.chainverse.sdk.manager.ContractManager;
+import com.chainverse.sdk.model.MarketItem.Currency;
 import com.chainverse.sdk.model.NFT.NFT;
 
+import org.web3j.protocol.core.DefaultBlockParameterName;
+
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
@@ -174,9 +181,6 @@ public class MainActivity extends AppCompatActivity {
         btnMarket.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                ChainverseSDK.getInstance().buyNFT(Constants.TOKEN_SUPPORTED.CVT, 335l,4.0, false);
-//                ChainverseSDK.getInstance().getMyAsset();
-//                ChainverseSDK.getInstance().sellNFT();
                 Intent intent = new Intent(MainActivity.this, MarketPlaceActivity.class);
                 startActivity(intent);
             }

@@ -179,8 +179,6 @@ public class BuyNftScreen extends Fragment implements View.OnClickListener {
                     Context context = this.getContext();
                     ContractManager contractManager = new ContractManager(context);
 
-                    int decimals = contractManager.decimals(currency);
-                    Double priceFormat = price * Math.pow(10, decimals);
                     progress = new ProgressDialog(this.getContext());
                     progress.setTitle("Loading");
                     progress.setMessage("Wait while loading...");
@@ -196,37 +194,45 @@ public class BuyNftScreen extends Fragment implements View.OnClickListener {
                                 txtLoading.setVisibility(View.VISIBLE);
                                 if (isAuction) {
                                     txtLoading.setText("Updating...");
+                                    progress.dismiss();
                                 } else {
                                     try {
-                                        tx = contractManager.buyNFT(currency, BigInteger.valueOf(listingId), BigDecimal.valueOf(priceFormat).toBigInteger());
+                                        tx = contractManager.buyNFT(currency, BigInteger.valueOf(listingId), price);
+                                        txtLoading.setText("Buy Successfully");
                                     } catch (Exception e) {
                                         System.out.println(e.getLocalizedMessage());
                                         txtLoading.setVisibility(View.GONE);
                                         txtError.setText("Transaction Error: " + e.getLocalizedMessage());
                                         txtError.setVisibility(View.VISIBLE);
                                         tvData.setVisibility(View.GONE);
+                                    } finally {
+                                        progress.dismiss();
                                     }
                                 }
                                 if (tx != null) {
                                     tvData.setText("Your transaction: " + tx);
-                                    txtLoading.setText("Buy Successfully");
                                     btnAgree.setVisibility(View.GONE);
                                     if (ChainverseSDK.getInstance().mCallback != null) {
                                         ChainverseSDK.getInstance().mCallback.onBuy(tx);
                                     }
                                 }
-                                progress.dismiss();
                             } else {
-                                String tx = new ContractManager(context).approved(currency, Constants.CONTRACT.MarketService, BigDecimal.valueOf(priceFormat).toBigInteger());
-                                if (tx != null || !tx.isEmpty()) {
-                                    btnAgree.setText("Buy now");
-                                    tvData.setText("Do you want to sign to buy the NFT");
-                                    isApproved = true;
+                                try {
+                                    String tx = new ContractManager(context).approved(currency, Constants.CONTRACT.MarketService, price);
+                                    if (tx != null || !tx.isEmpty()) {
+                                        btnAgree.setText("Buy now");
+                                        tvData.setText("Do you want to sign to buy the NFT");
+                                        isApproved = true;
+                                    }
+                                } catch (Exception e) {
+                                    txtLoading.setVisibility(View.GONE);
+                                    txtError.setText("Transaction Error: " + e.getLocalizedMessage());
+                                } finally {
+                                    progress.dismiss();
                                 }
-                                progress.dismiss();
                             }
                         }
-                    }, 500);
+                    }, 600);
                 }
             }
         } else if (view.getId() == R.id.chainverse_button_cancel_buy) {

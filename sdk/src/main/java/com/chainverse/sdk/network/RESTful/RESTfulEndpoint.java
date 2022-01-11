@@ -10,6 +10,7 @@ import io.reactivex.Observable;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import retrofit2.http.QueryMap;
@@ -50,4 +51,6 @@ public interface RESTfulEndpoint {
     @POST("/v1/item")
     Observable<JsonElement> testBuy(@Body TestRaw body);
 
+    @PUT("/v1/user/item/publish/{token_contract}/{token_id}")
+    Observable<JsonElement> publish(@Path("token_contract") String tokenContract, @Path("token_id") BigInteger tokenId);
 }

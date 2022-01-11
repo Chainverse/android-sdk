@@ -7,6 +7,15 @@ public class Currency implements Serializable {
     private String currency;
     private String symbol;
     private int decimal;
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getCurrency() {
         return currency;

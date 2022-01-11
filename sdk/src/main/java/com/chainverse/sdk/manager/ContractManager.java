@@ -2,6 +2,7 @@ package com.chainverse.sdk.manager;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Handler;
 
 import com.chainverse.sdk.ChainverseError;
 import com.chainverse.sdk.ChainverseSDK;
@@ -20,6 +21,7 @@ import com.chainverse.sdk.model.NFT.NFT;
 import com.chainverse.sdk.model.service.Service;
 
 
+import org.bouncycastle.util.encoders.Hex;
 import org.json.JSONObject;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
@@ -33,14 +35,24 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.RemoteFunctionCall;
+import org.web3j.protocol.core.Request;
+import org.web3j.protocol.core.Response;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthCall;
+import org.web3j.protocol.core.methods.response.EthEstimateGas;
+import org.web3j.protocol.core.methods.response.EthGasPrice;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
+import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import org.web3j.protocol.core.methods.response.EthTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple2;
 import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.gas.DefaultGasProvider;
+import org.web3j.tx.response.PollingTransactionReceiptProcessor;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -55,6 +67,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
@@ -277,43 +290,57 @@ public class ContractManager {
         return allowance;
     }
 
-    public String approved(String token, String spender, BigInteger amout) {
-        String tx = null;
+    public String approved(String token, String spender, double amout) throws Exception {
+        String tx;
 
         try {
             Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
 
-            ERC20 erc20 = ERC20.load(token, web3, credentials, new BigInteger("10000000000"), new BigInteger("80000"));
+            int decimals = decimals(token);
+            BigInteger priceFormat = BigDecimal.valueOf(amout * Math.pow(10, decimals)).toBigInteger();
 
-            RemoteCall<TransactionReceipt> receiptRemoteCall = (RemoteCall<TransactionReceipt>) erc20.approve(spender, amout);
+            Function function = new Function("approve",
+                    Arrays.asList(new Address(spender), new Uint256(priceFormat)),
+                    Collections.emptyList()
+            );
 
-            tx = receiptRemoteCall.sendAsync().get().getTransactionHash();
+            String functionEncoder = FunctionEncoder.encode(function);
 
-            System.out.println("approved " + tx);
+            RawTransactionManager rawTransactionManager = new RawTransactionManager(web3, credentials);
+
+            BigInteger gasPrice = web3.ethGasPrice().sendAsync().get().getGasPrice();
+            BigInteger gasLimit = getGasLimit(BigInteger.ZERO, token, functionEncoder);
+            BigInteger nonce = getNonce();
+
+            RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, gasLimit, token, BigInteger.ZERO, "0x" + functionEncoder);
+            String signedTransaction = rawTransactionManager.sign(rawTransaction);
+
+            EthSendTransaction sendRawTransaction = web3.ethSendRawTransaction(signedTransaction).sendAsync().get();
+
+            tx = sendRawTransaction.getTransactionHash();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            throw e;
         } catch (ExecutionException e) {
-            e.printStackTrace();
+            throw e;
+        } catch (Exception e) {
+            throw e;
         }
 
         return tx;
     }
 
-    public String buyNFT(String currency, BigInteger listingId, BigInteger price) throws Exception {
-        String tx = null;
+    public String buyNFT(String currency, BigInteger listingId, double price) throws Exception {
+        String tx;
         Service service = new ServiceManager(mContext).getService(Constants.CONTRACT.MarketService);
 
         if (service != null) {
             try {
-                String address = WalletUtils.getInstance().init(mContext).getAddress();
                 Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
 
-                EthGetTransactionCount ethGetTransactionCount = web3.ethGetTransactionCount(
-                        address, DefaultBlockParameterName.LATEST).sendAsync().get();
+                int decimals = decimals(currency);
+                BigInteger priceFormat = BigDecimal.valueOf(price * Math.pow(10, decimals)).toBigInteger();
 
-                BigInteger nonce = ethGetTransactionCount.getTransactionCount();
-
-                Function function = new Function("buy", Arrays.asList(new Uint256(listingId), new Uint256(price)), Collections.emptyList());
+                Function function = new Function("buy", Arrays.asList(new Uint256(listingId), new Uint256(priceFormat)), Collections.emptyList());
 
                 String functionEncoder = FunctionEncoder.encode(function);
 
@@ -322,9 +349,15 @@ public class ContractManager {
                 BigInteger value = BigInteger.ZERO;
 
                 if (currency.equals(Constants.TOKEN_SUPPORTED.NativeCurrency)) {
-                    value = price;
+                    value = priceFormat;
                 }
-                RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, new BigInteger("10000000000"), new BigInteger("200000"), Constants.CONTRACT.MarketService, value, "0x" + functionEncoder);
+
+                String data = "0x" + functionEncoder;
+                BigInteger gasPrice = web3.ethGasPrice().sendAsync().get().getGasPrice();
+                BigInteger nonce = getNonce();
+                BigInteger gasLimit = getGasLimit(value, Constants.CONTRACT.MarketService, functionEncoder);
+
+                RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, gasLimit, Constants.CONTRACT.MarketService, value, data);
                 String signedTransaction = rawTransactionManager.sign(rawTransaction);
 
                 EthSendTransaction sendRawTransaction = web3.ethSendRawTransaction(signedTransaction).sendAsync().get();
@@ -334,6 +367,8 @@ public class ContractManager {
                 throw e;
             } catch (ExecutionException e) {
                 throw e;
+            } catch (Exception e) {
+                throw e;
             }
         } else {
             throw new Exception("Service is not supported");
@@ -342,20 +377,17 @@ public class ContractManager {
         return tx;
     }
 
-    public String BidNFT(String currency, BigInteger listingId, BigInteger price) throws Exception {
-        String tx = null;
+    public String bidNFT(String currency, BigInteger listingId, double price) throws Exception {
+        String tx;
         Service service = new ServiceManager(mContext).getService(Constants.CONTRACT.MarketService);
         if (service != null) {
             try {
-                String address = WalletUtils.getInstance().init(mContext).getAddress();
                 Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
 
-                EthGetTransactionCount ethGetTransactionCount = web3.ethGetTransactionCount(
-                        address, DefaultBlockParameterName.LATEST).sendAsync().get();
+                int decimals = decimals(currency);
+                BigInteger priceFormat = BigDecimal.valueOf(price * Math.pow(10, decimals)).toBigInteger();
 
-                BigInteger nonce = ethGetTransactionCount.getTransactionCount();
-
-                Function function = new Function("bid", Arrays.asList(new Uint256(listingId), new Uint256(price)), Collections.emptyList());
+                Function function = new Function("bid", Arrays.asList(new Uint256(listingId), new Uint256(priceFormat)), Collections.emptyList());
 
                 String functionEncoder = FunctionEncoder.encode(function);
 
@@ -364,9 +396,15 @@ public class ContractManager {
                 BigInteger value = BigInteger.ZERO;
 
                 if (currency.equals(Constants.TOKEN_SUPPORTED.NativeCurrency)) {
-                    value = price;
+                    value = priceFormat;
                 }
-                RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, new BigInteger("10000000000"), new BigInteger("800000"), Constants.CONTRACT.MarketService, value, "0x" + functionEncoder);
+
+                String data = "0x" + functionEncoder;
+                BigInteger gasPrice = web3.ethGasPrice().sendAsync().get().getGasPrice();
+                BigInteger nonce = getNonce();
+                BigInteger gasLimit = getGasLimit(value, Constants.CONTRACT.MarketService, functionEncoder);
+
+                RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, gasLimit, Constants.CONTRACT.MarketService, value, data);
                 String signedTransaction = rawTransactionManager.sign(rawTransaction);
 
                 EthSendTransaction sendRawTransaction = web3.ethSendRawTransaction(signedTransaction).sendAsync().get();
@@ -410,18 +448,34 @@ public class ContractManager {
     }
 
     public String approveNFT(String nft, BigInteger tokenId) throws Exception {
-        String tx = null;
+        String tx;
         Service service = new ServiceManager(mContext).getService(Constants.CONTRACT.MarketService);
         if (service != null) {
-            Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
+            try {
+                Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
 
-            ERC721 erc721 = ERC721.load(nft, web3, credentials, new BigInteger("10000000000"), new BigInteger("800000"));
+                Function function = new Function("approve",
+                        Arrays.asList(new Address(Constants.CONTRACT.MarketService), new Uint256(tokenId)),
+                        Collections.emptyList()
+                );
 
-            RemoteCall<TransactionReceipt> receiptRemoteCall = erc721.approve(Constants.CONTRACT.MarketService, tokenId);
+                String functionEncoder = FunctionEncoder.encode(function);
 
-            TransactionReceipt transaction = receiptRemoteCall.sendAsync().get();
+                RawTransactionManager rawTransactionManager = new RawTransactionManager(web3, credentials);
 
-            tx = transaction.getTransactionHash();
+                BigInteger gasPrice = web3.ethGasPrice().sendAsync().get().getGasPrice();
+                BigInteger gasLimit = getGasLimit(BigInteger.ZERO, nft, functionEncoder);
+                BigInteger nonce = getNonce();
+
+                RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, gasLimit, nft, BigInteger.ZERO, "0x" + functionEncoder);
+                String signedTransaction = rawTransactionManager.sign(rawTransaction);
+
+                EthSendTransaction sendRawTransaction = web3.ethSendRawTransaction(signedTransaction).sendAsync().get();
+
+                tx = sendRawTransaction.getTransactionHash();
+            } catch (Exception e) {
+                throw e;
+            }
         } else {
             throw new Exception("Service is not supported");
         }
@@ -430,21 +484,42 @@ public class ContractManager {
     }
 
     public String list(String nft, BigInteger tokenId, double price, String currency) throws Exception {
-        String tx = null;
+        String tx;
         Service service = new ServiceManager(mContext).getService(Constants.CONTRACT.MarketService);
 
         if (service != null) {
-            Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
-            HandleContract handleContract = HandleContract.load(Constants.CONTRACT.MarketService, service.getAbi(), web3, credentials, new BigInteger("10000000000"), new BigInteger("800000"));
+            try {
+                Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
 
-            int decimals = decimals(currency);
-            Double priceFormat = price * Math.pow(10, decimals);
+                int decimals = decimals(currency);
+                Double priceFormat = price * Math.pow(10, decimals);
 
-            RemoteFunctionCall remoteFunctionCall = handleContract.callFunc("list", Arrays.asList(nft, tokenId, BigDecimal.valueOf(priceFormat).toBigInteger(), currency));
+                Function function = new Function("list",
+                        Arrays.asList(
+                                new Address(nft),
+                                new Uint256(tokenId),
+                                new Uint256(BigDecimal.valueOf(priceFormat).toBigInteger()),
+                                new Address(currency)),
+                        Collections.emptyList()
+                );
 
-            TransactionReceipt result = (TransactionReceipt) remoteFunctionCall.sendAsync().get();
+                String functionEncoder = FunctionEncoder.encode(function);
 
-            tx = result.getTransactionHash();
+                RawTransactionManager rawTransactionManager = new RawTransactionManager(web3, credentials);
+
+                BigInteger gasPrice = web3.ethGasPrice().sendAsync().get().getGasPrice();
+                BigInteger gasLimit = getGasLimit(BigInteger.ZERO, Constants.CONTRACT.MarketService, functionEncoder);
+                BigInteger nonce = getNonce();
+
+                RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, gasLimit, Constants.CONTRACT.MarketService, BigInteger.ZERO, "0x" + functionEncoder);
+                String signedTransaction = rawTransactionManager.sign(rawTransaction);
+
+                EthSendTransaction sendRawTransaction = web3.ethSendRawTransaction(signedTransaction).sendAsync().get();
+
+                tx = sendRawTransaction.getTransactionHash();
+            } catch (Exception e) {
+                throw e;
+            }
         } else {
             throw new Exception("Service is not supported");
         }
@@ -453,18 +528,32 @@ public class ContractManager {
     }
 
     public String unlist(BigInteger listingId) throws Exception {
-        String tx = null;
+        String tx;
         Service service = new ServiceManager(mContext).getService(Constants.CONTRACT.MarketService);
 
         if (service != null) {
-            Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
-            HandleContract handleContract = HandleContract.load(Constants.CONTRACT.MarketService, service.getAbi(), web3, credentials, new BigInteger("10000000000"), new BigInteger("800000"));
+            try {
+                Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
 
-            RemoteFunctionCall remoteFunctionCall = handleContract.callFunc("unList", Arrays.asList(listingId));
+                Function function = new Function("unList", Arrays.asList(new Uint256(listingId)), Collections.emptyList());
 
-            TransactionReceipt result = (TransactionReceipt) remoteFunctionCall.sendAsync().get();
+                String functionEncoder = FunctionEncoder.encode(function);
 
-            tx = result.getTransactionHash();
+                RawTransactionManager rawTransactionManager = new RawTransactionManager(web3, credentials);
+
+                BigInteger gasPrice = web3.ethGasPrice().sendAsync().get().getGasPrice();
+                BigInteger gasLimit = getGasLimit(BigInteger.ZERO, Constants.CONTRACT.MarketService, functionEncoder);
+                BigInteger nonce = getNonce();
+
+                RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, gasLimit, Constants.CONTRACT.MarketService, BigInteger.ZERO, "0x" + functionEncoder);
+                String signedTransaction = rawTransactionManager.sign(rawTransaction);
+
+                EthSendTransaction sendRawTransaction = web3.ethSendRawTransaction(signedTransaction).sendAsync().get();
+
+                tx = sendRawTransaction.getTransactionHash();
+            } catch (Exception e) {
+                throw e;
+            }
         } else {
             throw new Exception("Service is not supported");
         }
@@ -605,5 +694,46 @@ public class ContractManager {
         protected void onPostExecute(String result) {
             this.content = result;
         }
+    }
+
+    private BigInteger getNonce() {
+        BigInteger nonce = BigInteger.ONE;
+
+        try {
+            String address = WalletUtils.getInstance().init(mContext).getAddress();
+
+            EthBlock blockNumber = web3.ethGetBlockByNumber(DefaultBlockParameterName.LATEST, false).sendAsync().get();
+            BigInteger block = blockNumber.getBlock().getNumber().add(new BigInteger("5"));
+
+            EthGetTransactionCount ethGetTransactionCount = web3.ethGetTransactionCount(
+                    address, DefaultBlockParameterName.LATEST).sendAsync().get();
+
+            nonce = ethGetTransactionCount.getTransactionCount();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return nonce;
+    }
+
+    private BigInteger getGasLimit(BigInteger value, String to, String data) throws Exception {
+        BigInteger gasLimit;
+        String address = WalletUtils.getInstance().init(mContext).getAddress();
+        try {
+
+            Transaction transaction = Transaction.createFunctionCallTransaction(address, getNonce(), null, null, to, value, data);
+            Request<?, EthEstimateGas> rs = web3.ethEstimateGas(transaction);
+            EthEstimateGas eGasLimit = rs.sendAsync().get();
+            if (eGasLimit.hasError()) {
+                throw new Exception(eGasLimit.getError().getMessage());
+            } else {
+                gasLimit = eGasLimit.getAmountUsed();
+            }
+        } catch (Exception e) {
+            throw e;
+        }
+        return gasLimit;
     }
 }
