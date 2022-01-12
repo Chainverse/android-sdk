@@ -17,7 +17,7 @@ public class ServiceManager {
         Service service = null;
         if (chainverseService != null) {
             for (int i = 0; i < chainverseService.getServices().size(); i++) {
-                if (address.equals(chainverseService.getServices().get(i).getAddress())) {
+                if (address.toLowerCase().equals(chainverseService.getServices().get(i).getAddress().toLowerCase())) {
                     service = chainverseService.getServices().get(i);
                 }
             }

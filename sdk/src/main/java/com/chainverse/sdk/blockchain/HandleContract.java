@@ -111,10 +111,13 @@ public class HandleContract extends Contract {
                 while (i < abis.length()) {
                     JSONObject abi = abis.getJSONObject(i);
                     if (abi.has("name") && abi.getString("name").toUpperCase().equals(func.toUpperCase())) {
-                        break;
+                        if (abi.getJSONArray("inputs").length() == inputs.size()) {
+                            break;
+                        }
                     }
                     i++;
                 }
+
                 if (i < abis.length()) {
                     remoteCall = handleFunction(abis.getJSONObject(i), inputs);
                 }
@@ -135,7 +138,9 @@ public class HandleContract extends Contract {
                 while (i < abis.length()) {
                     JSONObject abi = abis.getJSONObject(i);
                     if (abi.has("name") && abi.getString("name").toUpperCase().equals(func.toUpperCase())) {
-                        break;
+                        if (abi.getJSONArray("inputs").length() == inputs.size()) {
+                            break;
+                        }
                     }
                     i++;
                 }

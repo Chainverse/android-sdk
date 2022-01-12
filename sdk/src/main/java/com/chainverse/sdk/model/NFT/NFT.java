@@ -13,6 +13,7 @@ public class NFT implements Serializable {
     private String name;
     private String nft;
     private String owner;
+    private String ownerOnChain;
     private String attributes;
     private String image;
     private String image_preview;
@@ -22,6 +23,14 @@ public class NFT implements Serializable {
     private Network network;
     private Auction auction;
     private Listing listing;
+
+    public String getOwnerOnChain() {
+        return ownerOnChain;
+    }
+
+    public void setOwnerOnChain(String ownerOnChain) {
+        this.ownerOnChain = ownerOnChain;
+    }
 
     public String getImage() {
         return image;

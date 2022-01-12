@@ -27,6 +27,7 @@ import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Keys;
@@ -200,10 +201,12 @@ public class ContractManager {
                 ERC721 contractERC721 = ERC721.load(nft, web3, dummyCredentials, new DefaultGasProvider());
                 RemoteCall<String> remoteCallUri = contractERC721.tokenURI(tokenId);
                 String uri = remoteCallUri.sendAsync().get();
+                String ownerOf = contractERC721.ownerOf(tokenId).sendAsync().get();
 
                 String content = handleTokenUri(uri);
 
                 item.setTokenId(tokenId);
+                item.setOwnerOnChain(ownerOf);
                 if (content != null && !content.isEmpty()) {
                     JSONObject json = new JSONObject(content);
 
@@ -233,6 +236,16 @@ public class ContractManager {
                 HandleContract.Auction auctionInfo = data.sendAsync().get().component1();
                 HandleContract.Listing listingInfo = data.sendAsync().get().component2();
 
+                if (ownerOf.toLowerCase().equals(ChainverseSDK.gameAddress.toLowerCase())) {
+                    String owner = ownerOfOnGame(nft, tokenId);
+                    item.setOwner(owner);
+                } else {
+                    item.setOwner(ownerOf);
+                }
+
+                String owner = ownerOfOnGame("0x7eAdaF22D3a4C10E0bA1aC692654b80954084bdD", new BigInteger("235"));
+
+
                 int feeAuction = Integer.parseInt(auctionInfo.fee.toString(), 8);
                 BigInteger bidDuration = new BigInteger(auctionInfo.bidDuration.toString(), 18);
                 BigInteger bidEnd = new BigInteger(auctionInfo.end.toString(), 18);
@@ -252,11 +265,13 @@ public class ContractManager {
                     BigDecimal price = org.web3j.utils.Convert.fromWei(new BigDecimal(auction.getBid()), org.web3j.utils.Convert.Unit.ETHER);
                     infoSell.setListingId(auction.getId());
                     infoSell.setPrice(Double.parseDouble(price.toString()));
+                    item.setOwner(auction.getOwner());
                 }
                 if (!listing.getId().equals(BigInteger.ZERO) && listing.getPrice() != null) {
                     BigDecimal price = org.web3j.utils.Convert.fromWei(new BigDecimal(listing.getPrice()), org.web3j.utils.Convert.Unit.ETHER);
                     infoSell.setListingId(listing.getId());
                     infoSell.setPrice(Double.parseDouble(price.toString()));
+                    item.setOwner(listing.getOwner());
                 }
 
                 item.setInfoSell(infoSell);
@@ -561,6 +576,29 @@ public class ContractManager {
         return tx;
     }
 
+    private String ownerOfOnGame(String nft, BigInteger tokenId) {
+        String owner = "";
+        if (ChainverseSDK.gameAddress != null) {
+            Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
+
+            Service service = new ServiceManager(mContext).getService(ChainverseSDK.gameAddress);
+            HandleContract handleContract = HandleContract.load(ChainverseSDK.gameAddress, service.getAbi(), web3, credentials, new DefaultGasProvider());
+
+            RemoteFunctionCall<String> functionCall = handleContract.callFunc("ownerOf", Arrays.asList(nft, tokenId));
+
+            try {
+                owner = functionCall.sendAsync().get();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return owner;
+    }
+
+    ;
 
     private boolean isDeveloperContract() {
         try {
@@ -642,12 +680,11 @@ public class ContractManager {
                     url = gateway + hash;
                 }
 
-                String content = getUrlContents(url);
-
-                if (!content.isEmpty() && content != null) {
+                try {
+                    String content = getUrlContents(url);
                     check = false;
                     return content;
-                } else {
+                } catch (Exception e) {
                     if (n == gateways.length - 1) {
                         check = false;
                         return "";
@@ -662,7 +699,7 @@ public class ContractManager {
         return "";
     }
 
-    private static String getUrlContents(String theUrl) {
+    private static String getUrlContents(String theUrl) throws Exception {
         StringBuilder content = new StringBuilder();
         // Use try and catch to avoid the exceptions
         try {
@@ -678,6 +715,7 @@ public class ContractManager {
             }
             bufferedReader.close();
         } catch (Exception e) {
+            throw e;
 //            e.printStackTrace();
         }
         return content.toString();
