@@ -771,12 +771,45 @@ public class ChainverseSDK implements Chainverse {
 
         String allowence = contractManager.allowenceNFT(nft, tokenId);
 
-        if (allowence.equals(Constants.CONTRACT.MarketService)) {
+        if (allowence.toLowerCase().equals(Constants.CONTRACT.MarketService.toLowerCase())) {
             isChecked = true;
         }
 
         return isChecked;
     }
+
+    public String withdrawNFT(String nft, BigInteger tokenId) throws Exception {
+        String tx;
+        ContractManager contractManager = new ContractManager(mContext);
+        try {
+            tx = contractManager.withdrawNFT(nft, tokenId);
+        } catch (Exception e) {
+            throw e;
+        }
+        return tx;
+    }
+
+//    public String withdrawCVT(double amount) throws Exception {
+//        String tx;
+//        ContractManager contractManager = new ContractManager(mContext);
+//        try {
+//            tx = contractManager.withdrawCVT(amount);
+//        } catch (Exception e) {
+//            throw e;
+//        }
+//        return tx;
+//    }
+//
+//    public String withdrawToken(String token, double amount) throws Exception {
+//        String tx;
+//        ContractManager contractManager = new ContractManager(mContext);
+//        try {
+//            tx = contractManager.withdrawToken(token, amount);
+//        } catch (Exception e) {
+//            throw e;
+//        }
+//        return tx;
+//    }
 
     private void setupBouncyCastle() {
         final Provider provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);

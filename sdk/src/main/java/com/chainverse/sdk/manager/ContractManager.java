@@ -114,7 +114,7 @@ public class ContractManager {
 
     public int decimals(String currency) {
         int decimals = 18;
-        if (currency.equals(Constants.TOKEN_SUPPORTED.NativeCurrency)) {
+        if (currency.toLowerCase().equals(Constants.TOKEN_SUPPORTED.NativeCurrency.toLowerCase())) {
             return decimals;
         }
         try {
@@ -363,7 +363,7 @@ public class ContractManager {
 
                 BigInteger value = BigInteger.ZERO;
 
-                if (currency.equals(Constants.TOKEN_SUPPORTED.NativeCurrency)) {
+                if (currency.toLowerCase().equals(Constants.TOKEN_SUPPORTED.NativeCurrency.toLowerCase())) {
                     value = priceFormat;
                 }
 
@@ -410,7 +410,7 @@ public class ContractManager {
 
                 BigInteger value = BigInteger.ZERO;
 
-                if (currency.equals(Constants.TOKEN_SUPPORTED.NativeCurrency)) {
+                if (currency.toLowerCase().equals(Constants.TOKEN_SUPPORTED.NativeCurrency.toLowerCase())) {
                     value = priceFormat;
                 }
 
@@ -576,6 +576,110 @@ public class ContractManager {
         return tx;
     }
 
+    public String withdrawNFT(String nft, BigInteger tokenId) throws Exception {
+        String tx;
+        Service service = new ServiceManager(mContext).getService(ChainverseSDK.gameAddress);
+
+        if (service != null) {
+            try {
+                Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
+
+                Function function = new Function("withdrawItem", Arrays.asList(new Address(nft), new Uint256(tokenId)), Collections.emptyList());
+
+                String functionEncoder = FunctionEncoder.encode(function);
+
+                RawTransactionManager rawTransactionManager = new RawTransactionManager(web3, credentials);
+
+                BigInteger gasPrice = web3.ethGasPrice().sendAsync().get().getGasPrice();
+                BigInteger gasLimit = getGasLimit(BigInteger.ZERO, ChainverseSDK.gameAddress, functionEncoder);
+                BigInteger nonce = getNonce();
+
+                RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, gasLimit, ChainverseSDK.gameAddress, BigInteger.ZERO, "0x" + functionEncoder);
+                String signedTransaction = rawTransactionManager.sign(rawTransaction);
+
+                EthSendTransaction sendRawTransaction = web3.ethSendRawTransaction(signedTransaction).sendAsync().get();
+
+                tx = sendRawTransaction.getTransactionHash();
+            } catch (Exception e) {
+                throw e;
+            }
+        } else {
+            throw new Exception("Service is not supported");
+        }
+
+        return tx;
+    }
+
+//    public String withdrawCVT(double amount) throws Exception {
+//        String tx;
+//        Service service = new ServiceManager(mContext).getService(ChainverseSDK.gameAddress);
+//
+//        if (service != null) {
+//            try {
+//                Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
+//                int decimals = decimals(Constants.TOKEN_SUPPORTED.CVT);
+//                Double amountFormat = amount * Math.pow(10, decimals);
+//                Function function = new Function("withdrawCVT", Arrays.asList(new Uint256(BigDecimal.valueOf(amountFormat).toBigInteger())), Collections.emptyList());
+//
+//                String functionEncoder = FunctionEncoder.encode(function);
+//
+//                RawTransactionManager rawTransactionManager = new RawTransactionManager(web3, credentials);
+//
+//                BigInteger gasPrice = web3.ethGasPrice().sendAsync().get().getGasPrice();
+//                BigInteger gasLimit = getGasLimit(BigInteger.ZERO, ChainverseSDK.gameAddress, functionEncoder);
+//                BigInteger nonce = getNonce();
+//
+//                RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, gasLimit, ChainverseSDK.gameAddress, BigInteger.ZERO, "0x" + functionEncoder);
+//                String signedTransaction = rawTransactionManager.sign(rawTransaction);
+//
+//                EthSendTransaction sendRawTransaction = web3.ethSendRawTransaction(signedTransaction).sendAsync().get();
+//
+//                tx = sendRawTransaction.getTransactionHash();
+//            } catch (Exception e) {
+//                throw e;
+//            }
+//        } else {
+//            throw new Exception("Service is not supported");
+//        }
+//
+//        return tx;
+//    }
+//
+//    public String withdrawToken(String token, double amount) throws Exception {
+//        String tx;
+//        Service service = new ServiceManager(mContext).getService(ChainverseSDK.gameAddress);
+//
+//        if (service != null) {
+//            try {
+//                Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
+//                int decimals = decimals(token);
+//                Double amountFormat = amount * Math.pow(10, decimals);
+//                Function function = new Function("withdraw", Arrays.asList(new Uint256(BigDecimal.valueOf(amountFormat).toBigInteger())), Collections.emptyList());
+//
+//                String functionEncoder = FunctionEncoder.encode(function);
+//
+//                RawTransactionManager rawTransactionManager = new RawTransactionManager(web3, credentials);
+//
+//                BigInteger gasPrice = web3.ethGasPrice().sendAsync().get().getGasPrice();
+//                BigInteger gasLimit = getGasLimit(BigInteger.ZERO, ChainverseSDK.gameAddress, functionEncoder);
+//                BigInteger nonce = getNonce();
+//
+//                RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, gasLimit, ChainverseSDK.gameAddress, BigInteger.ZERO, "0x" + functionEncoder);
+//                String signedTransaction = rawTransactionManager.sign(rawTransaction);
+//
+//                EthSendTransaction sendRawTransaction = web3.ethSendRawTransaction(signedTransaction).sendAsync().get();
+//
+//                tx = sendRawTransaction.getTransactionHash();
+//            } catch (Exception e) {
+//                throw e;
+//            }
+//        } else {
+//            throw new Exception("Service is not supported");
+//        }
+//
+//        return tx;
+//    }
+
     private String ownerOfOnGame(String nft, BigInteger tokenId) {
         String owner = "";
         if (ChainverseSDK.gameAddress != null) {
@@ -597,8 +701,6 @@ public class ContractManager {
 
         return owner;
     }
-
-    ;
 
     private boolean isDeveloperContract() {
         try {
