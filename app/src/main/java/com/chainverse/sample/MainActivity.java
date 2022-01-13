@@ -90,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onGetMyAssets(ArrayList<NFT> items) {
-
             }
 
             @Override
@@ -181,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
         btnMarket.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+//                ChainverseSDK.getInstance().getMyAsset();
                 Intent intent = new Intent(MainActivity.this, MarketPlaceActivity.class);
                 startActivity(intent);
             }

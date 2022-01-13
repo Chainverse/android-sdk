@@ -8,6 +8,15 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 
 public class NFT implements Serializable {
+    public enum STATUS {
+        AUCTION,
+        LISTING,
+        PENDING,
+        PRE_VIEW,
+        PRE_PUBLISH,
+        PUBLISH
+    }
+
     private static final long serialVersionUID = 1L;
     private BigInteger token_id;
     private String name;
@@ -23,6 +32,15 @@ public class NFT implements Serializable {
     private Network network;
     private Auction auction;
     private Listing listing;
+    private STATUS status;
+
+    public STATUS getStatus() {
+        return status;
+    }
+
+    public void setStatus(STATUS status) {
+        this.status = status;
+    }
 
     public String getOwnerOnChain() {
         return ownerOnChain;

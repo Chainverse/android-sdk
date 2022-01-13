@@ -162,7 +162,6 @@ public class ChainverseSDK implements Chainverse {
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(jsonElement -> {
-                        System.out.println("get game item" + jsonElement);
                         if (Utils.getErrorCodeResponse(jsonElement) == 0) {
                             Gson gson = new Gson();
                             ArrayList<ChainverseItem> items = gson.fromJson(jsonElement.getAsJsonObject().get("items"), new TypeToken<ArrayList<ChainverseItem>>() {
@@ -188,7 +187,6 @@ public class ChainverseSDK implements Chainverse {
                         JsonArray data = jsonElement.getAsJsonObject().get("data").getAsJsonObject().get("rows").getAsJsonArray();
                         for (JsonElement el : data) {
                             Gson gson = new Gson();
-
                             NFT item = gson.fromJson(el, NFT.class);
                             InfoSell infoSell = gson.fromJson(el.getAsJsonObject().get("auctions").getAsJsonArray().get(0), InfoSell.class);
                             item.setInfoSell(infoSell);
