@@ -102,7 +102,7 @@ public class HandleContract extends Contract {
         return new HandleContract(contractAddress, abi, web3j, credentials, new DefaultGasProvider());
     }
 
-    public RemoteFunctionCall callFunc(String func, List inputs) {
+    public RemoteFunctionCall callFunc(String func, List inputs) throws Exception {
         RemoteFunctionCall remoteCall = null;
         if (!_abi.isEmpty()) {
             try {
@@ -120,6 +120,8 @@ public class HandleContract extends Contract {
 
                 if (i < abis.length()) {
                     remoteCall = handleFunction(abis.getJSONObject(i), inputs);
+                } else {
+                    throw new Exception("Function is not supported in this service");
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -129,7 +131,7 @@ public class HandleContract extends Contract {
         return remoteCall;
     }
 
-    public RemoteFunctionCall callFunc(String func, List inputs, List<TypeReference<?>> outputParameters) {
+    public RemoteFunctionCall callFunc(String func, List inputs, List<TypeReference<?>> outputParameters) throws Exception {
         RemoteFunctionCall remoteCall = null;
         if (!_abi.isEmpty()) {
             try {
@@ -146,6 +148,8 @@ public class HandleContract extends Contract {
                 }
                 if (i < abis.length()) {
                     remoteCall = handleFunction(abis.getJSONObject(i), inputs, outputParameters);
+                } else {
+                    throw new Exception("Function is not supported in this service");
                 }
             } catch (JSONException e) {
                 e.printStackTrace();

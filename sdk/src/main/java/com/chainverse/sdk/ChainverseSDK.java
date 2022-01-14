@@ -97,11 +97,11 @@ public class ChainverseSDK implements Chainverse {
         this.developerAddress = developerAddress;
         encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(mContext);
 
-        getServiceByGame();
         exceptionSDK();
         checkContract();
         receiverCreatedWallet();
         setupBouncyCastle();
+        getServiceByGame();
     }
 
     public void init(String developerAddress, String gameAddress, Activity activity) {
@@ -110,11 +110,11 @@ public class ChainverseSDK implements Chainverse {
         this.developerAddress = developerAddress;
         encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(mContext);
 
-        getServiceByGame();
         exceptionSDK();
         checkContract();
         receiverCreatedWallet();
         setupBouncyCastle();
+        getServiceByGame();
     }
 
     private void receiverCreatedWallet() {
@@ -785,6 +785,21 @@ public class ChainverseSDK implements Chainverse {
             throw e;
         }
         return tx;
+    }
+
+    public void moveItemToGame(String nft, BigInteger tokenId, Action.eventMoveService action) {
+        ContractManager contractManager = new ContractManager(mContext);
+        contractManager.moveItemToGame(nft, tokenId, new Action.eventMoveService() {
+            @Override
+            public void onSuccess(String tx) {
+                action.onSuccess(tx);
+            }
+
+            @Override
+            public void onError(String message) {
+                action.onSuccess(message);
+            }
+        });
     }
 
 //    public String withdrawCVT(double amount) throws Exception {
