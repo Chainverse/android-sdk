@@ -29,6 +29,8 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -180,19 +182,8 @@ public class MainActivity extends AppCompatActivity {
         btnMarket.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ChainverseSDK.getInstance().moveItemToGame("0x7eAdaF22D3a4C10E0bA1aC692654b80954084bdD", new BigInteger("279"), new Action.eventMoveService() {
-                    @Override
-                    public void onSuccess(String tx) {
-                        System.out.println("transaction hash " + tx);
-                    }
-
-                    @Override
-                    public void onError(String message) {
-                        System.out.println("error " + message);
-                    }
-                });
-//                Intent intent = new Intent(MainActivity.this, MarketPlaceActivity.class);
-//                startActivity(intent);
+                Intent intent = new Intent(MainActivity.this, MarketPlaceActivity.class);
+                startActivity(intent);
             }
         });
     }

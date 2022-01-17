@@ -55,4 +55,15 @@ public class Constants {
                 "0x672021e3c741910896cad6D6121446a328ba5634",//CTV
         };
     }
+
+    public enum EFunction {
+        approveToken,
+        approveNFT,
+        buyNFT,
+        bidNFT,
+        sell,
+        cancelSell,
+        withdrawItem,
+        moveService
+    }
 }

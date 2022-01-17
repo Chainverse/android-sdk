@@ -776,6 +776,34 @@ public class ChainverseSDK implements Chainverse {
         return isChecked;
     }
 
+    public String approveNFTForService(String nft, String service, BigInteger tokenId) {
+        String tx = null;
+
+        ContractManager contractManager = new ContractManager(mContext);
+
+        try {
+            tx = contractManager.approveNFTForService(nft, service, tokenId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return tx;
+    }
+
+    public boolean isApprovedForService(String nft, String service, BigInteger tokenId) {
+        boolean isChecked = false;
+        ContractManager contractManager = new ContractManager(mContext);
+
+        String allowence = contractManager.allowenceNFT(nft, tokenId);
+
+        if (allowence.toLowerCase().equals(service.toLowerCase())) {
+            isChecked = true;
+        }
+
+        return isChecked;
+    }
+
+
     public String withdrawNFT(String nft, BigInteger tokenId) throws Exception {
         String tx;
         ContractManager contractManager = new ContractManager(mContext);
@@ -800,6 +828,39 @@ public class ChainverseSDK implements Chainverse {
                 action.onSuccess(message);
             }
         });
+    }
+
+    public String moveItemToService(String nft, String service, BigInteger tokenId) throws Exception {
+        String tx;
+        ContractManager contractManager = new ContractManager(mContext);
+        try {
+            tx = contractManager.moveService(nft, service, tokenId);
+        } catch (Exception e) {
+            throw e;
+        }
+        return tx;
+    }
+
+    public double estimateGasDefault(Constants.EFunction function, List inputs) throws Exception {
+        double fee;
+        ContractManager contractManager = new ContractManager(mContext);
+        try {
+            fee = contractManager.estimateGasDefault(function, inputs);
+        } catch (Exception e) {
+            throw e;
+        }
+        return fee;
+    }
+
+    public double estimateGasDefault(Constants.EFunction function, List inputs, BigInteger value) throws Exception {
+        double fee;
+        ContractManager contractManager = new ContractManager(mContext);
+        try {
+            fee = contractManager.estimateGasDefault(function, inputs, value);
+        } catch (Exception e) {
+            throw e;
+        }
+        return fee;
     }
 
 //    public String withdrawCVT(double amount) throws Exception {
