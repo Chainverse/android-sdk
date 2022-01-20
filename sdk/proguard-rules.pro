@@ -19,3 +19,17 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-dontwarn java8.util.**
+-dontwarn jnr.posix.**
+#-dontwarn com.kenai.**
+
+#-keep class org.bouncycastle.**
+-dontwarn org.bouncycastle.jce.provider.X509LDAPCertStoreSpi
+-dontwarn org.bouncycastle.x509.util.LDAPStoreHelper
+
+-keepclassmembers class org.web3j.protocol.* { *; }
+-keepclassmembers class org.web3j.crypto.* { *; }
+
+-keep class * extends org.web3j.abi.TypeReference
+-keep class * extends org.web3j.abi.datatypes.Type

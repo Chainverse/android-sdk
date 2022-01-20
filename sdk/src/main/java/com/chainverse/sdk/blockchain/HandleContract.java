@@ -1,10 +1,15 @@
 package com.chainverse.sdk.blockchain;
 
+import com.chainverse.sdk.common.LogUtil;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.AbiTypes;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Function;
@@ -15,6 +20,8 @@ import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.RemoteFunctionCall;
+import org.web3j.protocol.core.methods.response.AbiDefinition;
+import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.tuples.Tuple;
 import org.web3j.tuples.generated.Tuple10;
 import org.web3j.tuples.generated.Tuple2;
@@ -57,27 +64,40 @@ public class HandleContract extends Contract {
     private static final String FUNCTION = "function";
 
     String _abi;
+    List<AbiDefinition> abiDefinitions;
 
     @Deprecated
     protected HandleContract(String contractAddress, String abi, Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
         super(BINARY, contractAddress, web3j, credentials, gasPrice, gasLimit);
         this._abi = abi;
+        Gson gson = new Gson();
+        abiDefinitions = gson.fromJson(abi, new TypeToken<ArrayList<AbiDefinition>>() {
+        }.getType());
     }
 
     protected HandleContract(String contractAddress, String abi, Web3j web3j, Credentials credentials, ContractGasProvider contractGasProvider) {
         super(BINARY, contractAddress, web3j, credentials, contractGasProvider);
         this._abi = abi;
+        Gson gson = new Gson();
+        abiDefinitions = gson.fromJson(abi, new TypeToken<ArrayList<AbiDefinition>>() {
+        }.getType());
     }
 
     @Deprecated
     protected HandleContract(String contractAddress, String abi, Web3j web3j, TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
         super(BINARY, contractAddress, web3j, transactionManager, gasPrice, gasLimit);
         this._abi = abi;
+        Gson gson = new Gson();
+        abiDefinitions = gson.fromJson(abi, new TypeToken<ArrayList<AbiDefinition>>() {
+        }.getType());
     }
 
     protected HandleContract(String contractAddress, String abi, Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
         super(BINARY, contractAddress, web3j, transactionManager, contractGasProvider);
         this._abi = abi;
+        Gson gson = new Gson();
+        abiDefinitions = gson.fromJson(abi, new TypeToken<ArrayList<AbiDefinition>>() {
+        }.getType());
     }
 
     @Deprecated

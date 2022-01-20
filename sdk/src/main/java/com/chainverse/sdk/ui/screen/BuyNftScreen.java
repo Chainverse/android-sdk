@@ -122,7 +122,7 @@ public class BuyNftScreen extends Fragment implements View.OnClickListener {
         if (balance == null) {
             txtError.setVisibility(View.VISIBLE);
             txtError.setText("Your balance is not enough!");
-        } else if (balance.doubleValue() <= price) {
+        } else if (balance.doubleValue() < price) {
             txtError.setVisibility(View.VISIBLE);
             txtError.setText("Your balance is not enough!");
         } else {

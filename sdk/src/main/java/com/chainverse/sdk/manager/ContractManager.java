@@ -83,6 +83,7 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import kotlin.reflect.KClass;
 import rx.functions.Func0;
 
 
@@ -292,7 +293,7 @@ public class ContractManager {
                 throw e;
             }
         } else {
-            throw new Exception("Service is not supported");
+            throw new Exception(ChainverseError.SERVICE_NOT_SUPPORTED);
         }
 
     }
@@ -404,7 +405,7 @@ public class ContractManager {
                 throw e;
             }
         } else {
-            throw new Exception("Service is not supported");
+            throw new Exception(ChainverseError.SERVICE_NOT_SUPPORTED);
         }
 
         return tx;
@@ -455,7 +456,7 @@ public class ContractManager {
                 throw e;
             }
         } else {
-            throw new Exception("Service is not supported");
+            throw new Exception(ChainverseError.SERVICE_NOT_SUPPORTED);
         }
         return tx;
     }
@@ -552,7 +553,7 @@ public class ContractManager {
                 throw e;
             }
         } else {
-            throw new Exception("Service is not supported");
+            throw new Exception(ChainverseError.SERVICE_NOT_SUPPORTED);
         }
 
         return tx;
@@ -590,7 +591,7 @@ public class ContractManager {
                 throw e;
             }
         } else {
-            throw new Exception("Service is not supported");
+            throw new Exception(ChainverseError.SERVICE_NOT_SUPPORTED);
         }
 
         return tx;
@@ -628,7 +629,7 @@ public class ContractManager {
                 throw e;
             }
         } else {
-            throw new Exception("Service is not supported");
+            throw new Exception(ChainverseError.SERVICE_NOT_SUPPORTED);
         }
 
         return tx;
@@ -666,7 +667,7 @@ public class ContractManager {
 //                throw e;
 //            }
 //        } else {
-//            throw new Exception("Service is not supported");
+//            throw new Exception(ChainverseError.SERVICE_NOT_SUPPORTED);
 //        }
 //
 //        return tx;
@@ -704,7 +705,7 @@ public class ContractManager {
 //                throw e;
 //            }
 //        } else {
-//            throw new Exception("Service is not supported");
+//            throw new Exception(ChainverseError.SERVICE_NOT_SUPPORTED);
 //        }
 //
 //        return tx;
@@ -772,7 +773,38 @@ public class ContractManager {
                 throw e;
             }
         } else {
-            throw new Exception("Service is not supported");
+            throw new Exception(ChainverseError.SERVICE_NOT_SUPPORTED);
+        }
+        return tx;
+    }
+
+    public String transferItem(String from, String to, String nft, BigInteger tokenId) throws Exception {
+        String tx;
+
+        try {
+            Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
+
+            Function function = new Function("transferFrom", Arrays.asList(new Address(from), new Address(to), new Uint256(tokenId)), Collections.emptyList());
+
+            String functionEncoder = FunctionEncoder.encode(function);
+
+            RawTransactionManager rawTransactionManager = new RawTransactionManager(web3, credentials);
+
+            BigInteger gasPrice = web3.ethGasPrice().sendAsync().get().getGasPrice();
+            BigInteger gasLimit = getGasLimit(BigInteger.ZERO, nft, functionEncoder);
+            BigInteger nonce = getNonce();
+
+            RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, gasLimit, nft, BigInteger.ZERO, "0x" + functionEncoder);
+            String signedTransaction = rawTransactionManager.sign(rawTransaction);
+
+            EthSendTransaction sendRawTransaction = web3.ethSendRawTransaction(signedTransaction).sendAsync().get();
+
+            if (sendRawTransaction.hasError()) {
+                throw new Exception(sendRawTransaction.getError().getMessage());
+            }
+            tx = sendRawTransaction.getTransactionHash();
+        } catch (Exception e) {
+            throw e;
         }
         return tx;
     }
@@ -781,7 +813,7 @@ public class ContractManager {
         double fee;
 
         try {
-            fee = estimateFee(function, inputs, BigInteger.ZERO);
+            fee = estimateFee(function, inputs);
         } catch (Exception e) {
             throw e;
         }
@@ -789,25 +821,14 @@ public class ContractManager {
         return fee;
     }
 
-    public double estimateGasDefault(Constants.EFunction function, List inputs, BigInteger value) throws Exception {
-        double fee;
-
-        try {
-            fee = estimateFee(function, inputs, value);
-        } catch (Exception e) {
-            throw e;
-        }
-
-        return fee;
-    }
-
-    private double estimateFee(Constants.EFunction function, List inputs, BigInteger value) throws Exception {
+    private double estimateFee(Constants.EFunction function, List inputs) throws Exception {
         double fee;
         String func = "";
         String service = "";
         List contractInputs;
         int decimals = 18;
         BigInteger price;
+        BigInteger value = BigInteger.ZERO;
 
         switch (function) {
             case approveNFT:
@@ -820,6 +841,9 @@ public class ContractManager {
                 service = (String) inputs.get(0);
                 decimals = decimals((String) inputs.get(0));
                 price = BigDecimal.valueOf((double) inputs.get(2) * Math.pow(10, decimals)).toBigInteger();
+                if (((String) inputs.get(0)).toLowerCase().equals(Constants.TOKEN_SUPPORTED.NativeCurrency.toLowerCase())) {
+                    value = price;
+                }
                 contractInputs = Arrays.asList(new Address((String) inputs.get(1)), new Uint256(price));
                 break;
             case bidNFT:
@@ -827,6 +851,9 @@ public class ContractManager {
                 service = Constants.CONTRACT.MarketService;
                 decimals = decimals((String) inputs.get(0));
                 price = BigDecimal.valueOf((double) inputs.get(2) * Math.pow(10, decimals)).toBigInteger();
+                if (((String) inputs.get(0)).toLowerCase().equals(Constants.TOKEN_SUPPORTED.NativeCurrency.toLowerCase())) {
+                    value = price;
+                }
                 contractInputs = Arrays.asList(new Uint256((BigInteger) inputs.get(1)), new Uint256(price));
                 break;
             case buyNFT:
@@ -834,6 +861,9 @@ public class ContractManager {
                 service = Constants.CONTRACT.MarketService;
                 decimals = decimals((String) inputs.get(0));
                 price = BigDecimal.valueOf((double) inputs.get(2) * Math.pow(10, decimals)).toBigInteger();
+                if (((String) inputs.get(0)).toLowerCase().equals(Constants.TOKEN_SUPPORTED.NativeCurrency.toLowerCase())) {
+                    value = price;
+                }
                 contractInputs = Arrays.asList(new Uint256((BigInteger) inputs.get(1)), new Uint256(price));
                 break;
             case cancelSell:
@@ -939,7 +969,7 @@ public class ContractManager {
                 throw e;
             }
         } else {
-            throw new Exception("Service is not supported");
+            throw new Exception(ChainverseError.SERVICE_NOT_SUPPORTED);
         }
 
         return tx;

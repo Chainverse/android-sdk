@@ -13,6 +13,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.chainverse.sdk.base.web3.BaseWeb3;
+import com.chainverse.sdk.blockchain.HandleContract;
 import com.chainverse.sdk.common.CallbackToGame;
 import com.chainverse.sdk.common.Constants;
 import com.chainverse.sdk.common.EncryptPreferenceUtils;
@@ -22,6 +23,7 @@ import com.chainverse.sdk.common.WalletUtils;
 import com.chainverse.sdk.listener.Action;
 import com.chainverse.sdk.listener.OnEmitterListenter;
 import com.chainverse.sdk.manager.ContractManager;
+import com.chainverse.sdk.manager.ServiceManager;
 import com.chainverse.sdk.manager.TransferItemManager;
 import com.chainverse.sdk.model.MarketItem.Currency;
 import com.chainverse.sdk.model.MessageNonce;
@@ -46,7 +48,11 @@ import com.google.gson.reflect.TypeToken;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.web3j.abi.datatypes.Type;
+import org.web3j.crypto.Credentials;
+import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.EthCall;
+import org.web3j.protocol.http.HttpService;
+import org.web3j.tx.gas.DefaultGasProvider;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -841,22 +847,27 @@ public class ChainverseSDK implements Chainverse {
         return tx;
     }
 
+    public String transferItem(String to, String nft, BigInteger tokenId) throws Exception {
+        String tx;
+        ContractManager contractManager = new ContractManager(mContext);
+        try {
+            String account = encryptPreferenceUtils.getXUserAddress();
+            if (account != null || !account.isEmpty()) {
+                tx = contractManager.transferItem(account, to, nft, tokenId);
+            } else {
+                throw new Exception("Can not find user's address");
+            }
+        } catch (Exception e) {
+            throw e;
+        }
+        return tx;
+    }
+
     public double estimateGasDefault(Constants.EFunction function, List inputs) throws Exception {
         double fee;
         ContractManager contractManager = new ContractManager(mContext);
         try {
             fee = contractManager.estimateGasDefault(function, inputs);
-        } catch (Exception e) {
-            throw e;
-        }
-        return fee;
-    }
-
-    public double estimateGasDefault(Constants.EFunction function, List inputs, BigInteger value) throws Exception {
-        double fee;
-        ContractManager contractManager = new ContractManager(mContext);
-        try {
-            fee = contractManager.estimateGasDefault(function, inputs, value);
         } catch (Exception e) {
             throw e;
         }

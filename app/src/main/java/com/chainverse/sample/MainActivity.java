@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.chainverse.sample.marketplace.MarketPlaceActivity;
+import com.chainverse.sdk.Chainverse;
 import com.chainverse.sdk.ChainverseCallback;
 import com.chainverse.sdk.ChainverseError;
 import com.chainverse.sdk.ChainverseSDK;
@@ -24,13 +25,18 @@ import com.chainverse.sdk.manager.ContractManager;
 import com.chainverse.sdk.model.MarketItem.Currency;
 import com.chainverse.sdk.model.NFT.NFT;
 
+import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthBlock;
+import org.web3j.protocol.core.methods.response.EthChainId;
+import org.web3j.protocol.http.HttpService;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -182,8 +188,11 @@ public class MainActivity extends AppCompatActivity {
         btnMarket.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, MarketPlaceActivity.class);
-                startActivity(intent);
+//                ChainverseSDK.getInstance().getAbiDefination();
+                NFT nft = ChainverseSDK.getInstance().getNFT("0x7eAdaF22D3a4C10E0bA1aC692654b80954084bdD", new BigInteger("213"));
+//                LogUtil.log("nft ", nft);
+//                Intent intent = new Intent(MainActivity.this, MarketPlaceActivity.class);
+//                startActivity(intent);
             }
         });
     }
