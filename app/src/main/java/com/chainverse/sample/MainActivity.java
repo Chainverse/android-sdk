@@ -188,11 +188,11 @@ public class MainActivity extends AppCompatActivity {
         btnMarket.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+//                ChainverseSDK.getInstance().checkAddress("0x4115737CB80A7Dd57b4285C3c68894012275063d");
 //                ChainverseSDK.getInstance().getAbiDefination();
-                NFT nft = ChainverseSDK.getInstance().getNFT("0x7eAdaF22D3a4C10E0bA1aC692654b80954084bdD", new BigInteger("213"));
 //                LogUtil.log("nft ", nft);
-//                Intent intent = new Intent(MainActivity.this, MarketPlaceActivity.class);
-//                startActivity(intent);
+                Intent intent = new Intent(MainActivity.this, MarketPlaceActivity.class);
+                startActivity(intent);
             }
         });
     }

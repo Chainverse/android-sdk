@@ -12,4 +12,5 @@ public class ChainverseError {
     public static final int ERROR_SERVICE_NOT_FOUND = 1008;
 
     public static final String SERVICE_NOT_SUPPORTED = "Service is not supported";
+    public static final String ADDRESS_INVALID = "Address is invalid";
 }

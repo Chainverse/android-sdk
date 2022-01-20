@@ -49,6 +49,7 @@ import com.google.gson.reflect.TypeToken;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.Keys;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.http.HttpService;
@@ -63,6 +64,8 @@ import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import wallet.core.jni.AnyAddress;
+import wallet.core.jni.CoinType;
 
 
 public class ChainverseSDK implements Chainverse {
@@ -861,6 +864,11 @@ public class ChainverseSDK implements Chainverse {
             throw e;
         }
         return tx;
+    }
+
+    public boolean checkAddress(String address, String chainId) {
+        ContractManager contractManager = new ContractManager(mContext);
+        return contractManager.checkAddress(address, chainId);
     }
 
     public double estimateGasDefault(Constants.EFunction function, List inputs) throws Exception {

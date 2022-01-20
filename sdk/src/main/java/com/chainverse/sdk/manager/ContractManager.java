@@ -85,6 +85,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import kotlin.reflect.KClass;
 import rx.functions.Func0;
+import wallet.core.jni.AnyAddress;
+import wallet.core.jni.CoinType;
 
 
 public class ContractManager {
@@ -319,41 +321,46 @@ public class ContractManager {
     public String approved(String token, String spender, double amount) throws Exception {
         String tx;
 
-        try {
-            Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
+        ServiceManager serviceManager = new ServiceManager(mContext);
+        if (checkAddress(spender, serviceManager.getNetworkInfo().getChainId())) {
+            try {
+                Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
 
-            int decimals = decimals(token);
-            BigInteger priceFormat = BigDecimal.valueOf(amount * Math.pow(10, decimals)).toBigInteger();
+                int decimals = decimals(token);
+                BigInteger priceFormat = BigDecimal.valueOf(amount * Math.pow(10, decimals)).toBigInteger();
 
-            Function function = new Function("approve",
-                    Arrays.asList(new Address(spender), new Uint256(priceFormat)),
-                    Collections.emptyList()
-            );
+                Function function = new Function("approve",
+                        Arrays.asList(new Address(spender), new Uint256(priceFormat)),
+                        Collections.emptyList()
+                );
 
-            String functionEncoder = FunctionEncoder.encode(function);
+                String functionEncoder = FunctionEncoder.encode(function);
 
-            RawTransactionManager rawTransactionManager = new RawTransactionManager(web3, credentials);
+                RawTransactionManager rawTransactionManager = new RawTransactionManager(web3, credentials);
 
-            BigInteger gasPrice = web3.ethGasPrice().sendAsync().get().getGasPrice();
-            BigInteger gasLimit = getGasLimit(BigInteger.ZERO, token, functionEncoder);
-            BigInteger nonce = getNonce();
+                BigInteger gasPrice = web3.ethGasPrice().sendAsync().get().getGasPrice();
+                BigInteger gasLimit = getGasLimit(BigInteger.ZERO, token, functionEncoder);
+                BigInteger nonce = getNonce();
 
-            RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, gasLimit, token, BigInteger.ZERO, "0x" + functionEncoder);
-            String signedTransaction = rawTransactionManager.sign(rawTransaction);
+                RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, gasLimit, token, BigInteger.ZERO, "0x" + functionEncoder);
+                String signedTransaction = rawTransactionManager.sign(rawTransaction);
 
-            EthSendTransaction sendRawTransaction = web3.ethSendRawTransaction(signedTransaction).sendAsync().get();
+                EthSendTransaction sendRawTransaction = web3.ethSendRawTransaction(signedTransaction).sendAsync().get();
 
-            if (sendRawTransaction.hasError()) {
-                throw new Exception(sendRawTransaction.getError().getMessage());
+                if (sendRawTransaction.hasError()) {
+                    throw new Exception(sendRawTransaction.getError().getMessage());
+                }
+
+                tx = sendRawTransaction.getTransactionHash();
+            } catch (InterruptedException e) {
+                throw e;
+            } catch (ExecutionException e) {
+                throw e;
+            } catch (Exception e) {
+                throw e;
             }
-
-            tx = sendRawTransaction.getTransactionHash();
-        } catch (InterruptedException e) {
-            throw e;
-        } catch (ExecutionException e) {
-            throw e;
-        } catch (Exception e) {
-            throw e;
+        } else {
+            throw new Exception(ChainverseError.ADDRESS_INVALID);
         }
 
         return tx;
@@ -781,31 +788,39 @@ public class ContractManager {
     public String transferItem(String from, String to, String nft, BigInteger tokenId) throws Exception {
         String tx;
 
-        try {
-            Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
+        ServiceManager serviceManager = new ServiceManager(mContext);
 
-            Function function = new Function("transferFrom", Arrays.asList(new Address(from), new Address(to), new Uint256(tokenId)), Collections.emptyList());
+        if (checkAddress(to, serviceManager.getNetworkInfo().getChainId())) {
+            try {
+                Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
 
-            String functionEncoder = FunctionEncoder.encode(function);
+                Function function = new Function("transferFrom", Arrays.asList(new Address(from), new Address(to), new Uint256(tokenId)), Collections.emptyList());
 
-            RawTransactionManager rawTransactionManager = new RawTransactionManager(web3, credentials);
+                String functionEncoder = FunctionEncoder.encode(function);
 
-            BigInteger gasPrice = web3.ethGasPrice().sendAsync().get().getGasPrice();
-            BigInteger gasLimit = getGasLimit(BigInteger.ZERO, nft, functionEncoder);
-            BigInteger nonce = getNonce();
+                RawTransactionManager rawTransactionManager = new RawTransactionManager(web3, credentials);
 
-            RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, gasLimit, nft, BigInteger.ZERO, "0x" + functionEncoder);
-            String signedTransaction = rawTransactionManager.sign(rawTransaction);
+                BigInteger gasPrice = web3.ethGasPrice().sendAsync().get().getGasPrice();
+                BigInteger gasLimit = getGasLimit(BigInteger.ZERO, nft, functionEncoder);
+                BigInteger nonce = getNonce();
 
-            EthSendTransaction sendRawTransaction = web3.ethSendRawTransaction(signedTransaction).sendAsync().get();
+                RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, gasLimit, nft, BigInteger.ZERO, "0x" + functionEncoder);
+                String signedTransaction = rawTransactionManager.sign(rawTransaction);
 
-            if (sendRawTransaction.hasError()) {
-                throw new Exception(sendRawTransaction.getError().getMessage());
+                EthSendTransaction sendRawTransaction = web3.ethSendRawTransaction(signedTransaction).sendAsync().get();
+
+                if (sendRawTransaction.hasError()) {
+                    throw new Exception(sendRawTransaction.getError().getMessage());
+                }
+                tx = sendRawTransaction.getTransactionHash();
+            } catch (Exception e) {
+                throw e;
             }
-            tx = sendRawTransaction.getTransactionHash();
-        } catch (Exception e) {
-            throw e;
+        } else {
+            throw new Exception(ChainverseError.ADDRESS_INVALID);
         }
+
+
         return tx;
     }
 
@@ -819,6 +834,20 @@ public class ContractManager {
         }
 
         return fee;
+    }
+
+    public boolean checkAddress(String address, String chainId) {
+        boolean check;
+
+        CoinType coinType = getCoinType(chainId);
+        if (coinType == null) {
+            check = false;
+        } else {
+            check = AnyAddress.isValid(address, coinType);
+        }
+
+
+        return check;
     }
 
     private double estimateFee(Constants.EFunction function, List inputs) throws Exception {
@@ -1148,5 +1177,17 @@ public class ContractManager {
             throw e;
         }
         return gasLimit;
+    }
+
+    private CoinType getCoinType(String chainId) {
+        switch (chainId) {
+            case "97":
+            case "56":
+                return CoinType.SMARTCHAIN;
+            case "1":
+                return CoinType.ETHEREUM;
+            default:
+                return null;
+        }
     }
 }

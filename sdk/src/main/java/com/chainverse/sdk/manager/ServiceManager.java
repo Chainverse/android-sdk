@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.chainverse.sdk.common.EncryptPreferenceUtils;
 import com.chainverse.sdk.model.service.ChainverseService;
+import com.chainverse.sdk.model.service.Network;
 import com.chainverse.sdk.model.service.Service;
 
 public class ServiceManager {
@@ -13,6 +14,10 @@ public class ServiceManager {
     public ServiceManager(Context mContext, String address) {
         chainverseService = EncryptPreferenceUtils.getInstance().init(mContext).getService();
         this.address = address;
+    }
+
+    public ServiceManager(Context mContext) {
+        chainverseService = EncryptPreferenceUtils.getInstance().init(mContext).getService();
     }
 
     public Service getService() {
@@ -25,5 +30,13 @@ public class ServiceManager {
             }
         }
         return service;
+    }
+
+    public Network getNetworkInfo() {
+        Network network = null;
+        if (chainverseService != null) {
+            network = chainverseService.getNetworkInfo();
+        }
+        return network;
     }
 }
