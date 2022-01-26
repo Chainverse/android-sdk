@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onGetDetailItem(NFT nft) {
-                System.out.println(nft.getTokenId());
+                LogUtil.log("tag ", nft);
             }
 
             @Override

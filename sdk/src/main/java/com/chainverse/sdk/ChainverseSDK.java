@@ -47,10 +47,18 @@ import com.google.gson.reflect.TypeToken;
 
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Keys;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.gas.DefaultGasProvider;
@@ -60,7 +68,9 @@ import java.math.BigInteger;
 import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -273,8 +283,10 @@ public class ChainverseSDK implements Chainverse {
                     if (Utils.getErrorCodeResponse(jsonElement) == 0) {
                         Gson gson = new Gson();
                         NFT infoNft = gson.fromJson(jsonElement.getAsJsonObject().get("data"), NFT.class);
-                        InfoSell infoSell = gson.fromJson(jsonElement.getAsJsonObject().get("data").getAsJsonObject().get("auctions").getAsJsonArray().get(0), InfoSell.class);
-                        infoNft.setInfoSell(infoSell);
+                        if (jsonElement.getAsJsonObject().get("data").getAsJsonObject().get("auctions").getAsJsonArray().size() > 0) {
+                            InfoSell infoSell = gson.fromJson(jsonElement.getAsJsonObject().get("data").getAsJsonObject().get("auctions").getAsJsonArray().get(0), InfoSell.class);
+                            infoNft.setInfoSell(infoSell);
+                        }
                         CallbackToGame.onGetDetailItem(infoNft);
                     } else {
                         CallbackToGame.onError(ChainverseError.ERROR_REQUEST_ITEM);
