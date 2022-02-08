@@ -20,6 +20,7 @@ import com.chainverse.sample.R;
 import com.chainverse.sdk.ChainverseCallback;
 import com.chainverse.sdk.ChainverseItem;
 import com.chainverse.sdk.ChainverseSDK;
+import com.chainverse.sdk.common.Constants;
 import com.chainverse.sdk.model.MarketItem.Categories;
 import com.chainverse.sdk.model.NFT.NFT;
 
@@ -128,7 +129,7 @@ public class DetailNFTActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onBuy(String tx) {
+            public void onTransact(Constants.EFunction function, String tx) {
                 btnAction.setVisibility(View.GONE);
             }
         });

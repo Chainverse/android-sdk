@@ -11,7 +11,13 @@ public class Constants {
         public static String urlRestful = "https://beta-sdk-api.dev.chainverse.xyz";
         public static String urlResfulMarket = "https://beta-faucet-api.dev.chainverse.xyz";
         public static String urlBuyTest = "https://beta-game-sign-2.dev.chainverse.xyz";
-        public static String urlBlockchain = "https://data-seed-prebsc-1-s2.binance.org:8545";
+        public static String urlBlockchain = "https://data-seed-prebsc-1-s1.binance.org:8545";
+    }
+
+    public interface TYPE_IMPORT_WALLET {
+        public static String TRUST = "trust";
+        public static String CHAINVERSE = "chainverse";
+        public static String IMPORTED = "imported";
     }
 
 //    rpc: [
@@ -64,6 +70,7 @@ public class Constants {
         sell,
         cancelSell,
         withdrawItem,
-        moveService
+        moveService,
+        transferItem
     }
 }

@@ -71,16 +71,24 @@ public class WalletUtils {
     }
 
     public String getAddress() {
-        String seedPhrase = getMnemonic();
-        String passphrase = "";
-        HDWallet wallet = new HDWallet(seedPhrase, passphrase);
-        CoinType coinType = CoinType.ETHEREUM;
-        String address = wallet.getAddressForCoin(coinType);
+        String address = "";
+        if (encryptPreferenceUtils.getConnectWallet().equals(Constants.TYPE_IMPORT_WALLET.IMPORTED)) {
+            String seedPhrase = getMnemonic();
+            String passphrase = "";
+            HDWallet wallet = new HDWallet(seedPhrase, passphrase);
+            CoinType coinType = CoinType.ETHEREUM;
+            address = wallet.getAddressForCoin(coinType);
+        } else {
+            address = encryptPreferenceUtils.getXUserAddress();
+        }
         return address;
     }
 
     public String getPrivateKey() {
         String seedPhrase = getMnemonic();
+        if (!encryptPreferenceUtils.getConnectWallet().equals(Constants.TYPE_IMPORT_WALLET.IMPORTED)) {
+            return null;
+        }
         String passphrase = "";
         HDWallet wallet = new HDWallet(seedPhrase, passphrase);
         CoinType coinType = CoinType.ETHEREUM;
@@ -90,6 +98,9 @@ public class WalletUtils {
 
     public Credentials getCredential() {
         String seedPhrase = getMnemonic();
+        if (!encryptPreferenceUtils.getConnectWallet().equals(Constants.TYPE_IMPORT_WALLET.IMPORTED)) {
+            return null;
+        }
         String passphrase = "";
         HDWallet wallet = new HDWallet(seedPhrase, passphrase);
         PrivateKey secretPrivateKey = wallet.getKeyForCoin(CoinType.ETHEREUM);
@@ -109,6 +120,8 @@ public class WalletUtils {
         byte[] hexMessage = message.getBytes();
         Sign.SignatureData sigData = Sign.signMessage(hexMessage, credentials.getEcKeyPair());
 
+        System.out.println(message);
+
         byte[] sig = new byte[65];
 
         System.arraycopy(sigData.getR(), 0, sig, 0, 32);
@@ -116,6 +129,7 @@ public class WalletUtils {
         System.arraycopy(sigData.getV(), 0, sig, 64, 1);
 
         String signature = String.format("0x%s", Utils.byteToHexString(sig));
+        System.out.println("signature " + signature);
         return signature;
     }
 

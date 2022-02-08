@@ -137,8 +137,8 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onBuy(String tx) {
-
+            public void onTransact(Constants.EFunction function, String tx) {
+                System.out.println("function " + function + " transaction hash " + tx);
             }
         });
         ChainverseSDK.getInstance().setScheme("trust-rn-example1://");
@@ -191,8 +191,15 @@ public class MainActivity extends AppCompatActivity {
 //                ChainverseSDK.getInstance().checkAddress("0x4115737CB80A7Dd57b4285C3c68894012275063d");
 //                ChainverseSDK.getInstance().getAbiDefination();
 //                LogUtil.log("nft ", nft);
-                Intent intent = new Intent(MainActivity.this, MarketPlaceActivity.class);
-                startActivity(intent);
+                try {
+//                    String tx = ChainverseSDK.getInstance().approveToken(Constants.TOKEN_SUPPORTED.CVT, Constants.CONTRACT.MarketService, 50);
+//                    String tx = ChainverseSDK.getInstance().bidNFT(Constants.TOKEN_SUPPORTED.CVT, new BigInteger("609"), 45.5);
+                    String tx = ChainverseSDK.getInstance().transferItem("0x760B9251261520478CeE8b6db0f45E22b5D18E4A","0x2bB0966B95Bf340C76a10b4D2e6364Da5A303F15", new BigInteger("4590"));
+                } catch (Exception error) {
+                    System.out.println("error " + error);
+                }
+//                Intent intent = new Intent(MainActivity.this, MarketPlaceActivity.class);
+//                startActivity(intent);
             }
         });
     }

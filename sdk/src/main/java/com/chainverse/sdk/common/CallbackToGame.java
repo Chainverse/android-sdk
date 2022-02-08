@@ -65,4 +65,10 @@ public class CallbackToGame {
             ChainverseSDK.mCallback.onGetDetailItem(nft);
         }
     }
+
+    public static void onTransact(Constants.EFunction function, String tx) {
+        if (ChainverseSDK.mCallback != null) {
+            ChainverseSDK.mCallback.onTransact(function, tx);
+        }
+    }
 }

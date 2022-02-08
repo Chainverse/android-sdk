@@ -1,5 +1,6 @@
 package com.chainverse.sdk;
 
+import com.chainverse.sdk.common.Constants;
 import com.chainverse.sdk.model.NFT.NFT;
 
 import java.math.BigInteger;
@@ -28,6 +29,6 @@ public interface ChainverseCallback {
 
     void onSignTransaction(String signed);
 
-    void onBuy(String tx);
+    void onTransact(Constants.EFunction function, String tx);
 }
 

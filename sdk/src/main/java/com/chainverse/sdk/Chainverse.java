@@ -146,12 +146,12 @@ public interface Chainverse {
 
     void testBuy();
 
-    /**
-     * Buy NFT
-     * @param currency
-     * @param listing_id
-     * @param price
-     * return
-     */
-    void buyNFT(String currency, Long listing_id, Double price, boolean isAuction);
+//    /**
+//     * Buy NFT
+//     * @param currency
+//     * @param listing_id
+//     * @param price
+//     * return
+//     */
+//    void buyNFT(String currency, Long listing_id, Double price, boolean isAuction);
 }

@@ -213,7 +213,7 @@ public class BuyNftScreen extends Fragment implements View.OnClickListener {
                                     tvData.setText("Your transaction: " + tx);
                                     btnAgree.setVisibility(View.GONE);
                                     if (ChainverseSDK.getInstance().mCallback != null) {
-                                        ChainverseSDK.getInstance().mCallback.onBuy(tx);
+                                        ChainverseSDK.getInstance().mCallback.onTransact(Constants.EFunction.buyNFT, tx);
                                     }
                                 }
                             } else {

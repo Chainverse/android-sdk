@@ -53,8 +53,8 @@ public class Utils {
     }
 
     public static boolean isChainverseInstalled(Context context){
-        if(!isAppInstalled(context,"org.chainverse.app")){
-            openURI(context,Uri.parse("https://play.google.com/store/apps/details?id=org.chainverse.app"));
+        if(!isAppInstalled(context,"org.chainverse")){
+            openURI(context,Uri.parse("https://play.google.com/store/apps/details?id=org.chainverse"));
             return false;
         }
         return true;

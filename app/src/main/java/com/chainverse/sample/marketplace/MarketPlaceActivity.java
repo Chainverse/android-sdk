@@ -22,6 +22,8 @@ import com.chainverse.sample.MainActivity;
 import com.chainverse.sample.R;
 import com.chainverse.sdk.ChainverseCallback;
 import com.chainverse.sdk.ChainverseItem;
+import com.chainverse.sdk.common.Constants;
+import com.chainverse.sdk.common.LogUtil;
 import com.chainverse.sdk.model.MarketItem.Categories;
 import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.model.NFT.InfoSell;
@@ -153,7 +155,7 @@ public class MarketPlaceActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onBuy(String tx) {
+            public void onTransact(Constants.EFunction function, String tx) {
 
             }
         });
@@ -207,6 +209,9 @@ public class MarketPlaceActivity extends AppCompatActivity {
                 infoSell.setCurrencyInfo(nft.getInfoSell().getCurrencyInfo());
 
                 updatedItem.setInfoSell(infoSell);
+
+                LogUtil.log("NFT INFO ", nftInfo);
+
                 listNFT.set(index, updatedItem);
             } else {
                 Log.e(TAG, "Updated information for the item not found or invalid, remove it from list");

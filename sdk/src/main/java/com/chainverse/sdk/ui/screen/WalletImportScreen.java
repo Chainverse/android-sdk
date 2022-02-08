@@ -112,6 +112,7 @@ public class WalletImportScreen extends Fragment implements View.OnClickListener
                             EncryptPreferenceUtils.getInstance().init(getContext()).setXUserAddress(xUserAddress);
                             try {
                                 EncryptPreferenceUtils.getInstance().init(getContext()).setXUserSignature(WalletUtils.getInstance().init(getContext()).signMessage("ChainVerse"));
+                                EncryptPreferenceUtils.getInstance().init(getContext()).setConnectWallet(Constants.TYPE_IMPORT_WALLET.IMPORTED);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
