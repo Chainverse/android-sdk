@@ -326,6 +326,7 @@ public class ChainverseSDK implements Chainverse {
     }
 
     private void setAccessToken() {
+        encryptPreferenceUtils.clearXUserMessageNonce();
         RESTfulClient.getNonce()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -465,6 +466,7 @@ public class ChainverseSDK implements Chainverse {
         }
 
         if (Utils.isChainverseInstalled(mContext)) {
+            encryptPreferenceUtils.clearXUserMessageNonce();
             RESTfulClient.getNonce()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())

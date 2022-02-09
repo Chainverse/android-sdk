@@ -120,8 +120,6 @@ public class WalletUtils {
         byte[] hexMessage = message.getBytes();
         Sign.SignatureData sigData = Sign.signMessage(hexMessage, credentials.getEcKeyPair());
 
-        System.out.println(message);
-
         byte[] sig = new byte[65];
 
         System.arraycopy(sigData.getR(), 0, sig, 0, 32);
