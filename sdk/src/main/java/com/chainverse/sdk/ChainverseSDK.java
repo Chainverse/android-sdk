@@ -417,9 +417,12 @@ public class ChainverseSDK implements Chainverse {
             if ("account_sign_message".equals(action)) {
                 String xUserAddress = ChainverseResult.getUserAddress(intent);
                 String xUserSignature = ChainverseResult.getUserSignature(intent);
+                MessageNonce messageNonce = encryptPreferenceUtils.getXUserMessageNonce();
+                messageNonce.setMessage(xUserSignature);
+
                 encryptPreferenceUtils.setXUserAddress(xUserAddress);
                 encryptPreferenceUtils.setXUserSignature(xUserSignature);
-                doConnectSuccess();
+                encryptPreferenceUtils.setXUserMessageNonce(messageNonce);
             } else if (Constants.EFunction.approveToken.toString().equals(action) ||
                     Constants.EFunction.buyNFT.toString().equals(action) ||
                     Constants.EFunction.bidNFT.toString().equals(action) ||
@@ -462,9 +465,35 @@ public class ChainverseSDK implements Chainverse {
         }
 
         if (Utils.isChainverseInstalled(mContext)) {
-            encryptPreferenceUtils.setConnectWallet(Constants.TYPE_IMPORT_WALLET.CHAINVERSE);
-            ChainverseConnect chainverse = new ChainverseConnect.Builder().build(mContext);
-            chainverse.connect();
+            RESTfulClient.getNonce()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(jsonElement -> {
+                        if (Utils.getErrorCodeResponse(jsonElement) == 0) {
+                            Gson gson = new Gson();
+                            MessageNonce messageNonce = gson.fromJson(jsonElement.getAsJsonObject().get("data"), new TypeToken<MessageNonce>() {
+                            }.getType());
+
+                            try {
+                                EncryptPreferenceUtils encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(mContext);
+
+                                encryptPreferenceUtils.clearXUserMessageNonce();
+
+                                encryptPreferenceUtils.setConnectWallet(Constants.TYPE_IMPORT_WALLET.CHAINVERSE);
+                                ChainverseConnect chainverse = new ChainverseConnect.Builder().build(mContext);
+
+                                chainverse.connect(messageNonce.getMessage());
+
+                                encryptPreferenceUtils.setXUserMessageNonce(messageNonce);
+                            } catch (
+                                    Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }, throwable -> {
+                        System.out.println("error get nonce " + throwable);
+                    });
+
         }
     }
 
@@ -545,7 +574,8 @@ public class ChainverseSDK implements Chainverse {
     }
 
     @Override
-    public void signTransaction(String chainId, String gasPrice, String gasLimit, String toAddress, String amount) {
+    public void signTransaction(String chainId, String gasPrice, String gasLimit, String
+            toAddress, String amount) {
         SignerData data = new SignerData();
         data.setChainId(chainId);
         data.setGasPrice(gasPrice);
@@ -743,7 +773,8 @@ public class ChainverseSDK implements Chainverse {
         return tx;
     }
 
-    public String sellNFT(String nft, BigInteger tokenId, double price, String currency) throws Exception {
+    public String sellNFT(String nft, BigInteger tokenId, double price, String currency) throws
+            Exception {
         String tx;
         ContractManager contractManager = new ContractManager(mContext);
         try {
@@ -828,7 +859,8 @@ public class ChainverseSDK implements Chainverse {
         return contractManager.moveItemToGame(nft, tokenId);
     }
 
-    public String moveItemToService(String nft, String service, BigInteger tokenId) throws Exception {
+    public String moveItemToService(String nft, String service, BigInteger tokenId) throws
+            Exception {
         ContractManager contractManager = new ContractManager(mContext);
         return contractManager.moveService(nft, service, tokenId);
     }
@@ -854,7 +886,8 @@ public class ChainverseSDK implements Chainverse {
         return contractManager.checkAddress(address, chainId);
     }
 
-    public double estimateGasDefault(Constants.EFunction function, List inputs) throws Exception {
+    public double estimateGasDefault(Constants.EFunction function, List inputs) throws
+            Exception {
         double fee;
         ContractManager contractManager = new ContractManager(mContext);
         try {

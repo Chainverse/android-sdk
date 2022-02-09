@@ -18,8 +18,8 @@ public class ChainverseConnect {
         this.context = context;
     }
 
-    public void connect() {
-        Utils.openURI(this.context, Uri.parse(buildUri()));
+    public void connect(String message) {
+        Utils.openURI(this.context, Uri.parse(buildUri(message)));
     }
 
     public void signTransaction(
@@ -86,13 +86,13 @@ public class ChainverseConnect {
         Utils.openURI(this.context, Uri.parse(uri));
     }
 
-    private String buildUri() {
+    private String buildUri(String message) {
         return String.format("chainverse://%s?action=%s&coins.0=%s&coin=%s&data=%s&app=%s&callback=%s&id=%s",
                 "sdk_account_sign_message",
                 "account_sign_message",
                 "20000714",
                 "20000714",
-                "ChainVerse",
+                message,
                 ChainverseSDK.scheme,
                 "sdk_account_sign_result",
                 "2");

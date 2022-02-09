@@ -137,13 +137,13 @@ public class DetailNFTActivity extends AppCompatActivity {
         btnAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (itemInfo.getInfoSell().getListingId() != null) {
-                    ChainverseSDK.getInstance().buyNFT(
-                            itemInfo.getInfoSell().getCurrencyInfo().getCurrency(),
-                            itemInfo.getInfoSell().getListingId().longValue(),
-                            itemInfo.getInfoSell().getPrice(),
-                            itemInfo.getInfoSell().isAuction());
-                }
+//                if (itemInfo.getInfoSell().getListingId() != null) {
+//                    ChainverseSDK.getInstance().buyNFT(
+//                            itemInfo.getInfoSell().getCurrencyInfo().getCurrency(),
+//                            itemInfo.getInfoSell().getListingId().longValue(),
+//                            itemInfo.getInfoSell().getPrice(),
+//                            itemInfo.getInfoSell().isAuction());
+//                }
             }
         });
 
