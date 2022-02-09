@@ -11,7 +11,7 @@ public class Constants {
         public static String urlRestful = "https://beta-sdk-api.dev.chainverse.xyz";
         public static String urlResfulMarket = "https://beta-faucet-api.dev.chainverse.xyz";
         public static String urlBuyTest = "https://beta-game-sign-2.dev.chainverse.xyz";
-        public static String urlBlockchain = "https://data-seed-prebsc-1-s2.binance.org:8545";
+        public static String urlBlockchain = "https://data-seed-prebsc-1-s1.binance.org:8545";
     }
 
 //    rpc: [
