@@ -11,6 +11,14 @@ public class ChainverseResult {
         return intent.getData().getQueryParameter("accounts");
     }
 
+    public static String getTime(Intent intent) {
+        return intent.getData().getQueryParameter("time");
+    }
+
+    public static String getNonce(Intent intent) {
+        return intent.getData().getQueryParameter("nonce");
+    }
+
     public static String getUserSignature(Intent intent) {
         String signature = intent.getData().getQueryParameter("signature");
         if (signature.substring(0, 2).equals("0x")) {

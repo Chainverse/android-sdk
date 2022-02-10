@@ -418,8 +418,13 @@ public class ChainverseSDK implements Chainverse {
             if ("account_sign_message".equals(action)) {
                 String xUserAddress = ChainverseResult.getUserAddress(intent);
                 String xUserSignature = ChainverseResult.getUserSignature(intent);
-                MessageNonce messageNonce = encryptPreferenceUtils.getXUserMessageNonce();
+                String time = ChainverseResult.getTime(intent);
+                String nonce = ChainverseResult.getNonce(intent);
+
+                MessageNonce messageNonce = new MessageNonce();
                 messageNonce.setMessage(xUserSignature);
+                messageNonce.setNonce(Integer.parseInt(nonce));
+                messageNonce.setTime(Integer.parseInt(time));
 
                 encryptPreferenceUtils.setXUserAddress(xUserAddress);
                 encryptPreferenceUtils.setXUserSignature(xUserSignature);
@@ -467,35 +472,8 @@ public class ChainverseSDK implements Chainverse {
 
         if (Utils.isChainverseInstalled(mContext)) {
             encryptPreferenceUtils.clearXUserMessageNonce();
-            RESTfulClient.getNonce()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(jsonElement -> {
-                        if (Utils.getErrorCodeResponse(jsonElement) == 0) {
-                            Gson gson = new Gson();
-                            MessageNonce messageNonce = gson.fromJson(jsonElement.getAsJsonObject().get("data"), new TypeToken<MessageNonce>() {
-                            }.getType());
-
-                            try {
-                                EncryptPreferenceUtils encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(mContext);
-
-                                encryptPreferenceUtils.clearXUserMessageNonce();
-
-                                encryptPreferenceUtils.setConnectWallet(Constants.TYPE_IMPORT_WALLET.CHAINVERSE);
-                                ChainverseConnect chainverse = new ChainverseConnect.Builder().build(mContext);
-
-                                chainverse.connect(messageNonce.getMessage());
-
-                                encryptPreferenceUtils.setXUserMessageNonce(messageNonce);
-                            } catch (
-                                    Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }, throwable -> {
-                        System.out.println("error get nonce " + throwable);
-                    });
-
+            ChainverseConnect chainverse = new ChainverseConnect.Builder().build(mContext);
+            chainverse.connect("");
         }
     }
 
