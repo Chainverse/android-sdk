@@ -314,16 +314,23 @@ public class ContractManager {
 
     public BigInteger allowance(String token, String owner, String spender) {
         BigInteger allowance = BigInteger.ZERO;
-        Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
-
-        ERC20 erc20 = ERC20.load(token, web3, credentials, new DefaultGasProvider());
-
-        RemoteCall<BigInteger> remoteCall = (RemoteCall<BigInteger>) erc20.allowance(owner, spender);
         try {
+            Credentials dummyCredentials = Credentials.create(Keys.createEcKeyPair());
+
+            ERC20 erc20 = ERC20.load(token, web3, dummyCredentials, new DefaultGasProvider());
+
+            RemoteCall<BigInteger> remoteCall = (RemoteCall<BigInteger>) erc20.allowance(owner, spender);
+
             allowance = remoteCall.sendAsync().get();
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (NoSuchProviderException e) {
             e.printStackTrace();
         }
 
@@ -1021,11 +1028,12 @@ public class ContractManager {
     private String ownerOfOnGame(String nft, BigInteger tokenId) throws Exception {
         String owner = "";
         if (ChainverseSDK.gameAddress != null) {
-            Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
-
-            Service service = new ServiceManager(mContext, ChainverseSDK.gameAddress).getService();
-            HandleContract handleContract = HandleContract.load(ChainverseSDK.gameAddress, service.getAbi(), web3, credentials, new DefaultGasProvider());
             try {
+                Credentials dummyCredentials = Credentials.create(Keys.createEcKeyPair());
+
+                Service service = new ServiceManager(mContext, ChainverseSDK.gameAddress).getService();
+                HandleContract handleContract = HandleContract.load(ChainverseSDK.gameAddress, service.getAbi(), web3, dummyCredentials, new DefaultGasProvider());
+
                 RemoteFunctionCall<String> functionCall = handleContract.callFunc("ownerOf", Arrays.asList(nft, tokenId));
 
                 owner = functionCall.sendAsync().get();
