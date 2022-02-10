@@ -124,6 +124,7 @@ public class ChainverseSDK implements Chainverse {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction().equals(Constants.ACTION.CREATED_WALLET)) {
+                    encryptPreferenceUtils.setConnectWallet(Constants.TYPE_IMPORT_WALLET.IMPORTED);
                     doConnectSuccess();
                 }
             }
@@ -429,6 +430,7 @@ public class ChainverseSDK implements Chainverse {
                 encryptPreferenceUtils.setXUserAddress(xUserAddress);
                 encryptPreferenceUtils.setXUserSignature(xUserSignature);
                 encryptPreferenceUtils.setXUserMessageNonce(messageNonce);
+                encryptPreferenceUtils.setConnectWallet(Constants.TYPE_IMPORT_WALLET.CHAINVERSE);
             } else if (Constants.EFunction.approveToken.toString().equals(action) ||
                     Constants.EFunction.buyNFT.toString().equals(action) ||
                     Constants.EFunction.bidNFT.toString().equals(action) ||

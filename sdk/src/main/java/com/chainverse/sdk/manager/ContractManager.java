@@ -352,7 +352,6 @@ public class ContractManager {
                 BigInteger nonce = getNonce();
                 String data = "0x" + functionEncoder;
 
-
                 if (typeConnect.equals(Constants.TYPE_IMPORT_WALLET.IMPORTED)) {
                     Credentials credentials = WalletUtils.getInstance().init(mContext).getCredential();
 
@@ -368,7 +367,7 @@ public class ContractManager {
                     tx = sendRawTransaction.getTransactionHash();
 
                     CallbackToGame.onTransact(Constants.EFunction.approveNFT, tx);
-                } else if(typeConnect.equals(Constants.TYPE_IMPORT_WALLET.CHAINVERSE)) {
+                } else if (typeConnect.equals(Constants.TYPE_IMPORT_WALLET.CHAINVERSE)) {
                     chainverseConnect.sendTransaction(Constants.EFunction.approveToken, token, functionEncoder, BigInteger.ZERO, gasLimit, gasPrice, nonce);
                 }
             } catch (InterruptedException e) {

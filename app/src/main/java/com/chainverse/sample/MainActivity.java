@@ -192,14 +192,15 @@ public class MainActivity extends AppCompatActivity {
 ////                ChainverseSDK.getInstance().checkAddress("0x4115737CB80A7Dd57b4285C3c68894012275063d");
 ////                ChainverseSDK.getInstance().getAbiDefination();
 ////                LogUtil.log("nft ", nft);
-//                try {
-////                    String tx = ChainverseSDK.getInstance().approveToken(Constants.TOKEN_SUPPORTED.CVT, Constants.CONTRACT.MarketService, 50);
-////                    String tx = ChainverseSDK.getInstance().bidNFT(Constants.TOKEN_SUPPORTED.CVT, new BigInteger("609"), 45.5);
+                try {
+//                    String tx = ChainverseSDK.getInstance().approveToken(Constants.TOKEN_SUPPORTED.CVT, Constants.CONTRACT.MarketService, 50);
+//                    String tx = ChainverseSDK.getInstance().bidNFT(Constants.TOKEN_SUPPORTED.CVT, new BigInteger("609"), 45.5);
 //                    String tx = ChainverseSDK.getInstance().transferItem("0x760B9251261520478CeE8b6db0f45E22b5D18E4A","0x7eAdaF22D3a4C10E0bA1aC692654b80954084bdD", new BigInteger("291"));
-//                } catch (Exception error) {
-//                    System.out.println("error " + error);
-//                }
-                ChainverseSDK.getInstance().getMyAsset();
+                    ChainverseSDK.getInstance().approveToken(Constants.TOKEN_SUPPORTED.CVT, Constants.CONTRACT.MarketService, 45);
+                } catch (Exception error) {
+                    System.out.println("error " + error);
+                }
+//                ChainverseSDK.getInstance().getMyAsset();
 //                Intent intent = new Intent(MainActivity.this, MarketPlaceActivity.class);
 //                startActivity(intent);
             }
