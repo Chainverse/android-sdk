@@ -19,7 +19,29 @@ public class ChainverseConnect {
     }
 
     public void connect(String message) {
-        Utils.openURI(this.context, Uri.parse(buildUri(message)));
+        Utils.openURI(this.context, Uri.parse(buildUri(message, false)));
+    }
+
+    public void connect(String message, boolean isSignPersonal) {
+        Utils.openURI(this.context, Uri.parse(buildUri(message, isSignPersonal)));
+    }
+
+    public void signMultiMessage(boolean isSignPersonal, String... args) {
+        String uri = "chainverse://%s?action=%s&coin=%s&app=%s&callback=%s&id=%s&type=%s";
+        for (int i = 0; i < args.length; i++) {
+            uri += "&data." + i + "=" + args[i];
+        }
+
+        uri = String.format(uri,
+                "sdk_account_sign_message",
+                "account_sign_message",
+                "20000714",
+                ChainverseSDK.scheme,
+                "sdk_account_sign_result",
+                "2",
+                isSignPersonal);
+
+        Utils.openURI(this.context, Uri.parse(uri));
     }
 
     public void signTransaction(
@@ -86,8 +108,8 @@ public class ChainverseConnect {
         Utils.openURI(this.context, Uri.parse(uri));
     }
 
-    private String buildUri(String message) {
-        return String.format("chainverse://%s?action=%s&coins.0=%s&coin=%s&data=%s&app=%s&callback=%s&id=%s",
+    private String buildUri(String message, boolean isSignPersonal) {
+        return String.format("chainverse://%s?action=%s&coins.0=%s&coin=%s&data=%s&app=%s&callback=%s&id=%s&type=%s",
                 "sdk_account_sign_message",
                 "account_sign_message",
                 "20000714",
@@ -95,7 +117,8 @@ public class ChainverseConnect {
                 message,
                 ChainverseSDK.scheme,
                 "sdk_account_sign_result",
-                "2");
+                "2",
+                isSignPersonal ? "personal" : "none");
     }
 
     public static class Builder {

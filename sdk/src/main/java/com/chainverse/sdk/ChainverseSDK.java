@@ -28,11 +28,11 @@ import com.chainverse.sdk.model.MessageNonce;
 import com.chainverse.sdk.model.NFT.InfoSell;
 import com.chainverse.sdk.model.NFT.NFT;
 import com.chainverse.sdk.model.Params.FilterMarket;
+import com.chainverse.sdk.model.SignerData;
 import com.chainverse.sdk.model.service.ChainverseService;
 import com.chainverse.sdk.model.service.Token;
 import com.chainverse.sdk.network.RESTful.RESTfulClient;
 import com.chainverse.sdk.ui.ChainverseSDKActivity;
-import com.chainverse.sdk.model.SignerData;
 import com.chainverse.sdk.wallet.chainverse.ChainverseConnect;
 import com.chainverse.sdk.wallet.chainverse.ChainverseResult;
 import com.chainverse.sdk.wallet.trust.TrustConnect;
@@ -43,7 +43,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.protocol.core.methods.response.EthCall;
@@ -53,6 +52,8 @@ import java.math.BigInteger;
 import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -327,34 +328,51 @@ public class ChainverseSDK implements Chainverse {
     }
 
     private void setAccessToken() {
-        encryptPreferenceUtils.clearXUserMessageNonce();
-        RESTfulClient.getNonce()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(jsonElement -> {
-                    if (Utils.getErrorCodeResponse(jsonElement) == 0) {
-                        Gson gson = new Gson();
-                        MessageNonce messageNonce = gson.fromJson(jsonElement.getAsJsonObject().get("data"), new TypeToken<MessageNonce>() {
-                        }.getType());
+        String typeConnect = encryptPreferenceUtils.getConnectWallet();
+        if (typeConnect.equals(Constants.TYPE_IMPORT_WALLET.IMPORTED)) {
+            encryptPreferenceUtils.clearXUserMessageNonce();
+            RESTfulClient.getNonce()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(jsonElement -> {
+                        if (Utils.getErrorCodeResponse(jsonElement) == 0) {
+                            Gson gson = new Gson();
+                            MessageNonce messageNonce = gson.fromJson(jsonElement.getAsJsonObject().get("data"), new TypeToken<MessageNonce>() {
+                            }.getType());
 
-                        try {
-                            WalletUtils walletUtils = new WalletUtils().init(mContext);
-                            EncryptPreferenceUtils encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(mContext);
+                            try {
+                                WalletUtils walletUtils = new WalletUtils().init(mContext);
+                                EncryptPreferenceUtils encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(mContext);
 
-                            encryptPreferenceUtils.clearXUserMessageNonce();
+                                encryptPreferenceUtils.clearXUserMessageNonce();
 
-                            String messageSigned = walletUtils.signPersonalMessage(messageNonce.getMessage());
+                                String messageSigned = walletUtils.signPersonalMessage(messageNonce.getMessage());
 
-                            messageNonce.setMessage(messageSigned);
+                                messageNonce.setMessage(messageSigned);
 
-                            encryptPreferenceUtils.setXUserMessageNonce(messageNonce);
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                                encryptPreferenceUtils.setXUserMessageNonce(messageNonce);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
-                    }
-                }, throwable -> {
-                    System.out.println("error get nonce " + throwable);
-                });
+                    }, throwable -> {
+                        System.out.println("error get nonce " + throwable);
+                    });
+        } else if (typeConnect.equals(Constants.TYPE_IMPORT_WALLET.CHAINVERSE)) {
+            MessageNonce messageNonce = encryptPreferenceUtils.getXUserMessageNonce();
+            if (messageNonce != null) {
+                Calendar cal = Calendar.getInstance();
+                long time = messageNonce.getTime() * 1000L;
+                cal.setTimeInMillis(time);
+                cal.add(Calendar.HOUR, 24);
+                long diff = cal.getTime().getTime() - new Date().getTime();
+                if (diff <= 0) {
+                    CallbackToGame.onError(ChainverseError.EXPIRED_NONCE);
+                }
+            } else {
+                CallbackToGame.onError(ChainverseError.EXPIRED_NONCE);
+            }
+        }
     }
 
     private void doConnectSuccess() {
@@ -418,19 +436,20 @@ public class ChainverseSDK implements Chainverse {
 
             if ("account_sign_message".equals(action)) {
                 String xUserAddress = ChainverseResult.getUserAddress(intent);
-                String xUserSignature = ChainverseResult.getUserSignature(intent);
                 String time = ChainverseResult.getTime(intent);
                 String nonce = ChainverseResult.getNonce(intent);
+                List<String> signatures = ChainverseResult.getMultiUserSignature(intent);
 
                 MessageNonce messageNonce = new MessageNonce();
-                messageNonce.setMessage(xUserSignature);
+                messageNonce.setMessage(signatures.get(0));
                 messageNonce.setNonce(Integer.parseInt(nonce));
                 messageNonce.setTime(Integer.parseInt(time));
 
                 encryptPreferenceUtils.setXUserAddress(xUserAddress);
-                encryptPreferenceUtils.setXUserSignature(xUserSignature);
+                encryptPreferenceUtils.setXUserSignature(signatures.get(1));
                 encryptPreferenceUtils.setXUserMessageNonce(messageNonce);
                 encryptPreferenceUtils.setConnectWallet(Constants.TYPE_IMPORT_WALLET.CHAINVERSE);
+                doConnectSuccess();
             } else if (Constants.EFunction.approveToken.toString().equals(action) ||
                     Constants.EFunction.buyNFT.toString().equals(action) ||
                     Constants.EFunction.bidNFT.toString().equals(action) ||
@@ -475,7 +494,7 @@ public class ChainverseSDK implements Chainverse {
         if (Utils.isChainverseInstalled(mContext)) {
             encryptPreferenceUtils.clearXUserMessageNonce();
             ChainverseConnect chainverse = new ChainverseConnect.Builder().build(mContext);
-            chainverse.connect("");
+            chainverse.signMultiMessage(true, "", "ChainVerse");
         }
     }
 

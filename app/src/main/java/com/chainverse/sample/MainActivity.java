@@ -11,8 +11,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.chainverse.sample.marketplace.MarketPlaceActivity;
-import com.chainverse.sdk.Chainverse;
 import com.chainverse.sdk.ChainverseCallback;
 import com.chainverse.sdk.ChainverseError;
 import com.chainverse.sdk.ChainverseSDK;
@@ -20,23 +18,9 @@ import com.chainverse.sdk.ChainverseUser;
 import com.chainverse.sdk.common.Constants;
 import com.chainverse.sdk.common.LogUtil;
 import com.chainverse.sdk.ChainverseItem;
-import com.chainverse.sdk.listener.Action;
-import com.chainverse.sdk.manager.ContractManager;
-import com.chainverse.sdk.model.MarketItem.Currency;
 import com.chainverse.sdk.model.NFT.NFT;
 
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.response.EthBlock;
-import org.web3j.protocol.core.methods.response.EthChainId;
-import org.web3j.protocol.http.HttpService;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -89,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onGetItems(ArrayList<ChainverseItem> items) {
+                LogUtil.log("on get item ", items);
             }
 
             @Override
@@ -189,20 +174,21 @@ public class MainActivity extends AppCompatActivity {
         btnMarket.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-////                ChainverseSDK.getInstance().checkAddress("0x4115737CB80A7Dd57b4285C3c68894012275063d");
-////                ChainverseSDK.getInstance().getAbiDefination();
-////                LogUtil.log("nft ", nft);
-                try {
-//                    String tx = ChainverseSDK.getInstance().approveToken(Constants.TOKEN_SUPPORTED.CVT, Constants.CONTRACT.MarketService, 50);
-//                    String tx = ChainverseSDK.getInstance().bidNFT(Constants.TOKEN_SUPPORTED.CVT, new BigInteger("609"), 45.5);
-//                    String tx = ChainverseSDK.getInstance().transferItem("0x760B9251261520478CeE8b6db0f45E22b5D18E4A","0x7eAdaF22D3a4C10E0bA1aC692654b80954084bdD", new BigInteger("291"));
-//                    BigInteger allowence = ChainverseSDK.getInstance().isApproved(Constants.TOKEN_SUPPORTED.CVT, "0x4115737CB80A7Dd57b4285C3c68894012275063d", Constants.CONTRACT.MarketService);
-//                    System.out.println(allowence);
-//                    String approve = ChainverseSDK.getInstance().
-                } catch (Exception error) {
-                    System.out.println("error " + error);
-                }
+//////                ChainverseSDK.getInstance().checkAddress("0x4115737CB80A7Dd57b4285C3c68894012275063d");
+//////                ChainverseSDK.getInstance().getAbiDefination();
+//////                LogUtil.log("nft ", nft);
+//                try {
+////                    String tx = ChainverseSDK.getInstance().approveToken(Constants.TOKEN_SUPPORTED.CVT, Constants.CONTRACT.MarketService, 50);
+////                    String tx = ChainverseSDK.getInstance().bidNFT(Constants.TOKEN_SUPPORTED.CVT, new BigInteger("609"), 45.5);
+////                    String tx = ChainverseSDK.getInstance().transferItem("0x760B9251261520478CeE8b6db0f45E22b5D18E4A","0x7eAdaF22D3a4C10E0bA1aC692654b80954084bdD", new BigInteger("291"));
+////                    BigInteger allowence = ChainverseSDK.getInstance().isApproved(Constants.TOKEN_SUPPORTED.CVT, "0x4115737CB80A7Dd57b4285C3c68894012275063d", Constants.CONTRACT.MarketService);
+////                    System.out.println(allowence);
+////                    String approve = ChainverseSDK.getInstance().
+//                } catch (Exception error) {
+//                    System.out.println("error " + error);
+//                }
 //                ChainverseSDK.getInstance().getMyAsset();
+//                ChainverseSDK.getInstance().getItems();
 //                Intent intent = new Intent(MainActivity.this, MarketPlaceActivity.class);
 //                startActivity(intent);
             }

@@ -2,6 +2,13 @@ package com.chainverse.sdk.wallet.chainverse;
 
 import android.content.Intent;
 
+import com.chainverse.sdk.common.LogUtil;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 public class ChainverseResult {
     public static String handleConnect(Intent intent) {
         return intent.getData().getQueryParameter("data");
@@ -26,6 +33,17 @@ public class ChainverseResult {
         } else {
             return "0x" + intent.getData().getQueryParameter("signature");
         }
+    }
+
+    public static List<String> getMultiUserSignature(Intent intent) {
+        List<String> signatures = new ArrayList();
+        Set<String> params = intent.getData().getQueryParameterNames();
+        for (String param : params) {
+            if (param.indexOf("signature") >= 0) {
+                signatures.add(intent.getData().getQueryParameter(param));
+            }
+        }
+        return signatures;
     }
 
     public static String getAction(Intent intent) {

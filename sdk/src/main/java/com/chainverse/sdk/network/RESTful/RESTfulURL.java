@@ -2,6 +2,7 @@ package com.chainverse.sdk.network.RESTful;
 
 import com.chainverse.sdk.common.Constants;
 import com.chainverse.sdk.common.EncryptPreferenceUtils;
+import com.chainverse.sdk.common.LogUtil;
 import com.chainverse.sdk.common.WalletUtils;
 import com.chainverse.sdk.model.MessageNonce;
 
