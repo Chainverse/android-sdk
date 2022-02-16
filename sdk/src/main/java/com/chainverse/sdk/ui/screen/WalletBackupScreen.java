@@ -108,7 +108,7 @@ public class WalletBackupScreen extends Fragment implements View.OnClickListener
             if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 column = 6;
                 DisplayMetrics metrics = getResources().getDisplayMetrics();
-                btnNext.getLayoutParams().width = metrics.widthPixels / 2;
+//                btnNext.getLayoutParams().width = metrics.widthPixels / 2;
             }
 
 

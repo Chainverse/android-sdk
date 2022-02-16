@@ -41,11 +41,11 @@ public class WalletRecoveryScreen extends Fragment implements View.OnClickListen
         btnClose.setOnClickListener(this);
         btnSubmit.setOnClickListener(this);
         btnSubmit.setEnabled(false);
-        int orientation = this.getResources().getConfiguration().orientation;
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            DisplayMetrics metrics = getResources().getDisplayMetrics();
-            btnSubmit.getLayoutParams().width = metrics.widthPixels / 2;
-        }
+//        int orientation = this.getResources().getConfiguration().orientation;
+//        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//            DisplayMetrics metrics = getResources().getDisplayMetrics();
+//            btnSubmit.getLayoutParams().width = metrics.widthPixels / 2;
+//        }
         return mParent;
     }
 

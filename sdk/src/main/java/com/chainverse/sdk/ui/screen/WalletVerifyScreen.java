@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.chainverse.sdk.R;
@@ -36,6 +37,7 @@ public class WalletVerifyScreen extends Fragment implements View.OnClickListener
     private PhraseAdapter adapterRandom;
     private PhraseVerifyAdapter adapterVerify;
     private TextView tvMessageError;
+    private LinearLayout containerVerify;
     int phraseVerifyPosition = 0;
     private ArrayList<Phrase> phrasesRandom = new ArrayList<>();
     private ArrayList<Phrase> phrasesVerify = new ArrayList<>();
@@ -56,6 +58,7 @@ public class WalletVerifyScreen extends Fragment implements View.OnClickListener
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View mParent =  inflater.inflate(R.layout.chainverse_screen_wallet_verify, container, false);
+        containerVerify = mParent.findViewById(R.id.wallet_verify);
         btnClose = mParent.findViewById(R.id.chainverse_button_close);
         btnVerify = mParent.findViewById(R.id.chainverse_button_verify);
         phraseViewRandom = mParent.findViewById(R.id.chainverse_phraseview_random);
@@ -66,6 +69,9 @@ public class WalletVerifyScreen extends Fragment implements View.OnClickListener
         setupDataPhrase();
         initPhraseViewVerify();
         initPhraseViewRandom();
+
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        containerVerify.getLayoutParams().height = metrics.heightPixels;
         return mParent;
     }
 
@@ -232,8 +238,7 @@ public class WalletVerifyScreen extends Fragment implements View.OnClickListener
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             column = 6;
 
-            DisplayMetrics metrics = getResources().getDisplayMetrics();
-            btnVerify.getLayoutParams().width = metrics.widthPixels / 2;
+//            btnVerify.getLayoutParams().width = metrics.widthPixels / 2;
         }
 
         GridLayoutManager mLayoutManager = new GridLayoutManager(getContext(),column);
