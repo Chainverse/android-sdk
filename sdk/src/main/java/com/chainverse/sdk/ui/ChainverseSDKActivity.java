@@ -119,7 +119,8 @@ public class ChainverseSDKActivity extends AppCompatActivity {
                 replaceFragment(new WalletVerifyScreen());
                 break;
             case Constants.SCREEN.ALERT:
-                replaceFragment(new AlertScreen());
+                String message = getIntent().getStringExtra("message") != null ? getIntent().getStringExtra("message") : "";
+                replaceFragment(new AlertScreen(message));
                 break;
             case Constants.SCREEN.LOADING:
                 replaceFragment(new LoadingScreen());
