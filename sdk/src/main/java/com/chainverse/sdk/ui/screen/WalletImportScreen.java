@@ -121,6 +121,7 @@ public class WalletImportScreen extends Fragment implements View.OnClickListener
 
                             Intent intentAlert = new Intent(getContext(), ChainverseSDKActivity.class);
                             intentAlert.putExtra("screen", Constants.SCREEN.ALERT);
+                            intentAlert.putExtra("message", "Import wallet successful");
                             getActivity().startActivity(intentAlert);
 
                             getActivity().finish();

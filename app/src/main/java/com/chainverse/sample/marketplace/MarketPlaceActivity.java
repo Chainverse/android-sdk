@@ -125,7 +125,7 @@ public class MarketPlaceActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onGetListItemMarket(ArrayList<NFT> items) {
+            public void onGetListItemMarket(ArrayList<NFT> items, int count) {
                 onReceivedMarketItems(items);
             }
 
@@ -151,7 +151,7 @@ public class MarketPlaceActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onSignTransaction(String signed) {
+            public void onSignTransaction(Constants.EFunction function, String signed) {
             }
 
             @Override

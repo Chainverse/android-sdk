@@ -142,6 +142,16 @@ public interface Chainverse {
      */
     void showConnectWalletView();
 
+    String genMnemonic(int strength);
+
+    boolean isValidMnemonic(String phrase);
+
+    boolean isValidAddress(String address);
+
+    String importWalletByMnemonic(String phrase);
+
+    String importWalletByPrivateKey(String privateKey);
+
     void showWalletInfoView();
 
     void testBuy();

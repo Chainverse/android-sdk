@@ -15,7 +15,7 @@ public interface ChainverseCallback {
 
     void onGetItems(ArrayList<ChainverseItem> items);
 
-    void onGetListItemMarket(ArrayList<NFT> items);
+    void onGetListItemMarket(ArrayList<NFT> items, int count);
 
     void onGetMyAssets(ArrayList<NFT> items);
 
@@ -27,7 +27,7 @@ public interface ChainverseCallback {
 
     void onSignMessage(String signed);
 
-    void onSignTransaction(String signed);
+    void onSignTransaction(Constants.EFunction function, String signed);
 
     void onTransact(Constants.EFunction function, String tx);
 }

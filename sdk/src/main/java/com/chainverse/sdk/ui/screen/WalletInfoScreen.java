@@ -16,12 +16,16 @@ import android.widget.TextView;
 import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.R;
 import com.chainverse.sdk.common.Constants;
+import com.chainverse.sdk.common.EncryptPreferenceUtils;
 import com.chainverse.sdk.common.Utils;
 import com.chainverse.sdk.common.WalletUtils;
+import com.chainverse.sdk.model.service.ChainverseService;
+import com.chainverse.sdk.model.service.Token;
 import com.chainverse.sdk.ui.ChainverseSDKActivity;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
+
+import wallet.core.jni.StoredKey;
 
 
 public class WalletInfoScreen extends Fragment implements View.OnClickListener {
@@ -30,7 +34,9 @@ public class WalletInfoScreen extends Fragment implements View.OnClickListener {
     TextView tvAddress, txtBalance;
     private LinearLayout viewCopied;
 
-    private BigDecimal bnb, usdt, busd, cvt;
+    private String balance;
+
+    EncryptPreferenceUtils encryptPreferenceUtils;
 
     public WalletInfoScreen() {
         // Required empty public constructor
@@ -39,7 +45,6 @@ public class WalletInfoScreen extends Fragment implements View.OnClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setBalance();
     }
 
     @Override
@@ -59,15 +64,25 @@ public class WalletInfoScreen extends Fragment implements View.OnClickListener {
         btnClose.setOnClickListener(this);
         tvAddress.setOnClickListener(this);
 
+        encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(getContext());
+        StoredKey storedKey = WalletUtils.getInstance().init(getContext()).getStoredKey();
+        if (storedKey == null || !storedKey.isMnemonic()) {
+            btnRecovery.setVisibility(View.GONE);
+        }
+
+        setBalance();
+
         return mParent;
     }
 
     private void setBalance() {
-        String[] tokens = Constants.TOKEN_SUPPORTED.TOKENS;
-        for (int i = 0; i < tokens.length; i++) {
-            TokenProgress tokenProgress = new TokenProgress(tokens[i], i);
+        ChainverseService chainverseService = encryptPreferenceUtils.getService();
+        for (int i = 0; i < chainverseService.getTokens().size(); i++) {
+            Token token = chainverseService.getTokens().get(i);
+            TokenProgress tokenProgress = new TokenProgress(token, i);
             tokenProgress.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
+        balance = "BNB: " + ChainverseSDK.getInstance().getBalance() + "\n";
     }
 
 
@@ -92,42 +107,23 @@ public class WalletInfoScreen extends Fragment implements View.OnClickListener {
     }
 
     class TokenProgress extends AsyncTask<Void, TokenProgress, BigDecimal> {
-        private String tokenAddress;
+        private Token token;
         private int i;
 
-        public TokenProgress(String tokenAddress, int i) {
-            this.tokenAddress = tokenAddress;
+        public TokenProgress(Token token, int i) {
+            this.token = token;
             this.i = i;
         }
 
         @Override
         protected BigDecimal doInBackground(Void... voids) {
-            BigDecimal balance;
-            if (tokenAddress == Constants.TOKEN_SUPPORTED.NativeCurrency) {
-                balance = ChainverseSDK.getInstance().getBalance();
-            } else {
-                balance = ChainverseSDK.getInstance().getBalanceToken(tokenAddress);
-            }
+            BigDecimal balance = ChainverseSDK.getInstance().getBalanceToken(token.getAddress());
             return balance;
         }
 
         @Override
         protected void onPostExecute(BigDecimal bigDecimal) {
-            switch (tokenAddress) {
-                case Constants.TOKEN_SUPPORTED.NativeCurrency:
-                    bnb = bigDecimal;
-                    break;
-                case Constants.TOKEN_SUPPORTED.USDT:
-                    usdt = bigDecimal;
-                    break;
-                case Constants.TOKEN_SUPPORTED.BUSD:
-                    busd = bigDecimal;
-                    break;
-                case Constants.TOKEN_SUPPORTED.CVT:
-                    cvt = bigDecimal;
-                    break;
-            }
-            String balance = "BNB: " + bnb + "\n" + "USDT: " + usdt + "\n" + "BUSD: " + busd + "\n" + "CVT: " + cvt;
+            balance += token.getSymbol() + ": " + bigDecimal + "\n";
             txtBalance.setText(balance);
         }
     }

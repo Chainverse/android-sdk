@@ -44,6 +44,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Hex;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.protocol.core.methods.response.EthCall;
 
@@ -58,6 +59,11 @@ import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import wallet.core.jni.AnyAddress;
+import wallet.core.jni.CoinType;
+import wallet.core.jni.HDWallet;
+import wallet.core.jni.PrivateKey;
+import wallet.core.jni.StoredKey;
 
 
 public class ChainverseSDK implements Chainverse {
@@ -187,6 +193,7 @@ public class ChainverseSDK implements Chainverse {
                     if (Utils.getErrorCodeResponse(jsonElement) == 0) {
                         ArrayList<NFT> items = new ArrayList<>();
                         JsonArray data = jsonElement.getAsJsonObject().get("data").getAsJsonObject().get("rows").getAsJsonArray();
+                        int count = jsonElement.getAsJsonObject().get("data").getAsJsonObject().get("count").getAsInt();
                         for (JsonElement el : data) {
                             Gson gson = new Gson();
                             NFT item = gson.fromJson(el, NFT.class);
@@ -196,7 +203,7 @@ public class ChainverseSDK implements Chainverse {
                             items.add(item);
                         }
 
-                        CallbackToGame.onGetListItemMarket(items);
+                        CallbackToGame.onGetListItemMarket(items, count);
                     } else {
                         CallbackToGame.onError(ChainverseError.ERROR_REQUEST_ITEM);
                     }
@@ -433,6 +440,7 @@ public class ChainverseSDK implements Chainverse {
         } else {
             String action = ChainverseResult.getAction(intent);
             String data = ChainverseResult.handleConnect(intent);
+            String id = ChainverseResult.getId(intent);
 
             if ("account_sign_message".equals(action)) {
                 String xUserAddress = ChainverseResult.getUserAddress(intent);
@@ -459,7 +467,14 @@ public class ChainverseSDK implements Chainverse {
                     Constants.EFunction.sell.toString().equals(action) ||
                     Constants.EFunction.transferItem.toString().equals(action) ||
                     Constants.EFunction.withdrawItem.toString().equals(action)) {
-                CallbackToGame.onTransact(Enum.valueOf(Constants.EFunction.class, action), data);
+                if (id.equals("1")) {
+                    CallbackToGame.onSignTransaction(Enum.valueOf(Constants.EFunction.class, action), data);
+                } else {
+                    CallbackToGame.onTransact(Enum.valueOf(Constants.EFunction.class, action), data);
+                }
+            } else if ("sdk_sign_message".equals(action)) {
+                String signedMessage = ChainverseResult.getSignature(intent);
+                CallbackToGame.onSignMessage(signedMessage);
             }
 
         }
@@ -494,7 +509,7 @@ public class ChainverseSDK implements Chainverse {
         if (Utils.isChainverseInstalled(mContext)) {
             encryptPreferenceUtils.clearXUserMessageNonce();
             ChainverseConnect chainverse = new ChainverseConnect.Builder().build(mContext);
-            chainverse.signMultiMessage(true, "", "ChainVerse");
+            chainverse.signMessageAndAccount(true, "", "ChainVerse");
         }
     }
 
@@ -523,7 +538,7 @@ public class ChainverseSDK implements Chainverse {
         if (isUserConnected()) {
             ChainverseUser info = new ChainverseUser();
             info.setAddress(encryptPreferenceUtils.getXUserAddress());
-            info.setSignature(encryptPreferenceUtils.getXUserSignature());
+            info.setSignature(encryptPreferenceUtils.getXUserMessageNonce().getMessage());
             return info;
         }
         return null;
@@ -551,6 +566,10 @@ public class ChainverseSDK implements Chainverse {
         return null;
     }
 
+    public String getAddress() {
+        return WalletUtils.getInstance().init(mContext).getAddress();
+    }
+
     @Override
     public EthCall callFunction(String address, String method, List<Type> inputParameters) {
         try {
@@ -563,33 +582,45 @@ public class ChainverseSDK implements Chainverse {
 
     @Override
     public void signMessage(String message) {
-        SignerData data = new SignerData();
-        data.setMessage(message);
-        Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putString("screen", Constants.SCREEN.CONFIRM_SIGN);
-        bundle.putString("type", "message");
-        bundle.putParcelable("data", data);
-        intent.putExtras(bundle);
-        mContext.startActivity(intent);
+        if (encryptPreferenceUtils.getConnectWallet().equals(Constants.TYPE_IMPORT_WALLET.IMPORTED)) {
+            SignerData data = new SignerData();
+            data.setMessage(message);
+            Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putString("screen", Constants.SCREEN.CONFIRM_SIGN);
+            bundle.putString("type", "message");
+            bundle.putParcelable("data", data);
+            intent.putExtras(bundle);
+            mContext.startActivity(intent);
+        } else if (encryptPreferenceUtils.getConnectWallet().equals(Constants.TYPE_IMPORT_WALLET.CHAINVERSE)) {
+            ChainverseConnect chainverseConnect = new ChainverseConnect.Builder().build(mContext);
+            chainverseConnect.signMessage(false, message);
+        }
+
     }
 
     @Override
     public void signTransaction(String chainId, String gasPrice, String gasLimit, String
             toAddress, String amount) {
-        SignerData data = new SignerData();
-        data.setChainId(chainId);
-        data.setGasPrice(gasPrice);
-        data.setGasLimit(gasLimit);
-        data.setToAddress(toAddress);
-        data.setAmount(amount);
-        Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putString("screen", Constants.SCREEN.CONFIRM_SIGN);
-        bundle.putString("type", "transaction");
-        bundle.putParcelable("data", data);
-        intent.putExtras(bundle);
-        mContext.startActivity(intent);
+        if (encryptPreferenceUtils.getConnectWallet().equals(Constants.TYPE_IMPORT_WALLET.IMPORTED)) {
+            SignerData data = new SignerData();
+            data.setChainId(chainId);
+            data.setGasPrice(gasPrice);
+            data.setGasLimit(gasLimit);
+            data.setToAddress(toAddress);
+            data.setAmount(amount);
+            Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putString("screen", Constants.SCREEN.CONFIRM_SIGN);
+            bundle.putString("type", "transaction");
+            bundle.putParcelable("data", data);
+            intent.putExtras(bundle);
+            mContext.startActivity(intent);
+        } else if (encryptPreferenceUtils.getConnectWallet().equals(Constants.TYPE_IMPORT_WALLET.CHAINVERSE)) {
+//            ChainverseConnect chainverseConnect = new ChainverseConnect.Builder().build(mContext);
+//            chainverseConnect.signTransaction(Constants.EFunction.);
+        }
+
     }
 
     @Override
@@ -608,6 +639,68 @@ public class ChainverseSDK implements Chainverse {
         intent.putExtra("screen", Constants.SCREEN.WALLET);
         intent.putExtra("type", "normal");
         mContext.startActivity(intent);
+    }
+
+    /**
+     * @param strength
+     * @return
+     */
+    @Override
+    public String genMnemonic(int strength) {
+        HDWallet wallet = new HDWallet(strength, "");
+        return wallet.mnemonic();
+    }
+
+    @Override
+    public boolean isValidMnemonic(String phrase) {
+        String passphrase = "";
+
+        StoredKey storedKey = StoredKey.importHDWallet(phrase, "", passphrase.getBytes(), CoinType.ETHEREUM);
+        return storedKey.isMnemonic();
+    }
+
+    @Override
+    public boolean isValidAddress(String address) {
+        boolean isValid = AnyAddress.isValid(address, CoinType.ETHEREUM);
+        return isValid;
+    }
+
+    @Override
+    public String importWalletByMnemonic(String phrase) {
+        String seedPhrase = phrase;
+        String passphrase = "";
+        String address = null;
+
+        ArrayList<CoinType> coins = new ArrayList<>();
+        coins.add(CoinType.ETHEREUM);
+
+        StoredKey storedKey = WalletUtils.getInstance().init(mContext).importWallet(seedPhrase, "", passphrase, coins);
+        if (storedKey != null && storedKey.isMnemonic()) {
+            HDWallet wallet = storedKey.wallet(passphrase.getBytes());
+            address = wallet.getAddressForCoin(CoinType.ETHEREUM);
+            encryptPreferenceUtils.setMnemonic(wallet.mnemonic());
+            encryptPreferenceUtils.setXUserAddress(address);
+            encryptPreferenceUtils.setConnectWallet(Constants.TYPE_IMPORT_WALLET.IMPORTED);
+            doConnectSuccess();
+        }
+        return address;
+    }
+
+    @Override
+    public String importWalletByPrivateKey(String privateKey) {
+        byte[] bytes = Hex.decode(privateKey.trim());
+        String address = null;
+        PrivateKey importPrivateKey = new PrivateKey(bytes);
+
+        StoredKey storedKey = WalletUtils.getInstance().init(mContext).importWallet(importPrivateKey, "", "", CoinType.ETHEREUM);
+
+        if (storedKey != null) {
+            address = storedKey.account(0).address();
+            encryptPreferenceUtils.setConnectWallet(Constants.TYPE_IMPORT_WALLET.IMPORTED);
+            encryptPreferenceUtils.setXUserAddress(address);
+            doConnectSuccess();
+        }
+        return address;
     }
 
     @Override

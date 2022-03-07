@@ -26,7 +26,7 @@ public class ChainverseConnect {
         Utils.openURI(this.context, Uri.parse(buildUri(message, isSignPersonal)));
     }
 
-    public void signMultiMessage(boolean isSignPersonal, String... args) {
+    public void signMessageAndAccount(boolean isSignPersonal, String... args) {
         String uri = "chainverse://%s?action=%s&coin=%s&app=%s&callback=%s&id=%s&type=%s";
         for (int i = 0; i < args.length; i++) {
             uri += "&data." + i + "=" + args[i];
@@ -39,7 +39,23 @@ public class ChainverseConnect {
                 ChainverseSDK.scheme,
                 "sdk_account_sign_result",
                 "2",
-                isSignPersonal);
+                isSignPersonal ? "personal" : "");
+
+        Utils.openURI(this.context, Uri.parse(uri));
+    }
+
+    public void signMessage(boolean isSignPersonal, String message) {
+        String uri = "chainverse://%s?action=%s&coin=%s&app=%s&callback=%s&id=%s&type=%s&data=%s";
+
+        uri = String.format(uri,
+                "sdk_sign_message",
+                "sdk_sign_message",
+                "20000714",
+                ChainverseSDK.scheme,
+                "sdk_sign_result",
+                "1",
+                isSignPersonal ? "personal" : "",
+                message);
 
         Utils.openURI(this.context, Uri.parse(uri));
     }
@@ -69,7 +85,7 @@ public class ChainverseConnect {
                 ChainverseSDK.scheme,
                 "tx_callback",
                 "sign",
-                "2",
+                "1",
                 "memo"
         );
 

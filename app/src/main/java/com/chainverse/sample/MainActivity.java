@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -19,8 +20,13 @@ import com.chainverse.sdk.common.Constants;
 import com.chainverse.sdk.common.LogUtil;
 import com.chainverse.sdk.ChainverseItem;
 import com.chainverse.sdk.model.NFT.NFT;
+import com.chainverse.sdk.model.Params.FilterMarket;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+
+import wallet.core.jni.StoredKey;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -77,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onGetListItemMarket(ArrayList<NFT> items) {
+            public void onGetListItemMarket(ArrayList<NFT> items, int count) {
 
             }
 
@@ -118,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onSignTransaction(String signed) {
+            public void onSignTransaction(Constants.EFunction function, String signed) {
                 Log.i("onSignTransaction", signed);
             }
 
@@ -174,6 +180,9 @@ public class MainActivity extends AppCompatActivity {
         btnMarket.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+//                String mnemonic = ChainverseSDK.getInstance().genMnemonic(256);
+//                System.out.println(mnemonic);
+//                System.out.println(address);
 //////                ChainverseSDK.getInstance().checkAddress("0x4115737CB80A7Dd57b4285C3c68894012275063d");
 //////                ChainverseSDK.getInstance().getAbiDefination();
 //////                LogUtil.log("nft ", nft);

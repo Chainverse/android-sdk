@@ -1,6 +1,8 @@
 package com.chainverse.sdk.common;
 
 public class Constants {
+    public static String PATH = "keystore";
+
     public interface CONTRACT {
         public static String ChainverseFactory = "0x640Dce1028b1111421b72b884320D0e93d974fB3";
         public static String MarketService = "0x2ccA92F66BeA2A7fA2119B75F3e5CB698C252564";
@@ -71,6 +73,7 @@ public class Constants {
         cancelSell,
         withdrawItem,
         moveService,
-        transferItem
+        transferItem,
+        transferToken,
     }
 }

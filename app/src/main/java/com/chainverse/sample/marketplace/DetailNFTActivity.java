@@ -94,7 +94,7 @@ public class DetailNFTActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onGetListItemMarket(ArrayList<NFT> items) {
+            public void onGetListItemMarket(ArrayList<NFT> items, int count) {
 
             }
 
@@ -124,7 +124,7 @@ public class DetailNFTActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onSignTransaction(String signed) {
+            public void onSignTransaction(Constants.EFunction function, String signed) {
 
             }
 

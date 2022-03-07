@@ -54,9 +54,9 @@ public class CallbackToGame {
         }
     }
 
-    public static void onGetListItemMarket(ArrayList<NFT> items) {
+    public static void onGetListItemMarket(ArrayList<NFT> items, int count) {
         if (ChainverseSDK.mCallback != null) {
-            ChainverseSDK.mCallback.onGetListItemMarket(items);
+            ChainverseSDK.mCallback.onGetListItemMarket(items, count);
         }
     }
 
@@ -69,6 +69,18 @@ public class CallbackToGame {
     public static void onTransact(Constants.EFunction function, String tx) {
         if (ChainverseSDK.mCallback != null) {
             ChainverseSDK.mCallback.onTransact(function, tx);
+        }
+    }
+
+    public static void onSignMessage(String signedMessage) {
+        if (ChainverseSDK.mCallback != null) {
+            ChainverseSDK.mCallback.onSignMessage(signedMessage);
+        }
+    }
+
+    public static void onSignTransaction(Constants.EFunction function, String signed) {
+        if (ChainverseSDK.mCallback != null) {
+            ChainverseSDK.mCallback.onSignTransaction(function, signed);
         }
     }
 }

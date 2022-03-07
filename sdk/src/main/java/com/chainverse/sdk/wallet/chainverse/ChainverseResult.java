@@ -14,6 +14,10 @@ public class ChainverseResult {
         return intent.getData().getQueryParameter("data");
     }
 
+    public static String getId(Intent intent) {
+        return intent.getData().getQueryParameter("id");
+    }
+
     public static String getUserAddress(Intent intent) {
         return intent.getData().getQueryParameter("accounts");
     }
@@ -44,6 +48,10 @@ public class ChainverseResult {
             }
         }
         return signatures;
+    }
+
+    public static String getSignature(Intent intent) {
+        return intent.getData().getQueryParameter("signature");
     }
 
     public static String getAction(Intent intent) {

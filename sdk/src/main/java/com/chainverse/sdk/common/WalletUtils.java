@@ -1,26 +1,23 @@
 package com.chainverse.sdk.common;
 
 import android.content.Context;
+import android.os.Environment;
 
 import com.chainverse.sdk.listener.OnWalletListener;
 import com.google.protobuf.ByteString;
 
-import org.bouncycastle.util.encoders.Hex;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Sign;
 
-import java.io.ByteArrayOutputStream;
-import java.lang.reflect.Array;
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.ArrayList;
 
 import wallet.core.java.AnySigner;
 import wallet.core.jni.CoinType;
 import wallet.core.jni.HDWallet;
-import wallet.core.jni.Hash;
 import wallet.core.jni.PrivateKey;
 import wallet.core.jni.StoredKey;
 import wallet.core.jni.proto.Ethereum;
@@ -29,6 +26,7 @@ public class WalletUtils {
     private static WalletUtils instance;
     private Context context;
     private EncryptPreferenceUtils encryptPreferenceUtils;
+    private StoredKey storedKey;
 
     public static WalletUtils getInstance() {
         if (instance == null) {
@@ -44,11 +42,24 @@ public class WalletUtils {
     public WalletUtils init(Context context) {
         this.context = context;
         encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(context);
+        String path_keystore = encryptPreferenceUtils.getPathStoredKey();
+        storedKey = StoredKey.load(path_keystore);
+
         return this;
+    }
+
+    public StoredKey getStoredKey() {
+        return this.storedKey;
     }
 
     public void createWallet(int strength, String passphrase, OnWalletListener onWalletListener) {
         HDWallet wallet = new HDWallet(strength, passphrase);
+        String seedPhrase = wallet.mnemonic();
+
+        ArrayList<CoinType> coins = new ArrayList<>();
+        coins.add(CoinType.ETHEREUM);
+
+        this.importWallet(seedPhrase, "", passphrase, coins);
         encryptPreferenceUtils.setMnemonic(wallet.mnemonic());
         onWalletListener.onCreated();
     }
@@ -56,7 +67,11 @@ public class WalletUtils {
     public void importWallet(String phrase, OnWalletListener onWalletListener) {
         String seedPhrase = phrase;
         String passphrase = "";
-        StoredKey storedKey = StoredKey.importHDWallet(seedPhrase, "", passphrase.getBytes(), CoinType.ETHEREUM);
+
+        ArrayList<CoinType> coins = new ArrayList<>();
+        coins.add(CoinType.ETHEREUM);
+
+        StoredKey storedKey = this.importWallet(seedPhrase, "", passphrase, coins);
         if (storedKey != null && storedKey.isMnemonic()) {
             HDWallet wallet = storedKey.wallet(passphrase.getBytes());
             encryptPreferenceUtils.setMnemonic(wallet.mnemonic());
@@ -67,17 +82,18 @@ public class WalletUtils {
     }
 
     public String getMnemonic() {
-        return encryptPreferenceUtils.getMnemonic();
+        if (storedKey == null) {
+            return null;
+        }
+        return storedKey.decryptMnemonic("".getBytes());
     }
 
     public String getAddress() {
         String address = "";
         if (encryptPreferenceUtils.getConnectWallet().equals(Constants.TYPE_IMPORT_WALLET.IMPORTED)) {
-            String seedPhrase = getMnemonic();
-            String passphrase = "";
-            HDWallet wallet = new HDWallet(seedPhrase, passphrase);
-            CoinType coinType = CoinType.ETHEREUM;
-            address = wallet.getAddressForCoin(coinType);
+            if (storedKey != null && storedKey.accountCount() > 0) {
+                address = storedKey.account(0).address();
+            }
         } else {
             address = encryptPreferenceUtils.getXUserAddress();
         }
@@ -85,35 +101,42 @@ public class WalletUtils {
     }
 
     public String getPrivateKey() {
-        String seedPhrase = getMnemonic();
         if (!encryptPreferenceUtils.getConnectWallet().equals(Constants.TYPE_IMPORT_WALLET.IMPORTED)) {
             return null;
         }
+        if (storedKey == null) {
+            return null;
+        }
         String passphrase = "";
-        HDWallet wallet = new HDWallet(seedPhrase, passphrase);
         CoinType coinType = CoinType.ETHEREUM;
-        PrivateKey secretPrivateKey = wallet.getKeyForCoin(coinType);
+        PrivateKey secretPrivateKey = storedKey.privateKey(coinType, passphrase.getBytes());
         return Utils.byteToHexString(secretPrivateKey.data());
     }
 
     public Credentials getCredential() {
-        String seedPhrase = getMnemonic();
         if (!encryptPreferenceUtils.getConnectWallet().equals(Constants.TYPE_IMPORT_WALLET.IMPORTED)) {
             return null;
         }
+        if (storedKey == null) {
+            return null;
+        }
         String passphrase = "";
-        HDWallet wallet = new HDWallet(seedPhrase, passphrase);
-        PrivateKey secretPrivateKey = wallet.getKeyForCoin(CoinType.ETHEREUM);
+        PrivateKey secretPrivateKey = storedKey.privateKey(CoinType.ETHEREUM, passphrase.getBytes());
         Credentials credentials = Credentials.create(Utils.byteToHexString(secretPrivateKey.data()));
         return credentials;
     }
 
     public String signMessage(String message) throws Exception {
-        String seedPhrase = getMnemonic();
+        if (storedKey == null) {
+            return null;
+        }
         String passphrase = "";
-        HDWallet wallet = new HDWallet(seedPhrase, passphrase);
         CoinType coinType = CoinType.ETHEREUM;
-        PrivateKey secretPrivateKey = wallet.getKeyForCoin(coinType);
+        PrivateKey secretPrivateKey = storedKey.privateKey(CoinType.ETHEREUM, passphrase.getBytes());
+
+        if (secretPrivateKey == null) {
+            return null;
+        }
 
         Credentials credentials = Credentials.create(Utils.byteToHexString(secretPrivateKey.data()));
         String rawMessage = message;
@@ -132,12 +155,15 @@ public class WalletUtils {
     }
 
     public String signPersonalMessage(String message) {
+        if (storedKey == null) {
+            return null;
+        }
         String signature = "";
-        String seedPhrase = getMnemonic();
         String passphrase = "";
-        HDWallet wallet = new HDWallet(seedPhrase, passphrase);
-        CoinType coinType = CoinType.ETHEREUM;
-        PrivateKey privateKey = wallet.getKeyForCoin(coinType);
+        PrivateKey privateKey = storedKey.privateKey(CoinType.ETHEREUM, passphrase.getBytes());
+        if (privateKey == null) {
+            return null;
+        }
 
         String signMessage = "\u0019Ethereum Signed Message:\n" + message.length() + message;
 
@@ -158,10 +184,15 @@ public class WalletUtils {
     }
 
     public String signTransaction(String chainId, String gasPrice, String gasLimit, String toAddress, String amount) throws Exception {
-        String seedPhrase = getMnemonic();
+        if (storedKey == null) {
+            return null;
+        }
         String passphrase = "";
-        HDWallet wallet = new HDWallet(seedPhrase, passphrase);
-        PrivateKey secretPrivateKey = wallet.getKeyForCoin(CoinType.ETHEREUM);
+        PrivateKey secretPrivateKey = storedKey.privateKey(CoinType.ETHEREUM, passphrase.getBytes());
+
+        if (secretPrivateKey == null) {
+            return null;
+        }
 
         Ethereum.Transaction.Transfer transfer = Ethereum.Transaction.Transfer.newBuilder()
                 .setAmount(ByteString.copyFrom(new BigDecimal(amount).toBigInteger().toByteArray()))
@@ -181,5 +212,36 @@ public class WalletUtils {
         Ethereum.SigningOutput output = AnySigner.sign(signerInput, CoinType.ETHEREUM, Ethereum.SigningOutput.parser());
         String signature = Utils.byteToHexString(output.getEncoded().toByteArray());
         return signature;
+    }
+
+    public StoredKey importWallet(String phrase, String name, String encryptPassword, ArrayList<CoinType> coins) {
+        CoinType coin = coins.get(0) != null ? coins.get(0) : CoinType.ETHEREUM;
+        StoredKey storedKey = StoredKey.importHDWallet(phrase, name, encryptPassword.getBytes(), coin);
+        storedKey.store(getPath());
+        encryptPreferenceUtils.setPathStoredKey(getPath());
+        return storedKey;
+    }
+
+    public StoredKey importWallet(PrivateKey privateKey, String name, String password, CoinType coin) {
+        StoredKey storedKey = StoredKey.importPrivateKey(privateKey.data(), name, password.getBytes(), coin);
+        storedKey.store(getPath());
+        encryptPreferenceUtils.setPathStoredKey(getPath());
+        return storedKey;
+    }
+
+    private String getPath() {
+        File dir = new File(this.context.getApplicationInfo().dataDir + "/" + Constants.PATH);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        File store_key = new File(dir, "stored-key");
+        if (!store_key.exists()) {
+            try {
+                store_key.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return store_key.getPath();
     }
 }

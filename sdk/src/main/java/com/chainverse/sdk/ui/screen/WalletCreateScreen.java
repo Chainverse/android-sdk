@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.RelativeLayout;
 
 import com.chainverse.sdk.R;
 import com.chainverse.sdk.common.Constants;
@@ -21,6 +22,7 @@ import com.chainverse.sdk.ui.ChainverseSDKActivity;
 public class WalletCreateScreen extends Fragment implements View.OnClickListener{
     private Button btnClose, btnCreate;
     private CheckBox checkBoxTerm, checkBox12Word, checkBox24Word;
+    RelativeLayout containerCreate;
     public WalletCreateScreen() {
         // Required empty public constructor
     }
@@ -36,6 +38,7 @@ public class WalletCreateScreen extends Fragment implements View.OnClickListener
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View mParent =  inflater.inflate(R.layout.chainverse_screen_wallet_create, container, false);
+        containerCreate = mParent.findViewById(R.id.container_create_wallet);
         btnClose = mParent.findViewById(R.id.chainverse_button_close);
         btnCreate = mParent.findViewById(R.id.chainverse_button_create);
         checkBoxTerm = mParent.findViewById(R.id.chainverse_checkbox_term);
@@ -50,11 +53,13 @@ public class WalletCreateScreen extends Fragment implements View.OnClickListener
         btnCreate.setOnClickListener(this);
         btnCreate.setEnabled(false);
 
-        int orientation = this.getResources().getConfiguration().orientation;
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            DisplayMetrics metrics = getResources().getDisplayMetrics();
-            btnCreate.getLayoutParams().width = metrics.widthPixels / 2;
-        }
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        containerCreate.getLayoutParams().height = metrics.heightPixels - 30;
+//        int orientation = this.getResources().getConfiguration().orientation;
+//        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//            DisplayMetrics metrics = getResources().getDisplayMetrics();
+//            btnCreate.getLayoutParams().width = metrics.widthPixels / 2;
+//        }
         return mParent;
     }
 
