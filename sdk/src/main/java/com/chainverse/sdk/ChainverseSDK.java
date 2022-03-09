@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -166,7 +167,8 @@ public class ChainverseSDK implements Chainverse {
             return;
         }
         if (isUserConnected()) {
-            RESTfulClient.getItems(encryptPreferenceUtils.getXUserAddress(), ChainverseSDK.gameAddress)
+            WalletUtils walletUtils = WalletUtils.getInstance().init(mContext);
+            RESTfulClient.getItems(walletUtils.getAddress(), ChainverseSDK.gameAddress)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(jsonElement -> {
@@ -374,18 +376,22 @@ public class ChainverseSDK implements Chainverse {
                 cal.add(Calendar.HOUR, 24);
                 long diff = cal.getTime().getTime() - new Date().getTime();
                 if (diff <= 0) {
+                    this.logout();
                     CallbackToGame.onError(ChainverseError.EXPIRED_NONCE);
                 }
             } else {
+                this.logout();
                 CallbackToGame.onError(ChainverseError.EXPIRED_NONCE);
             }
         }
     }
 
     private void doConnectSuccess() {
+        System.out.println("is user connected" + isUserConnected());
         if (isUserConnected()) {
+            WalletUtils walletUtils = WalletUtils.getInstance().init(mContext);
+            CallbackToGame.onConnectSuccess(walletUtils.getAddress());
             setAccessToken();
-            CallbackToGame.onConnectSuccess(encryptPreferenceUtils.getXUserAddress());
 
             transferItemManager = new TransferItemManager(mContext);
             transferItemManager.on(new OnEmitterListenter() {
@@ -501,9 +507,13 @@ public class ChainverseSDK implements Chainverse {
     }
 
     @Override
-    public void connectWithChainverse() {
+    public void connectWithChainverse() throws Exception {
         if (!isInitSDKSuccess()) {
-            return;
+            throw new Exception("SDK initial failed");
+        }
+
+        if (isUserConnected()) {
+            throw new Exception("Wallet already connected");
         }
 
         if (Utils.isChainverseInstalled(mContext)) {
@@ -518,16 +528,20 @@ public class ChainverseSDK implements Chainverse {
         if (!isInitSDKSuccess()) {
             return;
         }
-        CallbackToGame.onLogout(encryptPreferenceUtils.getXUserAddress());
+        WalletUtils walletUtils = WalletUtils.getInstance().init(mContext);
+        CallbackToGame.onLogout(walletUtils.getAddress());
+        walletUtils.deleteStoredKey();
         encryptPreferenceUtils.clearXUserAddress();
         encryptPreferenceUtils.clearXUserSignature();
         encryptPreferenceUtils.clearMnemonic();
+        encryptPreferenceUtils.clearConnectWallet();
+        encryptPreferenceUtils.clearPathStoredKey();
         transferItemManager.disConnect();
     }
 
     @Override
     public Boolean isUserConnected() {
-        if (!encryptPreferenceUtils.getXUserSignature().isEmpty()) {
+        if (!WalletUtils.getInstance().init(mContext).getAddress().isEmpty()) {
             return true;
         }
         return false;
@@ -537,8 +551,12 @@ public class ChainverseSDK implements Chainverse {
     public ChainverseUser getUser() {
         if (isUserConnected()) {
             ChainverseUser info = new ChainverseUser();
-            info.setAddress(encryptPreferenceUtils.getXUserAddress());
-            info.setSignature(encryptPreferenceUtils.getXUserMessageNonce().getMessage());
+            WalletUtils walletUtils = WalletUtils.getInstance().init(mContext);
+            info.setAddress(walletUtils.getAddress());
+            LogUtil.log("user signature ", encryptPreferenceUtils.getXUserMessageNonce());
+            if(encryptPreferenceUtils.getXUserMessageNonce() != null) {
+                info.setSignature(encryptPreferenceUtils.getXUserMessageNonce().getMessage());
+            }
             return info;
         }
         return null;
@@ -547,7 +565,8 @@ public class ChainverseSDK implements Chainverse {
     @Override
     public BigDecimal getBalance() {
         try {
-            return BaseWeb3.getInstance().init(mContext).getBalance(encryptPreferenceUtils.getXUserAddress());
+            WalletUtils walletUtils = WalletUtils.getInstance().init(mContext);
+            return BaseWeb3.getInstance().init(mContext).getBalance(walletUtils.getAddress());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -557,8 +576,9 @@ public class ChainverseSDK implements Chainverse {
     @Override
     public BigDecimal getBalanceToken(String contractAddress) {
         try {
+            WalletUtils walletUtils = WalletUtils.getInstance().init(mContext);
             ContractManager contract = new ContractManager(mContext);
-            return contract.balanceOf(contractAddress, encryptPreferenceUtils.getXUserAddress());
+            return contract.balanceOf(contractAddress, walletUtils.getAddress());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -635,10 +655,18 @@ public class ChainverseSDK implements Chainverse {
 
     @Override
     public void showConnectWalletView() {
-        Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
-        intent.putExtra("screen", Constants.SCREEN.WALLET);
-        intent.putExtra("type", "normal");
-        mContext.startActivity(intent);
+        if(!isUserConnected()) {
+            WalletUtils walletUtils = WalletUtils.getInstance().init(mContext);
+            boolean checkPermission = walletUtils.checkPermissionStorage();
+            if (checkPermission) {
+                Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
+                intent.putExtra("screen", Constants.SCREEN.WALLET);
+                intent.putExtra("type", "normal");
+                mContext.startActivity(intent);
+            }
+        } else {
+            Toast.makeText(mContext, "Wallet is already created", Toast.LENGTH_LONG).show();
+        }
     }
 
     /**
@@ -666,7 +694,7 @@ public class ChainverseSDK implements Chainverse {
     }
 
     @Override
-    public String importWalletByMnemonic(String phrase) {
+    public String importWalletByMnemonic(String phrase) throws Exception {
         String seedPhrase = phrase;
         String passphrase = "";
         String address = null;
@@ -678,16 +706,13 @@ public class ChainverseSDK implements Chainverse {
         if (storedKey != null && storedKey.isMnemonic()) {
             HDWallet wallet = storedKey.wallet(passphrase.getBytes());
             address = wallet.getAddressForCoin(CoinType.ETHEREUM);
-            encryptPreferenceUtils.setMnemonic(wallet.mnemonic());
-            encryptPreferenceUtils.setXUserAddress(address);
-            encryptPreferenceUtils.setConnectWallet(Constants.TYPE_IMPORT_WALLET.IMPORTED);
             doConnectSuccess();
         }
         return address;
     }
 
     @Override
-    public String importWalletByPrivateKey(String privateKey) {
+    public String importWalletByPrivateKey(String privateKey) throws Exception {
         byte[] bytes = Hex.decode(privateKey.trim());
         String address = null;
         PrivateKey importPrivateKey = new PrivateKey(bytes);
@@ -696,8 +721,6 @@ public class ChainverseSDK implements Chainverse {
 
         if (storedKey != null) {
             address = storedKey.account(0).address();
-            encryptPreferenceUtils.setConnectWallet(Constants.TYPE_IMPORT_WALLET.IMPORTED);
-            encryptPreferenceUtils.setXUserAddress(address);
             doConnectSuccess();
         }
         return address;
@@ -962,8 +985,9 @@ public class ChainverseSDK implements Chainverse {
     public String transferItem(String to, String nft, BigInteger tokenId) throws Exception {
         String tx;
         ContractManager contractManager = new ContractManager(mContext);
+        WalletUtils walletUtils = WalletUtils.getInstance().init(mContext);
         try {
-            String account = encryptPreferenceUtils.getXUserAddress();
+            String account = walletUtils.getAddress();
             if (account != null || !account.isEmpty()) {
                 tx = contractManager.transferItem(account, to, nft, tokenId);
             } else {

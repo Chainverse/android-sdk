@@ -18,6 +18,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.chainverse.sdk.R;
 import com.chainverse.sdk.common.BroadcastUtil;
@@ -91,6 +92,7 @@ public class WalletImportScreen extends Fragment implements View.OnClickListener
         if (v.getId() == R.id.chainverse_button_close) {
             getActivity().finish();
         } else if (v.getId() == R.id.chainverse_button_import) {
+            WalletUtils walletUtils = WalletUtils.getInstance().init(getContext());
             Intent intent = new Intent(getContext(), ChainverseSDKActivity.class);
             intent.putExtra("screen", Constants.SCREEN.LOADING);
             getActivity().startActivity(intent);
@@ -98,45 +100,48 @@ public class WalletImportScreen extends Fragment implements View.OnClickListener
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    WalletUtils.getInstance().init(getContext()).importWallet(edtPhrase.getText().toString(), new OnWalletListener() {
-                        @Override
-                        public void onCreated() {
+                    try {
+                        WalletUtils.getInstance().init(getContext()).importWallet(edtPhrase.getText().toString(), new OnWalletListener() {
+                            @Override
+                            public void onCreated() {
 
-                        }
-
-                        @Override
-                        public void onImported() {
-                            BroadcastUtil.send(getContext(), Constants.ACTION.DIMISS_LOADING);
-
-                            String xUserAddress = WalletUtils.getInstance().init(getContext()).getAddress();
-                            EncryptPreferenceUtils.getInstance().init(getContext()).setXUserAddress(xUserAddress);
-                            try {
-                                EncryptPreferenceUtils.getInstance().init(getContext()).setXUserSignature(WalletUtils.getInstance().init(getContext()).signMessage("ChainVerse"));
-                                EncryptPreferenceUtils.getInstance().init(getContext()).setConnectWallet(Constants.TYPE_IMPORT_WALLET.IMPORTED);
-                            } catch (Exception e) {
-                                e.printStackTrace();
                             }
 
-                            BroadcastUtil.send(getContext(), Constants.ACTION.CREATED_WALLET);
+                            @Override
+                            public void onImported() {
+                                BroadcastUtil.send(getContext(), Constants.ACTION.DIMISS_LOADING);
 
-                            Intent intentAlert = new Intent(getContext(), ChainverseSDKActivity.class);
-                            intentAlert.putExtra("screen", Constants.SCREEN.ALERT);
-                            intentAlert.putExtra("message", "Import wallet successful");
-                            getActivity().startActivity(intentAlert);
+                                String xUserAddress = walletUtils.getAddress();
+                                EncryptPreferenceUtils.getInstance().init(getContext()).setXUserAddress(xUserAddress);
+                                try {
+                                    EncryptPreferenceUtils.getInstance().init(getContext()).setXUserSignature(walletUtils.signMessage("ChainVerse"));
+                                    EncryptPreferenceUtils.getInstance().init(getContext()).setConnectWallet(Constants.TYPE_IMPORT_WALLET.IMPORTED);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
 
-                            getActivity().finish();
-                        }
+                                BroadcastUtil.send(getContext(), Constants.ACTION.CREATED_WALLET);
 
-                        @Override
-                        public void onImportedFailed() {
-                            BroadcastUtil.send(getContext(), Constants.ACTION.DIMISS_LOADING);
-                            tvError.setVisibility(View.VISIBLE);
-                        }
-                    });
+                                Intent intentAlert = new Intent(getContext(), ChainverseSDKActivity.class);
+                                intentAlert.putExtra("screen", Constants.SCREEN.ALERT);
+                                intentAlert.putExtra("message", "Import wallet successful");
+                                getActivity().startActivity(intentAlert);
+
+                                getActivity().finish();
+                            }
+
+                            @Override
+                            public void onImportedFailed() {
+                                BroadcastUtil.send(getContext(), Constants.ACTION.DIMISS_LOADING);
+                                tvError.setVisibility(View.VISIBLE);
+                            }
+                        });
+                    } catch (Exception e) {
+                        BroadcastUtil.send(getContext(), Constants.ACTION.DIMISS_LOADING);
+                        Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();;
+                    }
                 }
             }, 500);
-
-
         } else if (v.getId() == R.id.chainverse_button_paste) {
             try {
                 ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);

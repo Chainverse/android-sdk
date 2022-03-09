@@ -45,7 +45,11 @@ public class ConnectWalletScreen extends Fragment implements View.OnClickListene
         if (v.getId() == R.id.chainverse_button_connect_trust) {
             ChainverseSDK.getInstance().connectWithTrust();
         }else if (v.getId() == R.id.chainverse_button_connect) {
-            ChainverseSDK.getInstance().connectWithChainverse();
+            try {
+                ChainverseSDK.getInstance().connectWithChainverse();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }else if(v.getId() == R.id.chainverse_button_close){
             getActivity().finish();
         }

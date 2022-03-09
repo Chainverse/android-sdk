@@ -74,7 +74,7 @@ public interface Chainverse {
     /**
      * connectWithChainverse: Connect with Chainverse
      */
-    void connectWithChainverse();
+    void connectWithChainverse() throws Exception;
 
     /**
      * logout: Logout
@@ -148,9 +148,9 @@ public interface Chainverse {
 
     boolean isValidAddress(String address);
 
-    String importWalletByMnemonic(String phrase);
+    String importWalletByMnemonic(String phrase) throws Exception;
 
-    String importWalletByPrivateKey(String privateKey);
+    String importWalletByPrivateKey(String privateKey) throws Exception;
 
     void showWalletInfoView();
 

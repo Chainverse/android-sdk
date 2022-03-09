@@ -1,7 +1,17 @@
 package com.chainverse.sdk.common;
 
+import android.Manifest;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Environment;
+import android.provider.Settings;
+
+import androidx.core.app.ActivityCompat;
 
 import com.chainverse.sdk.listener.OnWalletListener;
 import com.google.protobuf.ByteString;
@@ -27,6 +37,7 @@ public class WalletUtils {
     private Context context;
     private EncryptPreferenceUtils encryptPreferenceUtils;
     private StoredKey storedKey;
+    private String mnemonic;
 
     public static WalletUtils getInstance() {
         if (instance == null) {
@@ -52,40 +63,36 @@ public class WalletUtils {
         return this.storedKey;
     }
 
-    public void createWallet(int strength, String passphrase, OnWalletListener onWalletListener) {
+    public void genMnemonic(int strength, String passphrase, OnWalletListener onWalletListener) {
         HDWallet wallet = new HDWallet(strength, passphrase);
-        String seedPhrase = wallet.mnemonic();
+        this.mnemonic = wallet.mnemonic();
 
-        ArrayList<CoinType> coins = new ArrayList<>();
-        coins.add(CoinType.ETHEREUM);
-
-        this.importWallet(seedPhrase, "", passphrase, coins);
-        encryptPreferenceUtils.setMnemonic(wallet.mnemonic());
         onWalletListener.onCreated();
     }
 
-    public void importWallet(String phrase, OnWalletListener onWalletListener) {
+    public void importWallet(String phrase, OnWalletListener onWalletListener) throws Exception {
         String seedPhrase = phrase;
         String passphrase = "";
 
         ArrayList<CoinType> coins = new ArrayList<>();
         coins.add(CoinType.ETHEREUM);
 
-        StoredKey storedKey = this.importWallet(seedPhrase, "", passphrase, coins);
-        if (storedKey != null && storedKey.isMnemonic()) {
-            HDWallet wallet = storedKey.wallet(passphrase.getBytes());
-            encryptPreferenceUtils.setMnemonic(wallet.mnemonic());
-            onWalletListener.onImported();
-        } else {
-            onWalletListener.onImportedFailed();
+        StoredKey storedKey;
+        try {
+            storedKey = this.importWallet(seedPhrase, "", passphrase, coins);
+            if (storedKey != null && storedKey.isMnemonic()) {
+                HDWallet wallet = storedKey.wallet(passphrase.getBytes());
+                onWalletListener.onImported();
+            } else {
+                onWalletListener.onImportedFailed();
+            }
+        } catch (Exception e) {
+            throw e;
         }
     }
 
     public String getMnemonic() {
-        if (storedKey == null) {
-            return null;
-        }
-        return storedKey.decryptMnemonic("".getBytes());
+        return this.mnemonic;
     }
 
     public String getAddress() {
@@ -150,7 +157,7 @@ public class WalletUtils {
         System.arraycopy(sigData.getV(), 0, sig, 64, 1);
 
         String signature = String.format("0x%s", Utils.byteToHexString(sig));
-        System.out.println("signature " + signature);
+
         return signature;
     }
 
@@ -214,19 +221,81 @@ public class WalletUtils {
         return signature;
     }
 
-    public StoredKey importWallet(String phrase, String name, String encryptPassword, ArrayList<CoinType> coins) {
-        CoinType coin = coins.get(0) != null ? coins.get(0) : CoinType.ETHEREUM;
-        StoredKey storedKey = StoredKey.importHDWallet(phrase, name, encryptPassword.getBytes(), coin);
-        storedKey.store(getPath());
-        encryptPreferenceUtils.setPathStoredKey(getPath());
-        return storedKey;
+    public StoredKey importWallet(String phrase, String name, String encryptPassword, ArrayList<CoinType> coins) throws Exception {
+        if (this.storedKey == null || this.getAddress().isEmpty()) {
+            boolean isGrantedStorage = checkPermissionStorage();
+            if (isGrantedStorage) {
+                CoinType coin = coins.get(0) != null ? coins.get(0) : CoinType.ETHEREUM;
+                StoredKey storedKey = StoredKey.importHDWallet(phrase.trim(), name, encryptPassword.getBytes(), coin);
+                storedKey.store(getPath());
+                encryptPreferenceUtils.setPathStoredKey(getPath());
+                encryptPreferenceUtils.setMnemonic(phrase.trim());
+                encryptPreferenceUtils.setXUserAddress(storedKey.account(0).address());
+                encryptPreferenceUtils.setConnectWallet(Constants.TYPE_IMPORT_WALLET.IMPORTED);
+                return storedKey;
+            }
+        } else {
+            throw new Exception("Wallet is already existed");
+        }
+
+        return null;
     }
 
-    public StoredKey importWallet(PrivateKey privateKey, String name, String password, CoinType coin) {
-        StoredKey storedKey = StoredKey.importPrivateKey(privateKey.data(), name, password.getBytes(), coin);
-        storedKey.store(getPath());
-        encryptPreferenceUtils.setPathStoredKey(getPath());
-        return storedKey;
+    public StoredKey importWallet(PrivateKey privateKey, String name, String password, CoinType coin) throws Exception {
+        if (this.storedKey == null || this.getAddress().isEmpty()) {
+            boolean isGrantedStorage = checkPermissionStorage();
+            if (isGrantedStorage) {
+                StoredKey storedKey = StoredKey.importPrivateKey(privateKey.data(), name, password.getBytes(), coin);
+                storedKey.store(getPath());
+                encryptPreferenceUtils.setPathStoredKey(getPath());
+                encryptPreferenceUtils.setXUserAddress(storedKey.account(0).address());
+                encryptPreferenceUtils.setConnectWallet(Constants.TYPE_IMPORT_WALLET.IMPORTED);
+                return storedKey;
+            }
+        } else {
+            throw new Exception("Wallet is already existed");
+        }
+        return null;
+    }
+
+    public void deleteStoredKey() {
+        File dir = new File(this.context.getApplicationInfo().dataDir + "/" + Constants.PATH);
+        if (dir.exists()) {
+            File store_key = new File(dir, "stored-key");
+            if (store_key.exists()) {
+                store_key.delete();
+            }
+        }
+
+    }
+
+    public boolean checkPermissionStorage() {
+        if (context.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                context.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        } else {
+            if (!ActivityCompat.shouldShowRequestPermissionRationale((Activity) context, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                new AlertDialog.Builder(context)
+                        .setTitle("Allow Permission")
+                        .setMessage("Allow ChainVerseSDK to acess files on your device?")
+                        .setPositiveButton("Allow", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                Uri uri = Uri.fromParts("package", context.getPackageName(), null);
+                                intent.setData(uri);
+                                context.startActivity(intent);
+                            }
+                        })
+                        .setNegativeButton("Deny", null)
+                        .show();
+            } else {
+                ActivityCompat.requestPermissions((Activity) context,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        1);
+            }
+        }
+        return false;
     }
 
     private String getPath() {

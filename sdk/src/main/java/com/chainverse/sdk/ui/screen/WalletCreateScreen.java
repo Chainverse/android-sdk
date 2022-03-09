@@ -3,7 +3,9 @@ package com.chainverse.sdk.ui.screen;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+
 import androidx.fragment.app.Fragment;
+
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,10 +21,11 @@ import com.chainverse.sdk.listener.OnWalletListener;
 import com.chainverse.sdk.ui.ChainverseSDKActivity;
 
 
-public class WalletCreateScreen extends Fragment implements View.OnClickListener{
+public class WalletCreateScreen extends Fragment implements View.OnClickListener {
     private Button btnClose, btnCreate;
     private CheckBox checkBoxTerm, checkBox12Word, checkBox24Word;
     RelativeLayout containerCreate;
+
     public WalletCreateScreen() {
         // Required empty public constructor
     }
@@ -37,7 +40,7 @@ public class WalletCreateScreen extends Fragment implements View.OnClickListener
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View mParent =  inflater.inflate(R.layout.chainverse_screen_wallet_create, container, false);
+        View mParent = inflater.inflate(R.layout.chainverse_screen_wallet_create, container, false);
         containerCreate = mParent.findViewById(R.id.container_create_wallet);
         btnClose = mParent.findViewById(R.id.chainverse_button_close);
         btnCreate = mParent.findViewById(R.id.chainverse_button_create);
@@ -67,9 +70,9 @@ public class WalletCreateScreen extends Fragment implements View.OnClickListener
         @Override
         public void onClick(View v) {
             final boolean isChecked = checkBox12Word.isChecked();
-            if(isChecked){
+            if (isChecked) {
                 checkBox24Word.setChecked(false);
-            }else{
+            } else {
                 checkBox24Word.setChecked(true);
             }
         }
@@ -79,9 +82,9 @@ public class WalletCreateScreen extends Fragment implements View.OnClickListener
         @Override
         public void onClick(View v) {
             final boolean isChecked = checkBox24Word.isChecked();
-            if(isChecked){
+            if (isChecked) {
                 checkBox12Word.setChecked(false);
-            }else{
+            } else {
                 checkBox12Word.setChecked(true);
             }
         }
@@ -91,10 +94,10 @@ public class WalletCreateScreen extends Fragment implements View.OnClickListener
         @Override
         public void onClick(View v) {
             final boolean isChecked = checkBoxTerm.isChecked();
-            if(isChecked){
+            if (isChecked) {
                 btnCreate.setBackgroundResource(R.drawable.chainverse_background_button_wallet_create);
                 btnCreate.setEnabled(true);
-            }else{
+            } else {
                 btnCreate.setBackgroundResource(R.drawable.chainverse_background_button_wallet_create_default);
                 btnCreate.setEnabled(false);
             }
@@ -104,15 +107,17 @@ public class WalletCreateScreen extends Fragment implements View.OnClickListener
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == R.id.chainverse_button_close){
+        if (v.getId() == R.id.chainverse_button_close) {
             getActivity().finish();
-        }else if(v.getId() == R.id.chainverse_button_create){
+        } else if (v.getId() == R.id.chainverse_button_create) {
             int strength = 128;
-            if(checkBox24Word.isChecked()){
+            if (checkBox24Word.isChecked()) {
                 strength = 256;
             }
             String passphrase = "";
-            WalletUtils.getInstance().init(getContext()).createWallet(strength, passphrase, new OnWalletListener() {
+
+            WalletUtils walletUtils = WalletUtils.getInstance().init(getContext());
+            walletUtils.genMnemonic(strength, passphrase, new OnWalletListener() {
                 @Override
                 public void onCreated() {
                     Intent intent = new Intent(getContext(), ChainverseSDKActivity.class);

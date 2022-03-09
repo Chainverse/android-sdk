@@ -3,10 +3,13 @@ package com.chainverse.sdk.ui.screen;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,16 +17,19 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.chainverse.sdk.R;
 import com.chainverse.sdk.adapter.PhraseAdapter;
 import com.chainverse.sdk.adapter.PhraseVerifyAdapter;
+import com.chainverse.sdk.common.BroadcastUtil;
 import com.chainverse.sdk.common.Constants;
 import com.chainverse.sdk.common.EncryptPreferenceUtils;
 import com.chainverse.sdk.common.EqualSpacingItemDecoration;
 import com.chainverse.sdk.common.Utils;
 import com.chainverse.sdk.common.WalletUtils;
 import com.chainverse.sdk.listener.OnItemActionListener;
+import com.chainverse.sdk.listener.OnWalletListener;
 import com.chainverse.sdk.model.Phrase;
 import com.chainverse.sdk.ui.ChainverseSDKActivity;
 
@@ -31,7 +37,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 
-public class WalletVerifyScreen extends Fragment implements View.OnClickListener{
+public class WalletVerifyScreen extends Fragment implements View.OnClickListener {
     private Button btnClose, btnVerify;
     private RecyclerView phraseViewRandom, phraseViewVerify;
     private PhraseAdapter adapterRandom;
@@ -43,6 +49,7 @@ public class WalletVerifyScreen extends Fragment implements View.OnClickListener
     private ArrayList<Phrase> phrasesVerify = new ArrayList<>();
     private ArrayList<Phrase> phrasesChoose = new ArrayList<>();
     private String mnemonicChoose = "";
+
     public WalletVerifyScreen() {
         // Required empty public constructor
     }
@@ -57,7 +64,7 @@ public class WalletVerifyScreen extends Fragment implements View.OnClickListener
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View mParent =  inflater.inflate(R.layout.chainverse_screen_wallet_verify, container, false);
+        View mParent = inflater.inflate(R.layout.chainverse_screen_wallet_verify, container, false);
         containerVerify = mParent.findViewById(R.id.wallet_verify);
         btnClose = mParent.findViewById(R.id.chainverse_button_close);
         btnVerify = mParent.findViewById(R.id.chainverse_button_verify);
@@ -75,35 +82,35 @@ public class WalletVerifyScreen extends Fragment implements View.OnClickListener
         return mParent;
     }
 
-    private void setupDataPhrase(){
+    private void setupDataPhrase() {
         String[] phrasesArr = WalletUtils.getInstance().init(getContext()).getMnemonic().split(" ");
-        if(phrasesArr.length > 0){
-            for(int i = 0; i < phrasesArr.length; i++){
+        if (phrasesArr.length > 0) {
+            for (int i = 0; i < phrasesArr.length; i++) {
                 Phrase phraseVerify = new Phrase();
                 phraseVerify.setBody(phrasesArr[i]);
-                phraseVerify.setOrder(i+1);
+                phraseVerify.setOrder(i + 1);
                 phraseVerify.setShow(false);
                 phrasesVerify.add(phraseVerify);
 
                 Phrase phraseRandom = new Phrase();
                 phraseRandom.setBody(phrasesArr[i]);
-                phraseRandom.setOrder(i+1);
+                phraseRandom.setOrder(i + 1);
                 phraseRandom.setShow(true);
                 phrasesRandom.add(phraseRandom);
             }
         }
     }
 
-    private void initPhraseViewVerify(){
+    private void initPhraseViewVerify() {
         adapterVerify = new PhraseVerifyAdapter(phrasesVerify, getContext());
         adapterVerify.setOnItemActionListener(new OnItemActionListener() {
             @Override
             public void onItemClicked(int position, View v) {
-                if(!phrasesVerify.get(position).isShow()){
+                if (!phrasesVerify.get(position).isShow()) {
                     return;
                 }
                 //remove
-                if(phraseVerifyPosition > 0){
+                if (phraseVerifyPosition > 0) {
                     int pos = phrasesVerify.get(position).getPosition();
                     phrasesVerify.get(position).setShow(false);
                     handleDataVerifyAfterRemove(position);
@@ -113,7 +120,7 @@ public class WalletVerifyScreen extends Fragment implements View.OnClickListener
 
                     checkPhraseOrderAfterRemove(position);
                     phraseVerifyPosition--;
-                    if(phraseVerifyPosition < phrasesVerify.size()){
+                    if (phraseVerifyPosition < phrasesVerify.size()) {
                         btnVerify.setBackgroundResource(R.drawable.chainverse_background_button_wallet_create_default);
                         btnVerify.setEnabled(false);
                     }
@@ -133,53 +140,53 @@ public class WalletVerifyScreen extends Fragment implements View.OnClickListener
             column = 6;
         }
 
-        GridLayoutManager mLayoutManager = new GridLayoutManager(getContext(),column);
+        GridLayoutManager mLayoutManager = new GridLayoutManager(getContext(), column);
         phraseViewVerify.setLayoutManager(mLayoutManager);
-        phraseViewVerify.addItemDecoration(new EqualSpacingItemDecoration(Utils.convertDPToPixels(getContext(),10), EqualSpacingItemDecoration.GRID));
+        phraseViewVerify.addItemDecoration(new EqualSpacingItemDecoration(Utils.convertDPToPixels(getContext(), 10), EqualSpacingItemDecoration.GRID));
         phraseViewVerify.setAdapter(adapterVerify);
         phraseViewVerify.setVisibility(View.VISIBLE);
     }
 
-    private void checkPhraseOrderAfterRemove(int position){
+    private void checkPhraseOrderAfterRemove(int position) {
         phrasesChoose.remove(position);
         checkPhraseOrder();
     }
 
-    private void checkPhraseOrder(){
-        if(phrasesChoose.size() > 0){
+    private void checkPhraseOrder() {
+        if (phrasesChoose.size() > 0) {
             boolean isRight = false;
-            for(int a = 0; a < phrasesChoose.size(); a++){
-                if(phrasesChoose.get(a).getOrder() == phrasesVerify.get(a).getOrder()){
+            for (int a = 0; a < phrasesChoose.size(); a++) {
+                if (phrasesChoose.get(a).getOrder() == phrasesVerify.get(a).getOrder()) {
                     isRight = true;
-                }else{
+                } else {
                     isRight = false;
                     break;
                 }
             }
 
-            if(isRight){
+            if (isRight) {
                 tvMessageError.setVisibility(View.GONE);
-            }else{
+            } else {
                 tvMessageError.setVisibility(View.VISIBLE);
             }
-        }else{
+        } else {
             tvMessageError.setVisibility(View.GONE);
         }
 
 
     }
 
-    private void initPhraseViewRandom(){
+    private void initPhraseViewRandom() {
         Collections.shuffle(phrasesRandom);
-        adapterRandom = new PhraseAdapter(phrasesRandom, getContext(),"choose");
+        adapterRandom = new PhraseAdapter(phrasesRandom, getContext(), "choose");
         adapterRandom.setOnItemActionListener(new OnItemActionListener() {
             @Override
             public void onItemClicked(int position, View v) {
-                if(!phrasesRandom.get(position).isShow()){
+                if (!phrasesRandom.get(position).isShow()) {
                     return;
                 }
                 //Move to verify
-                if(phraseVerifyPosition < phrasesVerify.size()){
+                if (phraseVerifyPosition < phrasesVerify.size()) {
                     String p = phrasesRandom.get(position).getBody();
                     phrasesVerify.get(phraseVerifyPosition).setBody(p);
                     phrasesVerify.get(phraseVerifyPosition).setShow(true);
@@ -188,38 +195,21 @@ public class WalletVerifyScreen extends Fragment implements View.OnClickListener
                     adapterRandom.notifyItemChanged(position);
                     adapterVerify.notifyItemChanged(phraseVerifyPosition);
 
-                    if(!phrasesChoose.contains(phrasesRandom.get(position))){
+                    if (!phrasesChoose.contains(phrasesRandom.get(position))) {
                         phrasesChoose.add(phrasesRandom.get(position));
                     }
 
                     checkPhraseOrder();
                     phraseVerifyPosition++;
-                    if(phraseVerifyPosition == phrasesVerify.size()){
-                        if(isVerifyMnemonic()){
+                    if (phraseVerifyPosition == phrasesVerify.size()) {
+                        if (isVerifyMnemonic()) {
                             btnVerify.setBackgroundResource(R.drawable.chainverse_background_button_wallet_create);
                             btnVerify.setEnabled(true);
                         }
                         btnVerify.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                String xUserAddress = WalletUtils.getInstance().init(getContext()).getAddress();
-                                EncryptPreferenceUtils.getInstance().init(getContext()).setXUserAddress(xUserAddress);
-                                try {
-                                    EncryptPreferenceUtils.getInstance().init(getContext()).setXUserSignature(WalletUtils.getInstance().init(getContext()).signMessage("chainverse"));
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-
-                                Intent intent = new Intent();
-                                intent.setAction(Constants.ACTION.CREATED_WALLET);
-                                LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
-
-                                Intent intentAlert = new Intent(getContext(), ChainverseSDKActivity.class);
-                                intentAlert.putExtra("screen", Constants.SCREEN.ALERT);
-                                getActivity().startActivity(intentAlert);
-
-                                getActivity().finish();
-
+                                importWallet();
                             }
                         });
                     }
@@ -241,25 +231,79 @@ public class WalletVerifyScreen extends Fragment implements View.OnClickListener
 //            btnVerify.getLayoutParams().width = metrics.widthPixels / 2;
         }
 
-        GridLayoutManager mLayoutManager = new GridLayoutManager(getContext(),column);
+        GridLayoutManager mLayoutManager = new GridLayoutManager(getContext(), column);
         phraseViewRandom.setLayoutManager(mLayoutManager);
-        phraseViewRandom.addItemDecoration(new EqualSpacingItemDecoration(Utils.convertDPToPixels(getContext(),10), EqualSpacingItemDecoration.GRID));
+        phraseViewRandom.addItemDecoration(new EqualSpacingItemDecoration(Utils.convertDPToPixels(getContext(), 10), EqualSpacingItemDecoration.GRID));
         phraseViewRandom.setAdapter(adapterRandom);
         phraseViewRandom.setVisibility(View.VISIBLE);
     }
 
-    private boolean isVerifyMnemonic(){
+    private void importWallet() {
+        WalletUtils walletUtils = WalletUtils.getInstance().init(getContext());
+        Intent intent = new Intent(getContext(), ChainverseSDKActivity.class);
+        intent.putExtra("screen", Constants.SCREEN.LOADING);
+        getActivity().startActivity(intent);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    WalletUtils.getInstance().init(getContext()).importWallet(walletUtils.getMnemonic(), new OnWalletListener() {
+                        @Override
+                        public void onCreated() {
+
+                        }
+
+                        @Override
+                        public void onImported() {
+                            BroadcastUtil.send(getContext(), Constants.ACTION.DIMISS_LOADING);
+
+                            String xUserAddress = walletUtils.getAddress();
+                            EncryptPreferenceUtils.getInstance().init(getContext()).setXUserAddress(xUserAddress);
+                            try {
+                                EncryptPreferenceUtils.getInstance().init(getContext()).setXUserSignature(walletUtils.signMessage("ChainVerse"));
+                                EncryptPreferenceUtils.getInstance().init(getContext()).setConnectWallet(Constants.TYPE_IMPORT_WALLET.IMPORTED);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                            BroadcastUtil.send(getContext(), Constants.ACTION.CREATED_WALLET);
+
+                            Intent intentAlert = new Intent(getContext(), ChainverseSDKActivity.class);
+                            intentAlert.putExtra("screen", Constants.SCREEN.ALERT);
+                            intentAlert.putExtra("message", "Import wallet successful");
+                            getActivity().startActivity(intentAlert);
+
+                            getActivity().finish();
+                        }
+
+                        @Override
+                        public void onImportedFailed() {
+                            BroadcastUtil.send(getContext(), Constants.ACTION.DIMISS_LOADING);
+                        }
+                    });
+
+                } catch (Exception e) {
+                    BroadcastUtil.send(getContext(), Constants.ACTION.DIMISS_LOADING);
+                    Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();;
+                }
+            }
+        }, 500);
+    }
+
+    private boolean isVerifyMnemonic() {
         mnemonicChoose = "";
-        if(phrasesChoose.size() == phrasesVerify.size()){
-            for(int i = 0; i < phrasesChoose.size();i++){
-                if(i == 0){
+        if (phrasesChoose.size() == phrasesVerify.size()) {
+            for (int i = 0; i < phrasesChoose.size(); i++) {
+                if (i == 0) {
                     mnemonicChoose = mnemonicChoose.concat(phrasesChoose.get(i).getBody());
-                }else{
+                } else {
                     mnemonicChoose = mnemonicChoose.concat(" " + phrasesChoose.get(i).getBody());
                 }
             }
 
-            if(WalletUtils.getInstance().init(getContext()).getMnemonic().equals(mnemonicChoose)){
+            if (WalletUtils.getInstance().init(getContext()).getMnemonic().equals(mnemonicChoose)) {
                 return true;
             }
 
@@ -268,16 +312,16 @@ public class WalletVerifyScreen extends Fragment implements View.OnClickListener
         return false;
     }
 
-    private void handleDataVerifyAfterRemove(int position){
-        if(phrasesVerify.size() > 0){
-            for(int i = 0; i < phrasesVerify.size(); i++){
-                if(i >= position){
-                    if(i < phrasesVerify.size() - 1){
+    private void handleDataVerifyAfterRemove(int position) {
+        if (phrasesVerify.size() > 0) {
+            for (int i = 0; i < phrasesVerify.size(); i++) {
+                if (i >= position) {
+                    if (i < phrasesVerify.size() - 1) {
                         int pos = i + 1;
                         phrasesVerify.get(i).setBody(phrasesVerify.get(pos).getBody());
                         phrasesVerify.get(i).setPosition(phrasesVerify.get(pos).getPosition());
                         phrasesVerify.get(i).setShow(phrasesVerify.get(pos).isShow());
-                    }else{
+                    } else {
                         phrasesVerify.get(i).setBody("");
                         phrasesVerify.get(i).setPosition(0);
                         phrasesVerify.get(i).setShow(false);
@@ -292,7 +336,7 @@ public class WalletVerifyScreen extends Fragment implements View.OnClickListener
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == R.id.chainverse_button_close){
+        if (v.getId() == R.id.chainverse_button_close) {
             getActivity().finish();
         }
     }

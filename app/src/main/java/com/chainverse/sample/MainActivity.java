@@ -1,5 +1,6 @@
 package com.chainverse.sample;
 
+import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -24,6 +25,7 @@ import com.chainverse.sdk.model.Params.FilterMarket;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import wallet.core.jni.StoredKey;
@@ -173,13 +175,20 @@ public class MainActivity extends AppCompatActivity {
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ChainverseSDK.getInstance().testBuy();
+                ChainverseSDK.getInstance().logout();
             }
         });
 
         btnMarket.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+//                try {
+//                    ChainverseSDK.getInstance().connectWithChainverse();
+//                } catch (Exception e) {
+//                    System.out.println(e.getMessage());
+//                }
+
+//                ChainverseSDK.getInstance().importWalletByMnemonic("crush solar bread symbol laugh clutch unveil crack silent mushroom discover novel");
 //                String mnemonic = ChainverseSDK.getInstance().genMnemonic(256);
 //                System.out.println(mnemonic);
 //                System.out.println(address);
@@ -187,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
 //////                ChainverseSDK.getInstance().getAbiDefination();
 //////                LogUtil.log("nft ", nft);
 //                try {
-////                    String tx = ChainverseSDK.getInstance().approveToken(Constants.TOKEN_SUPPORTED.CVT, Constants.CONTRACT.MarketService, 50);
+//                    ChainverseSDK.getInstance().approveToken(Constants.TOKEN_SUPPORTED.CVT, Constants.CONTRACT.MarketService, 50);
 ////                    String tx = ChainverseSDK.getInstance().bidNFT(Constants.TOKEN_SUPPORTED.CVT, new BigInteger("609"), 45.5);
 ////                    String tx = ChainverseSDK.getInstance().transferItem("0x760B9251261520478CeE8b6db0f45E22b5D18E4A","0x7eAdaF22D3a4C10E0bA1aC692654b80954084bdD", new BigInteger("291"));
 ////                    BigInteger allowence = ChainverseSDK.getInstance().isApproved(Constants.TOKEN_SUPPORTED.CVT, "0x4115737CB80A7Dd57b4285C3c68894012275063d", Constants.CONTRACT.MarketService);
