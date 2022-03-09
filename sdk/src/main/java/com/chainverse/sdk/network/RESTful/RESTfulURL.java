@@ -57,7 +57,7 @@ public class RESTfulURL {
                 String time = messageNonce != null && messageNonce.getTime() != null ? String.valueOf(messageNonce.getTime()) : "";
                 String signature = messageNonce != null && messageNonce.getMessage() != null ? String.valueOf(messageNonce.getMessage()) : "";
                 final Request request = chain.request().newBuilder()
-                        .addHeader("x-address", EncryptPreferenceUtils.getInstance().getXUserAddress())
+                        .addHeader("x-address", WalletUtils.getInstance().getAddress())
                         .addHeader("x-signature", signature)
                         .addHeader("x-nonce", nonce)
                         .addHeader("x-time", time)

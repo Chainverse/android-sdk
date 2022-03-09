@@ -387,7 +387,6 @@ public class ChainverseSDK implements Chainverse {
     }
 
     private void doConnectSuccess() {
-        System.out.println("is user connected" + isUserConnected());
         if (isUserConnected()) {
             WalletUtils walletUtils = WalletUtils.getInstance().init(mContext);
             CallbackToGame.onConnectSuccess(walletUtils.getAddress());
@@ -554,7 +553,7 @@ public class ChainverseSDK implements Chainverse {
             WalletUtils walletUtils = WalletUtils.getInstance().init(mContext);
             info.setAddress(walletUtils.getAddress());
             LogUtil.log("user signature ", encryptPreferenceUtils.getXUserMessageNonce());
-            if(encryptPreferenceUtils.getXUserMessageNonce() != null) {
+            if (encryptPreferenceUtils.getXUserMessageNonce() != null) {
                 info.setSignature(encryptPreferenceUtils.getXUserMessageNonce().getMessage());
             }
             return info;
@@ -655,7 +654,7 @@ public class ChainverseSDK implements Chainverse {
 
     @Override
     public void showConnectWalletView() {
-        if(!isUserConnected()) {
+        if (!isUserConnected()) {
             WalletUtils walletUtils = WalletUtils.getInstance().init(mContext);
             boolean checkPermission = walletUtils.checkPermissionStorage();
             if (checkPermission) {

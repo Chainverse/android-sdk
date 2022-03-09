@@ -182,6 +182,7 @@ public class MainActivity extends AppCompatActivity {
         btnMarket.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ChainverseSDK.getInstance().getMyAsset();
 //                try {
 //                    ChainverseSDK.getInstance().connectWithChainverse();
 //                } catch (Exception e) {
