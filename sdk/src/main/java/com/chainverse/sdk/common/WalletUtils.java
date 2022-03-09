@@ -97,12 +97,14 @@ public class WalletUtils {
 
     public String getAddress() {
         String address = "";
-        if (encryptPreferenceUtils.getConnectWallet().equals(Constants.TYPE_IMPORT_WALLET.IMPORTED)) {
-            if (storedKey != null && storedKey.accountCount() > 0) {
-                address = storedKey.account(0).address();
+        if (encryptPreferenceUtils != null && encryptPreferenceUtils.getConnectWallet() != null) {
+            if (encryptPreferenceUtils.getConnectWallet().equals(Constants.TYPE_IMPORT_WALLET.IMPORTED)) {
+                if (storedKey != null && storedKey.accountCount() > 0) {
+                    address = storedKey.account(0).address();
+                }
+            } else {
+                address = encryptPreferenceUtils.getXUserAddress();
             }
-        } else {
-            address = encryptPreferenceUtils.getXUserAddress();
         }
         return address;
     }

@@ -244,10 +244,12 @@ public class ChainverseSDK implements Chainverse {
     }
 
     protected void getServiceByGame() {
+        System.out.println("run here");
         RESTfulClient.getServiceByGame(gameAddress)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(jsonElement -> {
+                    LogUtil.log("run here", jsonElement);
                     if (Utils.getErrorCodeResponse(jsonElement) == 0) {
                         Gson gson = new Gson();
 
