@@ -7,6 +7,7 @@ import com.chainverse.sdk.common.Constants;
 import com.chainverse.sdk.common.LogUtil;
 import com.chainverse.sdk.common.EncryptPreferenceUtils;
 import com.chainverse.sdk.common.WalletUtils;
+import com.chainverse.sdk.manager.ServiceManager;
 
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
@@ -56,7 +57,7 @@ public class BaseWeb3 {
 
 
     public BaseWeb3 init(Context context) {
-        web3 = Web3j.build(new HttpService(Constants.URL.urlBlockchain));
+        web3 = Web3j.build(new HttpService(ServiceManager.getInstance().init(context).getRPC()));
         this.context = context;
         return instance;
     }

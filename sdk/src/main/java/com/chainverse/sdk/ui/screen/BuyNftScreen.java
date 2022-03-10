@@ -114,7 +114,7 @@ public class BuyNftScreen extends Fragment implements View.OnClickListener {
 
                 balance = BaseWeb3.getInstance().getBalance(address);
             } else {
-                balance = new ContractManager(this.getContext()).balanceOf(currency, address);
+                balance = ContractManager.getInstance().init(this.getContext()).balanceOf(currency, address);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -142,7 +142,7 @@ public class BuyNftScreen extends Fragment implements View.OnClickListener {
             }
 
         } else {
-            BigInteger allowance = new ContractManager(this.getContext()).allowance(currency, address, Constants.CONTRACT.MarketService);
+            BigInteger allowance = ContractManager.getInstance().init(this.getContext()).allowance(currency, address, Constants.CONTRACT.MarketService);
             Double priceFormat = price * Math.pow(10, 18);
 
             if (allowance.doubleValue() < priceFormat) {
@@ -177,7 +177,7 @@ public class BuyNftScreen extends Fragment implements View.OnClickListener {
             } else {
                 if (isEnough) {
                     Context context = this.getContext();
-                    ContractManager contractManager = new ContractManager(context);
+                    ContractManager contractManager = ContractManager.getInstance().init(context);
 
                     progress = new ProgressDialog(this.getContext());
                     progress.setTitle("Loading");
@@ -218,7 +218,7 @@ public class BuyNftScreen extends Fragment implements View.OnClickListener {
                                 }
                             } else {
                                 try {
-                                    String tx = new ContractManager(context).approved(currency, Constants.CONTRACT.MarketService, price);
+                                    String tx = ContractManager.getInstance().init(context).approved(currency, Constants.CONTRACT.MarketService, price);
                                     if (tx != null || !tx.isEmpty()) {
                                         btnAgree.setText("Buy now");
                                         tvData.setText("Do you want to sign to buy the NFT");

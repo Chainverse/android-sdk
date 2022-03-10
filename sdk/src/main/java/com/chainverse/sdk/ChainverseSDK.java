@@ -23,6 +23,7 @@ import com.chainverse.sdk.common.WalletUtils;
 import com.chainverse.sdk.listener.Action;
 import com.chainverse.sdk.listener.OnEmitterListenter;
 import com.chainverse.sdk.manager.ContractManager;
+import com.chainverse.sdk.manager.ServiceManager;
 import com.chainverse.sdk.manager.TransferItemManager;
 import com.chainverse.sdk.model.MarketItem.Currency;
 import com.chainverse.sdk.model.MessageNonce;
@@ -106,7 +107,6 @@ public class ChainverseSDK implements Chainverse {
         encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(mContext);
 
         exceptionSDK();
-        checkContract();
         receiverCreatedWallet();
         setupBouncyCastle();
         getServiceByGame();
@@ -119,7 +119,6 @@ public class ChainverseSDK implements Chainverse {
         encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(mContext);
 
         exceptionSDK();
-        checkContract();
         receiverCreatedWallet();
         setupBouncyCastle();
         getServiceByGame();
@@ -244,19 +243,29 @@ public class ChainverseSDK implements Chainverse {
     }
 
     protected void getServiceByGame() {
-        System.out.println("run here");
         RESTfulClient.getServiceByGame(gameAddress)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(jsonElement -> {
-                    LogUtil.log("run here", jsonElement);
+
                     if (Utils.getErrorCodeResponse(jsonElement) == 0) {
                         Gson gson = new Gson();
 
                         ChainverseService service = gson.fromJson(jsonElement.getAsJsonObject().get("data"), new TypeToken<ChainverseService>() {
                         }.getType());
+
                         if (service != null) {
                             encryptPreferenceUtils.setService(service);
+                            ServiceManager serviceManager = ServiceManager.getInstance().init(mContext);
+
+                            if (service.getNetworkInfo() != null && service.getNetworkInfo().getRpcs() != null) {
+                                ArrayList<String> rpcs = gson.fromJson(service.getNetworkInfo().getRpcs(), new TypeToken<ArrayList<String>>() {
+                                }.getType());
+                                serviceManager.setRPC(rpcs.get(0));
+                            }
+
+                            checkContract();
+                            serviceManager.checkRPC();
                         } else {
                             CallbackToGame.onError(ChainverseError.ERROR_SERVICE_NOT_FOUND);
                         }
@@ -266,6 +275,7 @@ public class ChainverseSDK implements Chainverse {
                 }, throwable -> {
                     throwable.printStackTrace();
                     CallbackToGame.onError(ChainverseError.ERROR_SERVICE_NOT_FOUND);
+                    checkContract();
                 });
     }
 
@@ -293,7 +303,7 @@ public class ChainverseSDK implements Chainverse {
 
     public NFT getNFT(String nft, BigInteger tokenId) {
         try {
-            ContractManager contract = new ContractManager(mContext);
+            ContractManager contract = ContractManager.getInstance().init(mContext);
             NFT nftInfo = contract.getNFT(nft, tokenId);
             return nftInfo;
         } catch (Exception e) {
@@ -303,7 +313,7 @@ public class ChainverseSDK implements Chainverse {
     }
 
     private void checkContract() {
-        ContractManager checkContract = new ContractManager(mContext, new ContractManager.Listener() {
+        ContractManager checkContract = ContractManager.getInstance().init(mContext, new ContractManager.Listener() {
             @Override
             public void isChecked(boolean isCheck) {
                 if (isCheck) {
@@ -320,14 +330,13 @@ public class ChainverseSDK implements Chainverse {
 
 
     private void doInit() {
-        isInitSDK = true;
         if (isKeepConnect) {
             doConnectSuccess();
         } else {
             encryptPreferenceUtils.clearXUserAddress();
             encryptPreferenceUtils.clearXUserSignature();
         }
-
+        isInitSDK = true;
     }
 
     private Boolean isInitSDKSuccess() {
@@ -341,6 +350,8 @@ public class ChainverseSDK implements Chainverse {
     private void setAccessToken() {
         String typeConnect = encryptPreferenceUtils.getConnectWallet();
         if (typeConnect.equals(Constants.TYPE_IMPORT_WALLET.IMPORTED)) {
+            WalletUtils walletUtils = new WalletUtils().init(mContext);
+            encryptPreferenceUtils.setXUserSignature(walletUtils.signPersonalMessage("ChainVerse"));
             encryptPreferenceUtils.clearXUserMessageNonce();
             RESTfulClient.getNonce()
                     .subscribeOn(Schedulers.io())
@@ -352,7 +363,6 @@ public class ChainverseSDK implements Chainverse {
                             }.getType());
 
                             try {
-                                WalletUtils walletUtils = new WalletUtils().init(mContext);
                                 EncryptPreferenceUtils encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(mContext);
 
                                 encryptPreferenceUtils.clearXUserMessageNonce();
@@ -529,6 +539,7 @@ public class ChainverseSDK implements Chainverse {
         if (!isInitSDKSuccess()) {
             return;
         }
+
         WalletUtils walletUtils = WalletUtils.getInstance().init(mContext);
         CallbackToGame.onLogout(walletUtils.getAddress());
         walletUtils.deleteStoredKey();
@@ -537,7 +548,9 @@ public class ChainverseSDK implements Chainverse {
         encryptPreferenceUtils.clearMnemonic();
         encryptPreferenceUtils.clearConnectWallet();
         encryptPreferenceUtils.clearPathStoredKey();
-        transferItemManager.disConnect();
+        if (transferItemManager != null) {
+            transferItemManager.disConnect();
+        }
     }
 
     @Override
@@ -578,7 +591,7 @@ public class ChainverseSDK implements Chainverse {
     public BigDecimal getBalanceToken(String contractAddress) {
         try {
             WalletUtils walletUtils = WalletUtils.getInstance().init(mContext);
-            ContractManager contract = new ContractManager(mContext);
+            ContractManager contract = ContractManager.getInstance().init(mContext);
             return contract.balanceOf(contractAddress, walletUtils.getAddress());
         } catch (Exception e) {
             e.printStackTrace();
@@ -602,7 +615,7 @@ public class ChainverseSDK implements Chainverse {
     }
 
     @Override
-    public void signMessage(String message) {
+    public void signMessage(String message, boolean isPersonal) {
         if (encryptPreferenceUtils.getConnectWallet().equals(Constants.TYPE_IMPORT_WALLET.IMPORTED)) {
             SignerData data = new SignerData();
             data.setMessage(message);
@@ -615,7 +628,7 @@ public class ChainverseSDK implements Chainverse {
             mContext.startActivity(intent);
         } else if (encryptPreferenceUtils.getConnectWallet().equals(Constants.TYPE_IMPORT_WALLET.CHAINVERSE)) {
             ChainverseConnect chainverseConnect = new ChainverseConnect.Builder().build(mContext);
-            chainverseConnect.signMessage(false, message);
+            chainverseConnect.signMessage(isPersonal, message);
         }
 
     }
@@ -849,7 +862,7 @@ public class ChainverseSDK implements Chainverse {
 
     public BigInteger isApproved(String token, String owner, String spender) {
         BigInteger allowence = BigInteger.ZERO;
-        ContractManager contractManager = new ContractManager(mContext);
+        ContractManager contractManager = ContractManager.getInstance().init(mContext);
 
         allowence = contractManager.allowance(token, owner, spender);
 
@@ -858,7 +871,7 @@ public class ChainverseSDK implements Chainverse {
 
     public String approveToken(String token, String spender, double amount) throws Exception {
         String tx;
-        ContractManager contractManager = new ContractManager(mContext);
+        ContractManager contractManager = ContractManager.getInstance().init(mContext);
         try {
             tx = contractManager.approved(token, spender, amount);
         } catch (Exception e) {
@@ -869,7 +882,7 @@ public class ChainverseSDK implements Chainverse {
 
     public String buyNFT(String currency, BigInteger listingId, double price) throws Exception {
         String tx;
-        ContractManager contractManager = new ContractManager(mContext);
+        ContractManager contractManager = ContractManager.getInstance().init(mContext);
         try {
             tx = contractManager.buyNFT(currency, listingId, price);
         } catch (Exception e) {
@@ -881,7 +894,7 @@ public class ChainverseSDK implements Chainverse {
 
     public String bidNFT(String currency, BigInteger listingId, double price) throws Exception {
         String tx;
-        ContractManager contractManager = new ContractManager(mContext);
+        ContractManager contractManager = ContractManager.getInstance().init(mContext);
         try {
             tx = contractManager.bidNFT(currency, listingId, price);
         } catch (Exception e) {
@@ -894,7 +907,7 @@ public class ChainverseSDK implements Chainverse {
     public String sellNFT(String nft, BigInteger tokenId, double price, String currency) throws
             Exception {
         String tx;
-        ContractManager contractManager = new ContractManager(mContext);
+        ContractManager contractManager = ContractManager.getInstance().init(mContext);
         try {
             tx = contractManager.list(nft, tokenId, price, currency);
         } catch (Exception e) {
@@ -906,7 +919,7 @@ public class ChainverseSDK implements Chainverse {
 
     public String cancelSellNFT(BigInteger listingId) throws Exception {
         String tx;
-        ContractManager contractManager = new ContractManager(mContext);
+        ContractManager contractManager = ContractManager.getInstance().init(mContext);
         try {
             tx = contractManager.unlist(listingId);
         } catch (Exception e) {
@@ -917,18 +930,18 @@ public class ChainverseSDK implements Chainverse {
     }
 
     public String approveNFT(String nft, BigInteger tokenId) throws Exception {
-        ContractManager contractManager = new ContractManager(mContext);
+        ContractManager contractManager = ContractManager.getInstance().init(mContext);
         return contractManager.approveNFT(nft, tokenId);
     }
 
     public String approveNFTForGame(String nft, BigInteger tokenId) throws Exception {
-        ContractManager contractManager = new ContractManager(mContext);
+        ContractManager contractManager = ContractManager.getInstance().init(mContext);
         return contractManager.approveNFTForGame(nft, tokenId);
     }
 
     public boolean isApproved(String nft, BigInteger tokenId) {
         boolean isChecked = false;
-        ContractManager contractManager = new ContractManager(mContext);
+        ContractManager contractManager = ContractManager.getInstance().init(mContext);
 
         String allowence = contractManager.allowenceNFT(nft, tokenId);
 
@@ -942,7 +955,7 @@ public class ChainverseSDK implements Chainverse {
     public String approveNFTForService(String nft, String service, BigInteger tokenId) {
         String tx = null;
 
-        ContractManager contractManager = new ContractManager(mContext);
+        ContractManager contractManager = ContractManager.getInstance().init(mContext);
 
         try {
             tx = contractManager.approveNFTForService(nft, service, tokenId);
@@ -955,7 +968,7 @@ public class ChainverseSDK implements Chainverse {
 
     public boolean isApprovedForService(String nft, String service, BigInteger tokenId) {
         boolean isChecked = false;
-        ContractManager contractManager = new ContractManager(mContext);
+        ContractManager contractManager = ContractManager.getInstance().init(mContext);
 
         String allowence = contractManager.allowenceNFT(nft, tokenId);
 
@@ -968,24 +981,24 @@ public class ChainverseSDK implements Chainverse {
 
 
     public String withdrawNFT(String nft, BigInteger tokenId) throws Exception {
-        ContractManager contractManager = new ContractManager(mContext);
+        ContractManager contractManager = ContractManager.getInstance().init(mContext);
         return contractManager.withdrawNFT(nft, tokenId);
     }
 
     public String moveItemToGame(String nft, BigInteger tokenId) throws Exception {
-        ContractManager contractManager = new ContractManager(mContext);
+        ContractManager contractManager = ContractManager.getInstance().init(mContext);
         return contractManager.moveItemToGame(nft, tokenId);
     }
 
     public String moveItemToService(String nft, String service, BigInteger tokenId) throws
             Exception {
-        ContractManager contractManager = new ContractManager(mContext);
+        ContractManager contractManager = ContractManager.getInstance().init(mContext);
         return contractManager.moveService(nft, service, tokenId);
     }
 
     public String transferItem(String to, String nft, BigInteger tokenId) throws Exception {
         String tx;
-        ContractManager contractManager = new ContractManager(mContext);
+        ContractManager contractManager = ContractManager.getInstance().init(mContext);
         WalletUtils walletUtils = WalletUtils.getInstance().init(mContext);
         try {
             String account = walletUtils.getAddress();
@@ -1001,14 +1014,14 @@ public class ChainverseSDK implements Chainverse {
     }
 
     public boolean checkAddress(String address, String chainId) {
-        ContractManager contractManager = new ContractManager(mContext);
+        ContractManager contractManager = ContractManager.getInstance().init(mContext);
         return contractManager.checkAddress(address, chainId);
     }
 
     public double estimateGasDefault(Constants.EFunction function, List inputs) throws
             Exception {
         double fee;
-        ContractManager contractManager = new ContractManager(mContext);
+        ContractManager contractManager = ContractManager.getInstance().init(mContext);
         try {
             fee = contractManager.estimateGasDefault(function, inputs);
         } catch (Exception e) {
@@ -1019,7 +1032,7 @@ public class ChainverseSDK implements Chainverse {
 
 //    public String withdrawCVT(double amount) throws Exception {
 //        String tx;
-//        ContractManager contractManager = new ContractManager(mContext);
+//        ContractManager contractManager = ContractManager.getInstance().init(mContext);
 //        try {
 //            tx = contractManager.withdrawCVT(amount);
 //        } catch (Exception e) {
@@ -1030,7 +1043,7 @@ public class ChainverseSDK implements Chainverse {
 //
 //    public String withdrawToken(String token, double amount) throws Exception {
 //        String tx;
-//        ContractManager contractManager = new ContractManager(mContext);
+//        ContractManager contractManager = ContractManager.getInstance().init(mContext);
 //        try {
 //            tx = contractManager.withdrawToken(token, amount);
 //        } catch (Exception e) {

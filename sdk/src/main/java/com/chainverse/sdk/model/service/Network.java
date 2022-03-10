@@ -7,6 +7,7 @@ public class Network implements Serializable {
     private String name;
     private String network;
     private String chain_id;
+    private String rpcs;
 
     public String getName() {
         return name;
@@ -30,5 +31,13 @@ public class Network implements Serializable {
 
     public void setChainId(String chain_id) {
         this.chain_id = chain_id;
+    }
+
+    public String getRpcs() {
+        return rpcs;
+    }
+
+    public void setRpcs(String rpcs) {
+        this.rpcs = rpcs;
     }
 }

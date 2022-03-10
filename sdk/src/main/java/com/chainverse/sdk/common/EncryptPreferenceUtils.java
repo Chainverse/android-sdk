@@ -20,6 +20,7 @@ public class EncryptPreferenceUtils {
     public static final String NAME = "chainverse_secret_shared_prefs";
     public static final String SERVICE = "SERVICE";
     public static final String PATH_STORED_KEY = "PATH_STORED_KEY";
+    public static final String RPC = "RPC";
     public static final String KEY_1 = "CHAINVERSE_SDK_KEY_1";
     public static final String KEY_2 = "CHAINVERSE_SDK_KEY_2";
     public static final String KEY_3 = "CHAINVERSE_SDK_KEY_3";
@@ -161,6 +162,20 @@ public class EncryptPreferenceUtils {
     }
 
     public synchronized void clearPathStoredKey() {
+        preferences.edit().remove(PATH_STORED_KEY).commit();
+    }
+
+    public synchronized void setRPC(String path) {
+        editor.putString(PATH_STORED_KEY, path);
+        editor.commit();
+    }
+
+    public synchronized String getRPC() {
+        String value = preferences.getString(PATH_STORED_KEY, "");
+        return value;
+    }
+
+    public synchronized void clearRPC() {
         preferences.edit().remove(PATH_STORED_KEY).commit();
     }
 

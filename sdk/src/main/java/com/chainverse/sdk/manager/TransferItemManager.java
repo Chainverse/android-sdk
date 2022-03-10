@@ -5,6 +5,7 @@ import android.content.Context;
 import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.common.Constants;
 import com.chainverse.sdk.common.EncryptPreferenceUtils;
+import com.chainverse.sdk.common.WalletUtils;
 import com.chainverse.sdk.listener.OnEmitterListenter;
 
 import java.net.URISyntaxException;
@@ -22,12 +23,13 @@ public class TransferItemManager {
     private Socket mSocket;
     private Context mContext;
     private Map<String, String> map = new HashMap<String, String>();
-    public TransferItemManager(Context context){
+
+    public TransferItemManager(Context context) {
         mContext = context;
         map.put("type", "SDK");
         map.put("signature", EncryptPreferenceUtils.getInstance().getXUserSignature());
         map.put("signature_ethers", "false");
-        map.put("user_address", EncryptPreferenceUtils.getInstance().getXUserAddress());
+        map.put("user_address", WalletUtils.getInstance().init(mContext).getAddress());
         map.put("game_address", ChainverseSDK.gameAddress);
 
         IO.Options opts = new IO.Options();
@@ -40,48 +42,48 @@ public class TransferItemManager {
         }
     }
 
-    public void on(OnEmitterListenter listener){
+    public void on(OnEmitterListenter listener) {
         mSocket.on("transfer_item_to_user", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                listener.call("transfer_item_to_user",args);
+                listener.call("transfer_item_to_user", args);
             }
         });
 
         mSocket.on("transfer_item_from_user", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                listener.call("transfer_item_from_user",args);
+                listener.call("transfer_item_from_user", args);
             }
         });
 
         mSocket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                listener.call(Socket.EVENT_CONNECT,args);
+                listener.call(Socket.EVENT_CONNECT, args);
             }
         });
 
         mSocket.on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                listener.call(Socket.EVENT_DISCONNECT,args);
+                listener.call(Socket.EVENT_DISCONNECT, args);
             }
         });
 
         mSocket.on(Socket.EVENT_CONNECT_ERROR, new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                listener.call(Socket.EVENT_CONNECT_ERROR,args);
+                listener.call(Socket.EVENT_CONNECT_ERROR, args);
             }
         });
     }
 
-    public void connect(){
+    public void connect() {
         mSocket.connect();
     }
 
-    public void disConnect(){
+    public void disConnect() {
         mSocket.disconnect();
     }
 }

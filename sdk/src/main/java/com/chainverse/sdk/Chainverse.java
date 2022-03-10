@@ -116,8 +116,9 @@ public interface Chainverse {
      * signMessage
      *
      * @param data
+     * @param isPersonal
      */
-    void signMessage(String data);
+    void signMessage(String data, boolean isPersonal);
 
     /**
      * signTransaction

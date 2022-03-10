@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 //                try {
-//                    ChainverseSDK.getInstance().importWalletByPrivateKey("5fc1c6abe679d5f044abe2a37ae46dae32788a10aa65a57521817682c17d2868");
+//                    ChainverseSDK.getInstance().importWalletByMnemonic("crush solar bread symbol laugh clutch unveil crack silent mushroom discover novel");
 //                } catch (Exception e) {
 //                    e.printStackTrace();
 //                }
@@ -205,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
 //////                ChainverseSDK.getInstance().getAbiDefination();
 //////                LogUtil.log("nft ", nft);
                 try {
-//                    ChainverseSDK.getInstance().approveToken(Constants.TOKEN_SUPPORTED.CVT, Constants.CONTRACT.MarketService, 50);
+                    ChainverseSDK.getInstance().approveToken(Constants.TOKEN_SUPPORTED.CVT, Constants.CONTRACT.MarketService, 50);
 //                    String tx = ChainverseSDK.getInstance().bidNFT(Constants.TOKEN_SUPPORTED.CVT, new BigInteger("609"), 45.5);
 //                    String tx = ChainverseSDK.getInstance().transferItem("0x760B9251261520478CeE8b6db0f45E22b5D18E4A","0x7eAdaF22D3a4C10E0bA1aC692654b80954084bdD", new BigInteger("221"));
 //                    BigInteger allowence = ChainverseSDK.getInstance().isApproved(Constants.TOKEN_SUPPORTED.CVT, "0x4115737CB80A7Dd57b4285C3c68894012275063d", Constants.CONTRACT.MarketService);
