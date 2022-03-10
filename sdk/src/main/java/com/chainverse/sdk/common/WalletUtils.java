@@ -92,7 +92,14 @@ public class WalletUtils {
     }
 
     public String getMnemonic() {
-        return this.mnemonic;
+        if (this.storedKey != null && this.storedKey.isMnemonic()) {
+            String passPhrase = "";
+            return this.storedKey.decryptMnemonic(passPhrase.getBytes());
+        }
+        if (!this.mnemonic.isEmpty()) {
+            return this.mnemonic;
+        }
+        return "";
     }
 
     public String getAddress() {

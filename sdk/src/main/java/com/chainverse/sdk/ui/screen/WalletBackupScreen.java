@@ -79,6 +79,7 @@ public class WalletBackupScreen extends Fragment implements View.OnClickListener
     }
 
     private void initPhraseView(){
+
         String[] phrases = WalletUtils.getInstance().init(getContext()).getMnemonic().split(" ");
         if(phrases.length > 0){
             ArrayList<Phrase> phrasesList = new ArrayList<>();

@@ -65,9 +65,15 @@ public class WalletInfoScreen extends Fragment implements View.OnClickListener {
         tvAddress.setOnClickListener(this);
 
         encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(getContext());
-        StoredKey storedKey = WalletUtils.getInstance().init(getContext()).getStoredKey();
-        if (storedKey == null || !storedKey.isMnemonic()) {
+        String typeConnect = encryptPreferenceUtils.getConnectWallet();
+        if (typeConnect.equals(Constants.TYPE_IMPORT_WALLET.CHAINVERSE)) {
             btnRecovery.setVisibility(View.GONE);
+            btnExport.setVisibility(View.GONE);
+        } else {
+            StoredKey storedKey = WalletUtils.getInstance().init(getContext()).getStoredKey();
+            if (storedKey == null || !storedKey.isMnemonic()) {
+                btnRecovery.setVisibility(View.GONE);
+            }
         }
 
         setBalance();
@@ -77,10 +83,12 @@ public class WalletInfoScreen extends Fragment implements View.OnClickListener {
 
     private void setBalance() {
         ChainverseService chainverseService = encryptPreferenceUtils.getService();
-        for (int i = 0; i < chainverseService.getTokens().size(); i++) {
-            Token token = chainverseService.getTokens().get(i);
-            TokenProgress tokenProgress = new TokenProgress(token, i);
-            tokenProgress.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        if (chainverseService != null || chainverseService.getTokens() != null) {
+            for (int i = 0; i < chainverseService.getTokens().size(); i++) {
+                Token token = chainverseService.getTokens().get(i);
+                TokenProgress tokenProgress = new TokenProgress(token, i);
+                tokenProgress.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            }
         }
         balance = "BNB: " + ChainverseSDK.getInstance().getBalance() + "\n";
     }

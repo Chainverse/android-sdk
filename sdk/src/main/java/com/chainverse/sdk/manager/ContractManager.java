@@ -348,7 +348,7 @@ public class ContractManager {
 
                     tx = sendRawTransaction.getTransactionHash();
 
-                    CallbackToGame.onTransact(Constants.EFunction.approveNFT, tx);
+                    CallbackToGame.onTransact(Constants.EFunction.approveToken, tx);
                 } else if (typeConnect.equals(Constants.TYPE_IMPORT_WALLET.CHAINVERSE)) {
                     chainverseConnect.sendTransaction(Constants.EFunction.approveToken, token, functionEncoder, BigInteger.ZERO, gasLimit, gasPrice, nonce);
                 }
@@ -592,7 +592,7 @@ public class ContractManager {
 
                     CallbackToGame.onTransact(Constants.EFunction.sell, tx);
                 } else if (typeConnect.equals(Constants.TYPE_IMPORT_WALLET.CHAINVERSE)) {
-                    chainverseConnect.sendTransaction(Constants.EFunction.approveNFT.sell, Constants.CONTRACT.MarketService, functionEncoder, BigInteger.ZERO, gasLimit, gasPrice, nonce);
+                    chainverseConnect.sendTransaction(Constants.EFunction.sell, Constants.CONTRACT.MarketService, functionEncoder, BigInteger.ZERO, gasLimit, gasPrice, nonce);
                 }
             } catch (Exception e) {
                 throw e;
