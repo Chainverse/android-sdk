@@ -567,7 +567,6 @@ public class ChainverseSDK implements Chainverse {
             ChainverseUser info = new ChainverseUser();
             WalletUtils walletUtils = WalletUtils.getInstance().init(mContext);
             info.setAddress(walletUtils.getAddress());
-            LogUtil.log("user signature ", encryptPreferenceUtils.getXUserMessageNonce());
             if (encryptPreferenceUtils.getXUserMessageNonce() != null) {
                 info.setSignature(encryptPreferenceUtils.getXUserMessageNonce().getMessage());
             }

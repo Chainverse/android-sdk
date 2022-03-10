@@ -200,7 +200,6 @@ public class BuyNftScreen extends Fragment implements View.OnClickListener {
                                         tx = contractManager.buyNFT(currency, BigInteger.valueOf(listingId), price);
                                         txtLoading.setText("Buy Successfully");
                                     } catch (Exception e) {
-                                        System.out.println(e.getLocalizedMessage());
                                         txtLoading.setVisibility(View.GONE);
                                         txtError.setText("Transaction Error: " + e.getLocalizedMessage());
                                         txtError.setVisibility(View.VISIBLE);

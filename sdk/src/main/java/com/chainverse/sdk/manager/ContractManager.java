@@ -1233,7 +1233,6 @@ public class ContractManager {
         String content;
 
         protected String doInBackground(String... urls) {
-            System.out.println("run background ");
             return handleTokenUri(urls[0]);
         }
 
