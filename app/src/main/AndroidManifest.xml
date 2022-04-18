@@ -41,5 +41,8 @@
             android:theme="@style/ChainverseSDKTheme"
             android:windowSoftInputMode="stateAlwaysHidden" />
     </application>
-
+    <queries>
+        <!-- Explicit apps you know in advance about: -->
+        <package android:name="org.chainverse"/>
+    </queries>
 </manifest>
