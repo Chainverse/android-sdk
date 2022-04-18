@@ -4,11 +4,11 @@ import java.math.BigInteger;
 
 public class Auction extends BaseInfo {
     private String winner;
-    private BigInteger bid;
+    private double bid;
     private BigInteger duration;
     private BigInteger end;
 
-    public Auction(boolean isEnded, String nft, String owner, String currency, BigInteger tokenId, int fee, BigInteger id, String winner, BigInteger bid, BigInteger duration, BigInteger end) {
+    public Auction(boolean isEnded, String nft, String owner, String currency, BigInteger tokenId, int fee, BigInteger id, String winner, double bid, BigInteger duration, BigInteger end) {
         super(isEnded, nft, owner, currency, tokenId, fee, id);
         this.winner = winner;
         this.bid = bid;
@@ -24,11 +24,11 @@ public class Auction extends BaseInfo {
         this.winner = winner;
     }
 
-    public BigInteger getBid() {
+    public double getBid() {
         return bid;
     }
 
-    public void setBid(BigInteger bid) {
+    public void setBid(double bid) {
         this.bid = bid;
     }
 

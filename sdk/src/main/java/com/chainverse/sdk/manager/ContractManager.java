@@ -2,6 +2,7 @@ package com.chainverse.sdk.manager;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.chainverse.sdk.ChainverseError;
 import com.chainverse.sdk.ChainverseSDK;
@@ -15,6 +16,7 @@ import com.chainverse.sdk.common.Convert;
 import com.chainverse.sdk.common.EncryptPreferenceUtils;
 import com.chainverse.sdk.common.LogUtil;
 import com.chainverse.sdk.common.WalletUtils;
+import com.chainverse.sdk.model.MarketItem.Currency;
 import com.chainverse.sdk.model.NFT.Auction;
 import com.chainverse.sdk.model.NFT.InfoSell;
 import com.chainverse.sdk.model.NFT.Listing;
@@ -48,11 +50,18 @@ import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.gas.DefaultGasProvider;
 
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -157,6 +166,57 @@ public class ContractManager {
         return decimals;
     }
 
+    public org.web3j.utils.Convert.Unit getWei(String currency) {
+        org.web3j.utils.Convert.Unit decimals = org.web3j.utils.Convert.Unit.WEI;
+        if (currency.toLowerCase().equals(Constants.TOKEN_SUPPORTED.NativeCurrency.toLowerCase())) {
+            return decimals;
+        }
+        if (web3 != null) {
+            try {
+                Credentials dummyCredentials = Credentials.create(Keys.createEcKeyPair());
+                ERC20 erc20 = ERC20.load(currency, web3, dummyCredentials, new DefaultGasProvider());
+
+                RemoteCall<BigInteger> result = erc20.decimals();
+
+                int decimalToken = result.sendAsync().get().intValue();
+                switch (decimalToken) {
+                    case 0:
+                        return org.web3j.utils.Convert.Unit.WEI;
+                    case 3:
+                        return org.web3j.utils.Convert.Unit.KWEI;
+                    case 6:
+                        return org.web3j.utils.Convert.Unit.MWEI;
+                    case 9:
+                        return org.web3j.utils.Convert.Unit.GWEI;
+                    case 12:
+                        return org.web3j.utils.Convert.Unit.SZABO;
+                    case 15:
+                        return org.web3j.utils.Convert.Unit.FINNEY;
+                    case 18:
+                        return org.web3j.utils.Convert.Unit.ETHER;
+                    case 21:
+                        return org.web3j.utils.Convert.Unit.KETHER;
+                    case 24:
+                        return org.web3j.utils.Convert.Unit.METHER;
+                    case 27:
+                        return org.web3j.utils.Convert.Unit.GETHER;
+                }
+            } catch (InvalidAlgorithmParameterException e) {
+                e.printStackTrace();
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (NoSuchProviderException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return decimals;
+    }
+
     private Observable<Boolean> checkContractObservable() {
         return Observable.defer(new Func0<ObservableSource<? extends Boolean>>() {
 
@@ -217,6 +277,7 @@ public class ContractManager {
                 Credentials dummyCredentials = Credentials.create(Keys.createEcKeyPair());
                 HandleContract handleContract = HandleContract.load(Constants.CONTRACT.MarketService, service.getAbi(), web3, dummyCredentials, new DefaultGasProvider());
                 ERC721 contractERC721 = ERC721.load(nft, web3, dummyCredentials, new DefaultGasProvider());
+                ERC20 contractERC20 = null;
 
                 RemoteCall<String> remoteCallUri = contractERC721.tokenURI(tokenId);
 
@@ -224,9 +285,10 @@ public class ContractManager {
 
                 String ownerOf = contractERC721.ownerOf(tokenId).sendAsync().get();
 
-                String content = handleTokenUri(uri);
+                String content = new DownloadContent().execute(uri).get();
 
                 item.setTokenId(tokenId);
+                item.setNft(nft);
                 item.setOwnerOnChain(ownerOf);
 
                 if (content != null && !content.isEmpty()) {
@@ -268,29 +330,53 @@ public class ContractManager {
                 int feeAuction = Integer.parseInt(auctionInfo.fee.toString(), 8);
                 BigInteger bidDuration = new BigInteger(auctionInfo.bidDuration.toString(), 18);
                 BigInteger bidEnd = new BigInteger(auctionInfo.end.toString(), 18);
-                Auction auction = new Auction(auctionInfo.isEnded, auctionInfo.nft, auctionInfo.owner, auctionInfo.currency, auctionInfo.tokenId, feeAuction, auctionInfo.id, auctionInfo.winner, auctionInfo.bid, bidDuration, bidEnd);
+                BigDecimal bid = org.web3j.utils.Convert.fromWei(new BigDecimal(auctionInfo.bid), getWei(auctionInfo.currency));
+                double bidDouble = bid != null ? Double.parseDouble(bid.toString()) : 0.0;
+
+                Auction auction = new Auction(auctionInfo.isEnded, auctionInfo.nft, auctionInfo.owner, auctionInfo.currency, auctionInfo.tokenId, feeAuction, auctionInfo.id, auctionInfo.winner, bidDouble, bidDuration, bidEnd);
 
                 int feeListing = Integer.parseInt(listingInfo.fee.toString(), 8);
-                Listing listing = new Listing(listingInfo.isEnded, listingInfo.nft, listingInfo.owner, listingInfo.currency, listingInfo.tokenId, feeListing, listingInfo.id, listingInfo.price);
+                BigDecimal priceListing = org.web3j.utils.Convert.fromWei(new BigDecimal(listingInfo.price), getWei(listingInfo.currency));
+                double priceDouble = priceListing != null ? Double.parseDouble(priceListing.toString()) : 0.0;
+
+                Listing listing = new Listing(listingInfo.isEnded, listingInfo.nft, listingInfo.owner, listingInfo.currency, listingInfo.tokenId, feeListing, listingInfo.id, priceDouble);
 
                 item.setAuction(auction);
                 item.setListing(listing);
+
+                Currency currency = new Currency();
 
                 InfoSell infoSell = new InfoSell();
                 infoSell.setIsAuction((auction.getId().equals(BigInteger.ZERO)) ? false : true);
                 infoSell.setPrice(0.0);
                 infoSell.setListingId(BigInteger.ZERO);
+
                 if (!auction.getId().equals(BigInteger.ZERO)) {
-                    BigDecimal price = org.web3j.utils.Convert.fromWei(new BigDecimal(auction.getBid()), org.web3j.utils.Convert.Unit.ETHER);
+                    contractERC20 = ERC20.load(auction.getCurrency(), web3, dummyCredentials, new DefaultGasProvider());
+                    currency.setCurrency(auction.getCurrency());
+
                     infoSell.setListingId(auction.getId());
-                    infoSell.setPrice(Double.parseDouble(price.toString()));
+                    infoSell.setPrice(bidDouble);
                     item.setOwner(auction.getOwner());
                 }
-                if (!listing.getId().equals(BigInteger.ZERO) && listing.getPrice() != null) {
-                    BigDecimal price = org.web3j.utils.Convert.fromWei(new BigDecimal(listing.getPrice()), org.web3j.utils.Convert.Unit.ETHER);
+                if (!listing.getId().equals(BigInteger.ZERO) && listing.getPrice() != 0.0) {
+                    contractERC20 = ERC20.load(listing.getCurrency(), web3, dummyCredentials, new DefaultGasProvider());
+                    currency.setCurrency(listing.getCurrency());
+
                     infoSell.setListingId(listing.getId());
-                    infoSell.setPrice(Double.parseDouble(price.toString()));
+                    infoSell.setPrice(priceDouble);
                     item.setOwner(listing.getOwner());
+                }
+
+                if (contractERC20 != null) {
+                    int decimals = contractERC20.decimals().sendAsync().get().intValue();
+                    String name = contractERC20.name().sendAsync().get();
+                    String symbol = contractERC20.symbol().sendAsync().get();
+
+                    currency.setDecimal(decimals);
+                    currency.setName(name);
+                    currency.setSymbol(symbol);
+                    infoSell.setCurrencyInfo(currency);
                 }
 
                 item.setInfoSell(infoSell);
@@ -1209,7 +1295,7 @@ public class ContractManager {
 
     private static String getUrlContents(String theUrl) throws Exception {
         StringBuilder content = new StringBuilder();
-        // Use try and catch to avoid the exceptions
+
         try {
             URL url = new URL(theUrl); // creating a url object
             URLConnection urlConnection = url.openConnection(); // creating a urlconnection object
@@ -1224,8 +1310,8 @@ public class ContractManager {
             bufferedReader.close();
         } catch (Exception e) {
             throw e;
-//            e.printStackTrace();
         }
+
         return content.toString();
     }
 
@@ -1233,7 +1319,8 @@ public class ContractManager {
         String content;
 
         protected String doInBackground(String... urls) {
-            return handleTokenUri(urls[0]);
+            String content = handleTokenUri(urls[0]);
+            return content;
         }
 
         protected void onPostExecute(String result) {

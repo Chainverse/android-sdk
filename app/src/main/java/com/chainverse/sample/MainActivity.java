@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onGetListItemMarket(ArrayList<NFT> items, int count) {
 
+                LogUtil.log("nft ", items);
             }
 
             @Override
@@ -205,7 +206,17 @@ public class MainActivity extends AppCompatActivity {
 //////                ChainverseSDK.getInstance().getAbiDefination();
 //////                LogUtil.log("nft ", nft);
                 try {
-                    ChainverseSDK.getInstance().approveToken(Constants.TOKEN_SUPPORTED.CVT, Constants.CONTRACT.MarketService, 50);
+                    NFT nft = ChainverseSDK.getInstance().getNFT("0x7D5495EE8999258f2eDC5D3ed497889410793D31", new BigInteger("55"));
+                    LogUtil.log("key ", nft);
+//                    FilterMarket filterMarket = new FilterMarket();
+//                    filterMarket.setName("");
+//                    filterMarket.setPage(0);
+//                    filterMarket.setPageSize(10);
+//                    ChainverseSDK.getInstance().getListItemOnMarket(filterMarket);
+//                    BigInteger amount = ChainverseSDK.getInstance().isApproved(Constants.TOKEN_SUPPORTED.CVT, "0x4115737CB80A7Dd57b4285C3c68894012275063d", Constants.CONTRACT.MarketService);
+//                    double mount = amount.doubleValue() * Math.pow(10, -18);
+//                    System.out.println(mount);
+//                    ChainverseSDK.getInstance().approveToken(Constants.TOKEN_SUPPORTED.CVT, Constants.CONTRACT.MarketService, 200.000000);
 //                    String tx = ChainverseSDK.getInstance().bidNFT(Constants.TOKEN_SUPPORTED.CVT, new BigInteger("609"), 45.5);
 //                    String tx = ChainverseSDK.getInstance().transferItem("0x760B9251261520478CeE8b6db0f45E22b5D18E4A","0x7eAdaF22D3a4C10E0bA1aC692654b80954084bdD", new BigInteger("221"));
 //                    BigInteger allowence = ChainverseSDK.getInstance().isApproved(Constants.TOKEN_SUPPORTED.CVT, "0x4115737CB80A7Dd57b4285C3c68894012275063d", Constants.CONTRACT.MarketService);
