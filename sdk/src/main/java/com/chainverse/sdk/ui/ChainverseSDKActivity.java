@@ -19,7 +19,7 @@ import com.chainverse.sdk.ui.screen.LoadingScreen;
 import com.chainverse.sdk.ui.screen.SignerScreen;
 import com.chainverse.sdk.ui.screen.ConnectWalletScreen;
 import com.chainverse.sdk.ui.screen.WalletBackupScreen;
-import com.chainverse.sdk.ui.screen.WalletCreateScreen;
+import com.chainverse.sdk.ui.screen.WalletCreateStepScreen;
 import com.chainverse.sdk.ui.screen.WalletExportScreen;
 import com.chainverse.sdk.ui.screen.WalletImportScreen;
 import com.chainverse.sdk.ui.screen.WalletInfoScreen;
@@ -104,7 +104,8 @@ public class ChainverseSDKActivity extends AppCompatActivity {
                 replaceFragment(new WalletExportScreen());
                 break;
             case Constants.SCREEN.CREATE_WALLET:
-                replaceFragment(new WalletCreateScreen());
+                replaceFragment(new WalletCreateStepScreen());
+//                replaceFragment(new WalletCreateScreen());
                 break;
             case Constants.SCREEN.RECOVERY_WALLET:
                 replaceFragment(new WalletRecoveryScreen());

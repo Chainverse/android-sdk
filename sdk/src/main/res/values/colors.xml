@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ChainverseColorPrimary">#077DC5</color>
+    <color name="ChainverseColorPrimary">#0046FF</color>
+    <color name="ColorDisable">#838A97</color>
+    <color name="danger">#FE193A</color>
 </resources>

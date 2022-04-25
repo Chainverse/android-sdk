@@ -5,17 +5,17 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,13 +38,18 @@ import java.util.Collections;
 
 
 public class WalletVerifyScreen extends Fragment implements View.OnClickListener {
-    private Button btnClose, btnVerify;
     private RecyclerView phraseViewRandom, phraseViewVerify;
     private PhraseAdapter adapterRandom;
     private PhraseVerifyAdapter adapterVerify;
-    private TextView tvMessageError;
-    private LinearLayout containerVerify;
+    private TextView tvMessageError, textStep;
+    private RelativeLayout containerVerify;
+    private LinearLayout buttonNext;
+    private View mGroupButton, mBackStep, mParent;
+    private ImageButton buttonClose;
+    private ImageView iconArrowRight;
+
     int phraseVerifyPosition = 0;
+
     private ArrayList<Phrase> phrasesRandom = new ArrayList<>();
     private ArrayList<Phrase> phrasesVerify = new ArrayList<>();
     private ArrayList<Phrase> phrasesChoose = new ArrayList<>();
@@ -64,22 +69,52 @@ public class WalletVerifyScreen extends Fragment implements View.OnClickListener
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View mParent = inflater.inflate(R.layout.chainverse_screen_wallet_verify, container, false);
-        containerVerify = mParent.findViewById(R.id.wallet_verify);
-        btnClose = mParent.findViewById(R.id.chainverse_button_close);
-        btnVerify = mParent.findViewById(R.id.chainverse_button_verify);
-        phraseViewRandom = mParent.findViewById(R.id.chainverse_phraseview_random);
-        phraseViewVerify = mParent.findViewById(R.id.chainverse_phraseview_verify);
-        tvMessageError = mParent.findViewById(R.id.chainverse_message_error);
-        btnClose.setOnClickListener(this);
+        mParent = inflater.inflate(R.layout.verify_wallet, container, false);
+        containerVerify = mParent.findViewById(R.id.container_verify);
+        mGroupButton = inflater.inflate(R.layout.groupt_button, container, false);
+        mBackStep = inflater.inflate(R.layout.back_step, container, false);
+
+        findView();
+
+        buttonClose.setOnClickListener(this);
+        mBackStep.setOnClickListener(this);
+        buttonNext.setOnClickListener(this);
+
+        resizeView();
 
         setupDataPhrase();
         initPhraseViewVerify();
         initPhraseViewRandom();
 
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
-        containerVerify.getLayoutParams().height = metrics.heightPixels;
         return mParent;
+    }
+
+    private void findView() {
+        phraseViewRandom = mParent.findViewById(R.id.phrase_random);
+        phraseViewVerify = mParent.findViewById(R.id.phrase_input);
+        tvMessageError = mParent.findViewById(R.id.text_error_verify);
+        textStep = mBackStep.findViewById(R.id.text_step);
+        buttonClose = mGroupButton.findViewById(R.id.chainverse_button_close);
+        iconArrowRight = mParent.findViewById(R.id.icon_backup_arrow_right);
+        buttonNext = mParent.findViewById(R.id.button_verify_next);
+
+        buttonNext.setEnabled(false);
+        textStep.setText("Phrase");
+    }
+
+    private void resizeView() {
+        RelativeLayout.LayoutParams lp_button = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams lp_back = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        lp_button.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+        lp_button.topMargin = 20;
+        lp_button.rightMargin = 20;
+
+        lp_back.topMargin = 20;
+        lp_back.leftMargin = 80;
+
+        containerVerify.addView(mGroupButton, lp_button);
+        containerVerify.addView(mBackStep, lp_back);
     }
 
     private void setupDataPhrase() {
@@ -121,8 +156,9 @@ public class WalletVerifyScreen extends Fragment implements View.OnClickListener
                     checkPhraseOrderAfterRemove(position);
                     phraseVerifyPosition--;
                     if (phraseVerifyPosition < phrasesVerify.size()) {
-                        btnVerify.setBackgroundResource(R.drawable.chainverse_background_button_wallet_create_default);
-                        btnVerify.setEnabled(false);
+                        buttonNext.setBackgroundTintList(getContext().getColorStateList(R.color.ColorDisable));
+                        iconArrowRight.setBackgroundTintList(getContext().getColorStateList(R.color.ColorDisable));
+                        buttonNext.setEnabled(false);
                     }
                 }
 
@@ -203,15 +239,10 @@ public class WalletVerifyScreen extends Fragment implements View.OnClickListener
                     phraseVerifyPosition++;
                     if (phraseVerifyPosition == phrasesVerify.size()) {
                         if (isVerifyMnemonic()) {
-                            btnVerify.setBackgroundResource(R.drawable.chainverse_background_button_wallet_create);
-                            btnVerify.setEnabled(true);
+                            buttonNext.setBackgroundTintList(getContext().getColorStateList(R.color.ChainverseColorPrimary));
+                            iconArrowRight.setBackgroundTintList(getContext().getColorStateList(R.color.ChainverseColorPrimary));
+                            buttonNext.setEnabled(true);
                         }
-                        btnVerify.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                importWallet();
-                            }
-                        });
                     }
                 }
 
@@ -286,7 +317,8 @@ public class WalletVerifyScreen extends Fragment implements View.OnClickListener
 
                 } catch (Exception e) {
                     BroadcastUtil.send(getContext(), Constants.ACTION.DIMISS_LOADING);
-                    Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();;
+                    Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                    ;
                 }
             }
         }, 500);
@@ -338,6 +370,13 @@ public class WalletVerifyScreen extends Fragment implements View.OnClickListener
     public void onClick(View v) {
         if (v.getId() == R.id.chainverse_button_close) {
             getActivity().finish();
+        } else if (v.getId() == R.id.button_back_step) {
+            Intent intent = new Intent(getContext(), ChainverseSDKActivity.class);
+            intent.putExtra("screen", Constants.SCREEN.BACKUP_WALLET);
+            getActivity().startActivity(intent);
+            getActivity().finish();
+        } else if (v.getId() == R.id.button_verify_next) {
+            importWallet();
         }
     }
 }

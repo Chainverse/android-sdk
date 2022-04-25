@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/create_wallet_step_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/chainverse_background"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/container_create_step"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="50dp"
+            android:background="@drawable/container"
+            android:elevation="10dp"
+            android:orientation="vertical"
+            android:paddingTop="21dp">
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:paddingBottom="20dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_horizontal"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Back up your wallet now!"
+                        android:textColor="#222222"
+                        android:textSize="18dp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="20dp"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center"
+                        android:text="In the next step you will see Secret Phrase (12 words) that allows you to recover a wallet."
+                        android:textAlignment="center" />
+
+                    <LinearLayout
+                        android:id="@+id/container_step"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="20dp"
+                            android:gravity="center">
+
+                            <Button
+                                android:id="@+id/btn_step1"
+                                android:layout_width="100dp"
+                                android:layout_height="100dp"
+                                android:background="@drawable/background_uncheck"
+                                android:padding="14dp"
+                                android:text="If I lose my secret phrase, my funds will be lost forever."
+                                android:textColor="#838A97"
+                                android:textSize="8dp" />
+
+                            <Button
+                                android:id="@+id/btn_step2"
+                                android:layout_width="100dp"
+                                android:layout_height="100dp"
+                                android:layout_marginHorizontal="15dp"
+                                android:background="@drawable/background_uncheck"
+                                android:padding="14dp"
+                                android:text="If I expose or share my secret phrase to anybody, my funds can get stolen."
+                                android:textColor="#838A97"
+                                android:textSize="8dp" />
+
+                            <Button
+                                android:id="@+id/btn_step3"
+                                android:layout_width="100dp"
+                                android:layout_height="100dp"
+                                android:background="@drawable/background_uncheck"
+                                android:padding="14dp"
+                                android:text="It is my full responsibility to keep my secret phrase secure."
+                                android:textColor="#838A97"
+                                android:textSize="8dp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/button_next"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:background="@drawable/circle_background"
+                            android:backgroundTint="#838A97"
+                            android:gravity="center"
+                            android:paddingVertical="4dp"
+                            android:paddingRight="4dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="fill_parent"
+                                android:background="@android:color/transparent"
+                                android:text="CONTINUE"
+                                android:textColor="#ffffff"
+                                android:textSize="12dp"
+                                android:layout_marginRight="12dp"
+                                android:layout_marginTop="2dp"
+                                android:layout_marginLeft="10dp"
+                                android:textStyle="bold" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/circle_background"
+                                android:padding="5dp">
+
+                                <ImageView
+                                    android:id="@+id/icon_arrow_right"
+                                    android:layout_width="12dp"
+                                    android:layout_height="12dp"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/arrow_right"
+                                    android:tint="#838A97" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </LinearLayout>
+            </ScrollView>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

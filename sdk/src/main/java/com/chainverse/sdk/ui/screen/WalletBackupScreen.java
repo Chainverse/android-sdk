@@ -6,15 +6,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.chainverse.sdk.R;
 import com.chainverse.sdk.adapter.PhraseAdapter;
@@ -29,12 +34,18 @@ import com.chainverse.sdk.ui.ChainverseSDKActivity;
 import java.util.ArrayList;
 
 
-public class WalletBackupScreen extends Fragment implements View.OnClickListener{
-    private Button btnClose, btnNext, btnCopy;
+public class WalletBackupScreen extends Fragment implements View.OnClickListener {
     private RecyclerView phraseView;
     private PhraseAdapter adapter;
-    private LinearLayout viewCopied;
+    private LinearLayout viewCopied, btnBackStep, btnNext;
+    private RelativeLayout container_backup;
     private String type;
+    private View mGroupButton, mBackStep, mParent;
+    private TextView text_step, text_copy;
+    private ImageButton btn_close;
+
+    private String phrase;
+
     public WalletBackupScreen() {
         // Required empty public constructor
     }
@@ -60,38 +71,77 @@ public class WalletBackupScreen extends Fragment implements View.OnClickListener
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View mParent =  inflater.inflate(R.layout.chainverse_screen_wallet_backup, container, false);
-        btnClose = mParent.findViewById(R.id.chainverse_button_close);
-        btnNext = mParent.findViewById(R.id.chainverse_button_next);
-        btnCopy = mParent.findViewById(R.id.chainverse_button_copy);
-        phraseView = mParent.findViewById(R.id.chainverse_phraseview);
-        viewCopied = mParent.findViewById(R.id.chainverse_view_copied);
-        btnClose.setOnClickListener(this);
-        btnCopy.setOnClickListener(this);
+        mParent = inflater.inflate(R.layout.wallet_backup, container, false);
+        mGroupButton = inflater.inflate(R.layout.groupt_button, container, false);
+        mBackStep = inflater.inflate(R.layout.back_step, container, false);
+
+        findView();
+
+        btnBackStep.setOnClickListener(this);
+        viewCopied.setOnClickListener(this);
+        btn_close.setOnClickListener(this);
         btnNext.setOnClickListener(this);
 
-        btnNext.setVisibility(View.VISIBLE);
-        if(type.equals("view")){
-            btnNext.setVisibility(View.GONE);
+        WalletUtils walletUtils = WalletUtils.getInstance().init(getContext());
+        if (walletUtils.getMnemonic().isEmpty()) {
+            phrase = walletUtils.genMnemonic(128, "");
+        } else {
+            phrase = walletUtils.getMnemonic();
         }
+
+
         initPhraseView();
+
+        resizeView();
         return mParent;
     }
 
-    private void initPhraseView(){
+    private void findView() {
+        viewCopied = mParent.findViewById(R.id.button_copy);
+        container_backup = mParent.findViewById(R.id.container_backup);
+        phraseView = mParent.findViewById(R.id.phrase_view);
+        btnBackStep = mBackStep.findViewById(R.id.button_back_step);
+        btnNext = mParent.findViewById(R.id.button_backup_next);
+        text_step = mBackStep.findViewById(R.id.text_step);
+        text_copy = mParent.findViewById(R.id.text_copy);
+        btn_close = mGroupButton.findViewById(R.id.chainverse_button_close);
 
-        String[] phrases = WalletUtils.getInstance().init(getContext()).getMnemonic().split(" ");
-        if(phrases.length > 0){
+        if (type.equals("view")) {
+            btnNext.setVisibility(View.GONE);
+            text_step.setText("Back");
+        } else {
+            text_step.setText("Create Account");
+        }
+    }
+
+    private void resizeView() {
+        RelativeLayout.LayoutParams lp_button = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams lp_back = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        lp_button.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+        lp_button.topMargin = 20;
+        lp_button.rightMargin = 20;
+
+        lp_back.topMargin = 20;
+        lp_back.leftMargin = 80;
+
+        container_backup.addView(mGroupButton, lp_button);
+        container_backup.addView(mBackStep, lp_back);
+    }
+
+    private void initPhraseView() {
+        String[] phrases = phrase.split(" ");
+        if (phrases.length > 0) {
             ArrayList<Phrase> phrasesList = new ArrayList<>();
-            for(int i = 0; i < phrases.length; i++){
+            for (int i = 0; i < phrases.length; i++) {
                 Phrase phrase = new Phrase();
                 phrase.setBody(phrases[i]);
-                phrase.setOrder(i+1);
+                phrase.setOrder(i + 1);
                 phrase.setShow(true);
                 phrasesList.add(phrase);
             }
 
-            adapter = new PhraseAdapter(phrasesList, getContext(),"display");
+            adapter = new PhraseAdapter(phrasesList, getContext(), "display");
             adapter.setOnItemActionListener(new OnItemActionListener() {
                 @Override
                 public void onItemClicked(int position, View v) {
@@ -113,9 +163,9 @@ public class WalletBackupScreen extends Fragment implements View.OnClickListener
             }
 
 
-            GridLayoutManager mLayoutManager = new GridLayoutManager(getContext(),column);
+            GridLayoutManager mLayoutManager = new GridLayoutManager(getContext(), column);
             phraseView.setLayoutManager(mLayoutManager);
-            phraseView.addItemDecoration(new EqualSpacingItemDecoration(Utils.convertDPToPixels(getContext(),10), EqualSpacingItemDecoration.GRID));
+            phraseView.addItemDecoration(new EqualSpacingItemDecoration(Utils.convertDPToPixels(getContext(), 10), EqualSpacingItemDecoration.GRID));
             phraseView.setAdapter(adapter);
             phraseView.setVisibility(View.VISIBLE);
 
@@ -125,20 +175,27 @@ public class WalletBackupScreen extends Fragment implements View.OnClickListener
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == R.id.chainverse_button_close){
-            getActivity().finish();
-        }else if(v.getId() == R.id.chainverse_button_copy){
+        if (v.getId() == R.id.button_back_step) {
+            if (type.equals("view")) {
+                getActivity().finish();
+            } else {
+                Intent intent = new Intent(getContext(), ChainverseSDKActivity.class);
+                intent.putExtra("screen", Constants.SCREEN.CREATE_WALLET);
+                getActivity().startActivity(intent);
+                getActivity().finish();
+            }
+        } else if (v.getId() == R.id.button_copy) {
             ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("phase", WalletUtils.getInstance().init(getContext()).getMnemonic());
+            ClipData clip = ClipData.newPlainText("phase", phrase);
             clipboard.setPrimaryClip(clip);
-            btnCopy.setVisibility(View.GONE);
-            viewCopied.setVisibility(View.VISIBLE);
-        }else if(v.getId() == R.id.chainverse_button_next){
+            text_copy.setText("COPIED");
+        } else if (v.getId() == R.id.chainverse_button_close) {
+            getActivity().finish();
+        } else if (v.getId() == R.id.button_backup_next) {
             Intent intent = new Intent(getContext(), ChainverseSDKActivity.class);
             intent.putExtra("screen", Constants.SCREEN.VERIFY_WALLET);
             getActivity().startActivity(intent);
             getActivity().finish();
-
         }
     }
 }

@@ -1,11 +1,14 @@
 package com.chainverse.sdk.adapter;
 
 import android.content.Context;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.chainverse.sdk.R;
@@ -29,13 +32,16 @@ public class PhraseVerifyAdapter extends RecyclerView.Adapter<PhraseVerifyAdapte
     }
 
     class PhraseVerifyHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private TextView tvPhrase,tvNum;
+        private TextView tvPhrase, tvNum;
         private OnItemActionListener clickListener;
+        private LinearLayout containerItemVerify;
+
         PhraseVerifyHolder(@NonNull View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
             tvPhrase = itemView.findViewById(R.id.chainverse_tvphrase);
             tvNum = itemView.findViewById(R.id.chainverse_tvnum);
+            containerItemVerify = itemView.findViewById(R.id.container_item_verify);
         }
 
         void setOnItemActionListener(OnItemActionListener clickListener) {
@@ -61,10 +67,12 @@ public class PhraseVerifyAdapter extends RecyclerView.Adapter<PhraseVerifyAdapte
     public void onBindViewHolder(@NonNull PhraseVerifyHolder holder, int position) {
         Phrase item = phrases.get(position);
         holder.tvPhrase.setText(item.getBody());
-        holder.tvNum.setText(""+ item.getOrder());
+        holder.tvNum.setText("" + item.getOrder());
 
         holder.tvPhrase.setVisibility(View.INVISIBLE);
-        if(item.isShow()){
+        holder.containerItemVerify.setBackground(mContext.getDrawable(R.drawable.chainverse_background_phrase_item));
+        if (item.isShow()) {
+            holder.containerItemVerify.setBackground(mContext.getDrawable(R.drawable.background_phrase_item_close));
             holder.tvPhrase.setVisibility(View.VISIBLE);
         }
     }

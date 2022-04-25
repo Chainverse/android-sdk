@@ -2,6 +2,7 @@ package com.chainverse.sdk.ui.screen;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -12,6 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.chainverse.sdk.R;
@@ -22,7 +25,11 @@ import com.chainverse.sdk.ui.ChainverseSDKActivity;
 public class WalletScreen extends Fragment implements View.OnClickListener {
     Button btnCreate, btnImport;
     ImageButton btnClose;
-    RelativeLayout container_screen_wallet;
+    RelativeLayout wallet_container;
+    LinearLayout container_screen_wallet, layout_logo;
+    ImageView image_logo;
+
+    View mGroupButton, mParent;
 
     public WalletScreen() {
         // Required empty public constructor
@@ -37,26 +44,64 @@ public class WalletScreen extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View mParent = inflater.inflate(R.layout.chainverse_screen_wallet, container, false);
-        btnCreate = mParent.findViewById(R.id.chainverse_button_create);
-        btnImport = mParent.findViewById(R.id.chainverse_button_import);
-        btnClose = mParent.findViewById(R.id.chainverse_button_close);
-        container_screen_wallet = mParent.findViewById(R.id.container_screen_wallet);
+        mParent = inflater.inflate(R.layout.chainverse_screen_wallet, container, false);
+        mGroupButton = inflater.inflate(R.layout.groupt_button, container, false);
+
+        findView();
+
         btnCreate.setOnClickListener(this);
         btnImport.setOnClickListener(this);
         btnClose.setOnClickListener(this);
 
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
-        container_screen_wallet.getLayoutParams().height = metrics.heightPixels;
-//        int orientation = this.getResources().getConfiguration().orientation;
-//        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-//            btnCreate.getLayoutParams().width = metrics.widthPixels / 2;
-//            btnImport.getLayoutParams().width = metrics.widthPixels / 2;
-//        }
+        resizeView();
 
         return mParent;
     }
 
+    private void findView() {
+        wallet_container = mParent.findViewById(R.id.wallet_container);
+        layout_logo = mParent.findViewById(R.id.layout_logo);
+        container_screen_wallet = mParent.findViewById(R.id.container_screen_wallet);
+
+        btnCreate = mParent.findViewById(R.id.chainverse_button_create);
+        btnImport = mParent.findViewById(R.id.chainverse_button_import);
+        btnClose = mGroupButton.findViewById(R.id.chainverse_button_close);
+        image_logo = mParent.findViewById(R.id.image_logo);
+    }
+
+    private void resizeView() {
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+        params.topMargin = 20;
+        params.rightMargin = 20;
+
+        wallet_container.addView(mGroupButton, params);
+
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        container_screen_wallet.getLayoutParams().width = metrics.widthPixels - (48 * 2);
+        image_logo.getLayoutParams().height = metrics.heightPixels / 3;
+        image_logo.getLayoutParams().width = metrics.heightPixels / 3;
+
+        btnCreate.getLayoutParams().width = container_screen_wallet.getLayoutParams().width / 4;
+        btnCreate.setTextSize(getSizeText(metrics));
+        btnImport.getLayoutParams().width = container_screen_wallet.getLayoutParams().width / 4;
+        btnImport.setTextSize(getSizeText(metrics));
+    }
+
+    private float getSizeText(DisplayMetrics metrics) {
+        System.out.println(metrics.widthPixels);
+        float size;
+        if (0 < metrics.widthPixels && metrics.widthPixels <= 768) {
+            size = 10;
+        } else if (768 < metrics.widthPixels && metrics.widthPixels <= 1080) {
+            size = 13;
+        } else {
+            size = 15;
+        }
+
+        return size;
+    }
 
     @Override
     public void onClick(View v) {

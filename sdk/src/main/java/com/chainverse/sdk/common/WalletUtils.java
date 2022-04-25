@@ -70,6 +70,12 @@ public class WalletUtils {
         onWalletListener.onCreated();
     }
 
+    public String genMnemonic(int strength, String passphrase) {
+        HDWallet wallet = new HDWallet(strength, passphrase);
+        this.mnemonic = wallet.mnemonic();
+        return this.mnemonic;
+    }
+
     public void importWallet(String phrase, OnWalletListener onWalletListener) throws Exception {
         String seedPhrase = phrase;
         String passphrase = "";
@@ -276,6 +282,10 @@ public class WalletUtils {
             }
         }
 
+    }
+
+    public void removeMnemonic() {
+        this.mnemonic = "";
     }
 
     public boolean checkPermissionStorage() {

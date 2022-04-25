@@ -1,36 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="wrap_content">
+
     <LinearLayout
         android:id="@+id/chainverse_view_phrase"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:background="@drawable/chainverse_background_phrase_item"
         android:gravity="left"
-        android:padding="5dp"
-        android:background="@drawable/chainverse_background_phrase_item">
+        android:orientation="horizontal"
+        android:padding="5dp">
 
         <TextView
             android:id="@+id/chainverse_tvnum"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text=""
-            android:textSize="10dp"
-            android:textStyle="bold"
+            android:layout_marginRight="5dp"
             android:gravity="center"
+            android:text=""
             android:textColor="#AFB2B6"
-            android:layout_marginRight="5dp"/>
+            android:textSize="10dp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/chainverse_tvphrase"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text=""
-            android:textSize="12dp"
             android:gravity="center"
-            android:textColor="#000000" />
+            android:text=""
+            android:textColor="#000000"
+            android:textSize="12dp"
+            android:textStyle="bold" />
     </LinearLayout>
 
 </RelativeLayout>
