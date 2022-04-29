@@ -12,4 +12,8 @@ public interface Action {
 
         void onError(String message);
     }
+
+    interface Callback {
+        void onCallback();
+    }
 }

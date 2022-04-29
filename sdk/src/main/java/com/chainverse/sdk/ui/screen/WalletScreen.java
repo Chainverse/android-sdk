@@ -16,6 +16,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.chainverse.sdk.R;
 import com.chainverse.sdk.common.Constants;
@@ -23,11 +24,11 @@ import com.chainverse.sdk.ui.ChainverseSDKActivity;
 
 
 public class WalletScreen extends Fragment implements View.OnClickListener {
-    Button btnCreate, btnImport;
     ImageButton btnClose;
     RelativeLayout wallet_container;
-    LinearLayout container_screen_wallet, layout_logo;
+    LinearLayout container_screen_wallet, layout_logo, btnCreate, btnImport;
     ImageView image_logo;
+    TextView textCreate, textImport;
 
     View mGroupButton, mParent;
 
@@ -62,6 +63,8 @@ public class WalletScreen extends Fragment implements View.OnClickListener {
         wallet_container = mParent.findViewById(R.id.wallet_container);
         layout_logo = mParent.findViewById(R.id.layout_logo);
         container_screen_wallet = mParent.findViewById(R.id.container_screen_wallet);
+        textCreate = mParent.findViewById(R.id.text_create);
+        textImport = mParent.findViewById(R.id.text_import);
 
         btnCreate = mParent.findViewById(R.id.chainverse_button_create);
         btnImport = mParent.findViewById(R.id.chainverse_button_import);
@@ -83,10 +86,13 @@ public class WalletScreen extends Fragment implements View.OnClickListener {
         image_logo.getLayoutParams().height = metrics.heightPixels / 3;
         image_logo.getLayoutParams().width = metrics.heightPixels / 3;
 
-        btnCreate.getLayoutParams().width = container_screen_wallet.getLayoutParams().width / 4;
-        btnCreate.setTextSize(getSizeText(metrics));
-        btnImport.getLayoutParams().width = container_screen_wallet.getLayoutParams().width / 4;
-        btnImport.setTextSize(getSizeText(metrics));
+        int orientation = this.getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            btnCreate.getLayoutParams().width = container_screen_wallet.getLayoutParams().width / 4;
+            btnImport.getLayoutParams().width = container_screen_wallet.getLayoutParams().width / 4;
+        }
+        textCreate.setTextSize(getSizeText(metrics));
+        textImport.setTextSize(getSizeText(metrics));
     }
 
     private float getSizeText(DisplayMetrics metrics) {

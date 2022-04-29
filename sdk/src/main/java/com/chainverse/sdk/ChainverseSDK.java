@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -14,6 +15,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.chainverse.sdk.base.web3.BaseWeb3;
+import com.chainverse.sdk.common.BroadcastUtil;
 import com.chainverse.sdk.common.CallbackToGame;
 import com.chainverse.sdk.common.Constants;
 import com.chainverse.sdk.common.EncryptPreferenceUtils;
@@ -31,6 +33,7 @@ import com.chainverse.sdk.model.NFT.InfoSell;
 import com.chainverse.sdk.model.NFT.NFT;
 import com.chainverse.sdk.model.Params.FilterMarket;
 import com.chainverse.sdk.model.SignerData;
+import com.chainverse.sdk.model.TransactionData;
 import com.chainverse.sdk.model.service.ChainverseService;
 import com.chainverse.sdk.model.service.Token;
 import com.chainverse.sdk.network.RESTful.RESTfulClient;
@@ -616,15 +619,29 @@ public class ChainverseSDK implements Chainverse {
     @Override
     public void signMessage(String message, boolean isPersonal) {
         if (encryptPreferenceUtils.getConnectWallet().equals(Constants.TYPE_IMPORT_WALLET.IMPORTED)) {
-            SignerData data = new SignerData();
-            data.setMessage(message);
             Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
-            Bundle bundle = new Bundle();
-            bundle.putString("screen", Constants.SCREEN.CONFIRM_SIGN);
-            bundle.putString("type", "message");
-            bundle.putParcelable("data", data);
-            intent.putExtras(bundle);
+            intent.putExtra("screen", Constants.SCREEN.LOADING);
             mContext.startActivity(intent);
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    TransactionData transactionData = new TransactionData();
+                    transactionData.setType(Constants.EFunction.signMessage);
+                    transactionData.setMessage(message);
+                    transactionData.setFrom(getAddress());
+
+                    BroadcastUtil.send(mContext, Constants.ACTION.DIMISS_LOADING);
+
+                    Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
+                    intent.putExtra("isPersonal", isPersonal);
+                    intent.putExtra("transactionData", transactionData);
+                    intent.putExtra("screen", Constants.SCREEN.CONFIRM_TRANSACTION);
+                    mContext.startActivity(intent);
+                }
+            }, 500);
+
+
         } else if (encryptPreferenceUtils.getConnectWallet().equals(Constants.TYPE_IMPORT_WALLET.CHAINVERSE)) {
             ChainverseConnect chainverseConnect = new ChainverseConnect.Builder().build(mContext);
             chainverseConnect.signMessage(isPersonal, message);
@@ -819,123 +836,51 @@ public class ChainverseSDK implements Chainverse {
         return currencies;
     }
 
-//    @Override
-//    public void buyNFT(String currency, Long listing_id, Double price, boolean isAuction) {
-//        if (isUserConnected()) {
-//            ChainverseService chainverseService = encryptPreferenceUtils.getService();
-//            if (chainverseService != null) {
-//                Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
-//                Bundle bundle = new Bundle();
-//                bundle.putString("screen", Constants.SCREEN.BUY_NFT);
-//                bundle.putString("currency", currency);
-//                bundle.putLong("listing_id", listing_id);
-//                bundle.putDouble("price", price);
-//                bundle.putBoolean("isAuction", isAuction);
-//                intent.putExtra("type", "buyNFT");
-//                intent.putExtras(bundle);
-//
-//                mContext.startActivity(intent);
-//            } else {
-//                CallbackToGame.onError(ChainverseError.ERROR_SERVICE_NOT_FOUND);
-//            }
-//        } else {
-//            AlertDialog alertDialog = new AlertDialog.Builder(mContext).create();
-//            alertDialog.setTitle("Đăng nhập!");
-//            alertDialog.setMessage("Bạn cần đăng nhập để mua");
-//            alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Đăng nhập",
-//                    new DialogInterface.OnClickListener() {
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            showConnectWalletView();
-//                            dialog.dismiss();
-//                        }
-//                    });
-//            alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel",
-//                    new DialogInterface.OnClickListener() {
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            dialog.dismiss();
-//                        }
-//                    });
-//            alertDialog.show();
-//        }
-//    }
-
-    public BigInteger isApproved(String token, String owner, String spender) {
-        BigInteger allowence = BigInteger.ZERO;
+    public double isApproved(String token, String owner, String spender) {
+        BigInteger allowence;
         ContractManager contractManager = ContractManager.getInstance().init(mContext);
 
         allowence = contractManager.allowance(token, owner, spender);
 
-        return allowence;
+        BigDecimal amountApporoved = org.web3j.utils.Convert.fromWei(new BigDecimal(allowence), contractManager.getWei(token));
+        double priceDouble = amountApporoved != null ? Double.parseDouble(amountApporoved.toString()) : 0.0;
+
+        return priceDouble;
     }
 
-    public String approveToken(String token, String spender, double amount) throws Exception {
-        String tx;
+    public void approveToken(String token, String spender, double amount) {
         ContractManager contractManager = ContractManager.getInstance().init(mContext);
-        try {
-            tx = contractManager.approved(token, spender, amount);
-        } catch (Exception e) {
-            throw e;
-        }
-        return tx;
+        contractManager.approved(token, spender, amount);
     }
 
-    public String buyNFT(String currency, BigInteger listingId, double price) throws Exception {
-        String tx;
+    public void buyNFT(String currency, BigInteger listingId, double price) {
         ContractManager contractManager = ContractManager.getInstance().init(mContext);
-        try {
-            tx = contractManager.buyNFT(currency, listingId, price);
-        } catch (Exception e) {
-            throw e;
-        }
-
-        return tx;
+        contractManager.buyNFT(currency, listingId, price);
     }
 
-    public String bidNFT(String currency, BigInteger listingId, double price) throws Exception {
-        String tx;
+    public void bidNFT(String currency, BigInteger listingId, double price) {
         ContractManager contractManager = ContractManager.getInstance().init(mContext);
-        try {
-            tx = contractManager.bidNFT(currency, listingId, price);
-        } catch (Exception e) {
-            throw e;
-        }
-
-        return tx;
+        contractManager.bidNFT(currency, listingId, price);
     }
 
-    public String sellNFT(String nft, BigInteger tokenId, double price, String currency) throws
-            Exception {
-        String tx;
+    public void sellNFT(String nft, BigInteger tokenId, double price, String currency) {
         ContractManager contractManager = ContractManager.getInstance().init(mContext);
-        try {
-            tx = contractManager.list(nft, tokenId, price, currency);
-        } catch (Exception e) {
-            throw e;
-        }
-
-        return tx;
+        contractManager.list(nft, tokenId, price, currency);
     }
 
-    public String cancelSellNFT(BigInteger listingId) throws Exception {
-        String tx;
+    public void cancelSellNFT(BigInteger listingId) {
         ContractManager contractManager = ContractManager.getInstance().init(mContext);
-        try {
-            tx = contractManager.unlist(listingId);
-        } catch (Exception e) {
-            throw e;
-        }
-
-        return tx;
+        contractManager.unlist(listingId);
     }
 
-    public String approveNFT(String nft, BigInteger tokenId) throws Exception {
+    public void approveNFT(String nft, BigInteger tokenId) {
         ContractManager contractManager = ContractManager.getInstance().init(mContext);
-        return contractManager.approveNFT(nft, tokenId);
+        contractManager.approveNFT(nft, tokenId);
     }
 
-    public String approveNFTForGame(String nft, BigInteger tokenId) throws Exception {
+    public void approveNFTForGame(String nft, BigInteger tokenId) {
         ContractManager contractManager = ContractManager.getInstance().init(mContext);
-        return contractManager.approveNFTForGame(nft, tokenId);
+        contractManager.approveNFTForGame(nft, tokenId);
     }
 
     public boolean isApproved(String nft, BigInteger tokenId) {
@@ -951,18 +896,9 @@ public class ChainverseSDK implements Chainverse {
         return isChecked;
     }
 
-    public String approveNFTForService(String nft, String service, BigInteger tokenId) {
-        String tx = null;
-
+    public void approveNFTForService(String nft, String service, BigInteger tokenId) {
         ContractManager contractManager = ContractManager.getInstance().init(mContext);
-
-        try {
-            tx = contractManager.approveNFTForService(nft, service, tokenId);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return tx;
+        contractManager.approveNFTForService(nft, service, tokenId);
     }
 
     public boolean isApprovedForService(String nft, String service, BigInteger tokenId) {
@@ -979,37 +915,30 @@ public class ChainverseSDK implements Chainverse {
     }
 
 
-    public String withdrawNFT(String nft, BigInteger tokenId) throws Exception {
+    public void withdrawNFT(String nft, BigInteger tokenId) {
         ContractManager contractManager = ContractManager.getInstance().init(mContext);
-        return contractManager.withdrawNFT(nft, tokenId);
+        contractManager.withdrawNFT(nft, tokenId);
     }
 
-    public String moveItemToGame(String nft, BigInteger tokenId) throws Exception {
+    public void moveItemToGame(String nft, BigInteger tokenId) {
         ContractManager contractManager = ContractManager.getInstance().init(mContext);
-        return contractManager.moveItemToGame(nft, tokenId);
+        contractManager.moveItemToGame(nft, tokenId);
     }
 
-    public String moveItemToService(String nft, String service, BigInteger tokenId) throws
-            Exception {
+    public void moveItemToService(String nft, String service, BigInteger tokenId) {
         ContractManager contractManager = ContractManager.getInstance().init(mContext);
-        return contractManager.moveService(nft, service, tokenId);
+        contractManager.moveService(nft, service, tokenId);
     }
 
-    public String transferItem(String to, String nft, BigInteger tokenId) throws Exception {
-        String tx;
+    public void transferItem(String to, String nft, BigInteger tokenId) {
         ContractManager contractManager = ContractManager.getInstance().init(mContext);
         WalletUtils walletUtils = WalletUtils.getInstance().init(mContext);
-        try {
-            String account = walletUtils.getAddress();
-            if (account != null || !account.isEmpty()) {
-                tx = contractManager.transferItem(account, to, nft, tokenId);
-            } else {
-                throw new Exception("Can not find user's address");
-            }
-        } catch (Exception e) {
-            throw e;
+        String account = walletUtils.getAddress();
+        if (account != null || !account.isEmpty()) {
+            contractManager.transferItem(account, to, nft, tokenId);
+        } else {
+            CallbackToGame.onErrorTransaction(Constants.EFunction.transferItem, "Can not find user's address");
         }
-        return tx;
     }
 
     public boolean checkAddress(String address, String chainId) {

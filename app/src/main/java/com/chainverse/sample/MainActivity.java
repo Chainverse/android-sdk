@@ -23,6 +23,7 @@ import com.chainverse.sdk.ChainverseItem;
 import com.chainverse.sdk.listener.Action;
 import com.chainverse.sdk.model.NFT.NFT;
 import com.chainverse.sdk.model.Params.FilterMarket;
+import com.chainverse.sdk.ui.ChainverseSDKActivity;
 
 import java.io.File;
 import java.io.IOException;
@@ -138,6 +139,11 @@ public class MainActivity extends AppCompatActivity {
             public void onTransact(Constants.EFunction function, String tx) {
                 System.out.println("function " + function + " transaction hash " + tx);
             }
+
+            @Override
+            public void onErrorTransaction(Constants.EFunction function, String error) {
+                System.out.println("function " + function + " error " + error);
+            }
         });
         ChainverseSDK.getInstance().setScheme("trust-rn-example1://");
         ChainverseSDK.getInstance().setHost("accounts_callback");
@@ -156,12 +162,22 @@ public class MainActivity extends AppCompatActivity {
         btnChooseWallet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                try {
-//                    ChainverseSDK.getInstance().importWalletByMnemonic("crush solar bread symbol laugh clutch unveil crack silent mushroom discover novel");
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
                 ChainverseSDK.getInstance().showConnectView();
+//                ChainverseSDK.getInstance().approveToken("0x672021e3c741910896cad6D6121446a328ba5634", "0x2ccA92F66BeA2A7fA2119B75F3e5CB698C252564", 3.0);
+//                ChainverseSDK.getInstance().buyNFT("0x672021e3c741910896cad6D6121446a328ba5634", new BigInteger("476"), 0.1);
+//                ChainverseSDK.getInstance().approveNFT("0x7eAdaF22D3a4C10E0bA1aC692654b80954084bdD", new BigInteger("279"));
+//                ChainverseSDK.getInstance().bidNFT("0x672021e3c741910896cad6D6121446a328ba5634", new BigInteger("2116"), 0.25);
+//                ChainverseSDK.getInstance().sellNFT("0x7eAdaF22D3a4C10E0bA1aC692654b80954084bdD", new BigInteger("279"), 2, "0x672021e3c741910896cad6D6121446a328ba5634");
+//                ChainverseSDK.getInstance().cancelSellNFT(new BigInteger("2122"));
+//                ChainverseSDK.getInstance().transferItem("0x265b5F34bA132D5E39D7d0dB3680Fe3D8fD39810", "0x7eAdaF22D3a4C10E0bA1aC692654b80954084bdD", new BigInteger("279"));
+//                ChainverseSDK.getInstance().signMessage("Welcome to ChainVerse!\n" +
+//                        "\n" +
+//                        "This request will not trigger a blockchain transaction or cost any gas fees.\n" +
+//                        "\n" +
+//                        "Your authentication status will reset after 24 hours.\n" +
+//                        "\n" +
+//                        "Your timestamp: 1651133781\n" +
+//                        "Nonce: 18033", false);
             }
         });
 

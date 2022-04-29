@@ -59,12 +59,14 @@
                     android:orientation="horizontal">
 
                     <LinearLayout
+                        android:id="@+id/chainverse_button_create"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="48dp"
                         android:layout_centerHorizontal="true"
                         android:layout_marginRight="5dp"
                         android:background="@drawable/chainverse_background_button_import"
                         android:orientation="horizontal"
+                        android:gravity="center"
                         android:paddingHorizontal="23dp">
 
                         <ImageView
@@ -73,23 +75,26 @@
                             android:layout_gravity="center"
                             android:src="@drawable/ic_create" />
 
-                        <Button
-                            android:id="@+id/chainverse_button_create"
-                            style="?android:attr/borderlessButtonStyle"
+                        <TextView
+                            android:id="@+id/text_create"
                             android:layout_width="wrap_content"
-                            android:layout_height="48dp"
+                            android:layout_height="wrap_content"
                             android:text="Create Account"
                             android:textAllCaps="false"
                             android:textColor="#FFFFFF"
                             android:textSize="14dp"
+                            android:layout_marginLeft="10dp"
                             android:textStyle="bold"
                             android:visibility="visible" />
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/chainverse_button_import"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="48dp"
                         android:layout_marginLeft="5dp"
+                        android:gravity="center"
+                        android:layout_gravity="center"
                         android:background="@drawable/chainverse_background_button_create_new"
                         android:paddingHorizontal="23dp">
 
@@ -99,17 +104,17 @@
                             android:layout_gravity="center"
                             android:src="@drawable/ic_import" />
 
-                        <Button
-                            android:id="@+id/chainverse_button_import"
-                            style="?android:attr/borderlessButtonStyle"
+                        <TextView
+                            android:id="@+id/text_import"
                             android:layout_width="wrap_content"
-                            android:layout_height="48dp"
+                            android:layout_height="wrap_content"
                             android:text="Import Account"
                             android:textAllCaps="false"
                             android:textColor="#0046FF"
                             android:textSize="14dp"
                             android:textStyle="bold"
-                            android:visibility="visible" />
+                            android:visibility="visible"
+                            android:layout_marginLeft="10dp"/>
                     </LinearLayout>
                 </LinearLayout>
 

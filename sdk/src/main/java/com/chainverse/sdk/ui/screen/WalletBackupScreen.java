@@ -106,7 +106,7 @@ public class WalletBackupScreen extends Fragment implements View.OnClickListener
         text_copy = mParent.findViewById(R.id.text_copy);
         btn_close = mGroupButton.findViewById(R.id.chainverse_button_close);
 
-        if (type.equals("view")) {
+        if (type != null && type.equals("view")) {
             btnNext.setVisibility(View.GONE);
             text_step.setText("Back");
         } else {
@@ -176,7 +176,7 @@ public class WalletBackupScreen extends Fragment implements View.OnClickListener
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.button_back_step) {
-            if (type.equals("view")) {
+            if (type != null && type.equals("view")) {
                 getActivity().finish();
             } else {
                 Intent intent = new Intent(getContext(), ChainverseSDKActivity.class);

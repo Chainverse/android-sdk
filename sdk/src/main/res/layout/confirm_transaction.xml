@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container_confirm"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    android:orientation="vertical"
+    android:paddingBottom="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/chainverse_background"
+        android:orientation="vertical"
+        android:paddingBottom="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="50dp"
+            android:background="@drawable/container"
+            android:elevation="10dp"
+            android:orientation="vertical"
+            android:paddingTop="21dp">
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_horizontal"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="10dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical">
+
+                        <LinearLayout
+                            android:id="@+id/view_from"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/chainverse_background_phrase_item"
+                            android:orientation="vertical"
+                            android:paddingHorizontal="20dp"
+                            android:paddingVertical="10dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="From"
+                                android:textColor="#000000" />
+
+                            <TextView
+                                android:id="@+id/transaction_from"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textColor="#000000"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/view_arrow"
+                            android:visibility="gone"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="10dp"
+                            android:background="@drawable/circle_background"
+                            android:backgroundTint="#F3EEEB"
+                            android:padding="5dp">
+
+                            <ImageView
+                                android:layout_width="12dp"
+                                android:layout_height="12dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/arrow_right"
+                                android:tint="#ffffff" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/view_to"
+                            android:visibility="gone"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/chainverse_background_phrase_item"
+                            android:orientation="vertical"
+                            android:paddingHorizontal="20dp"
+                            android:paddingVertical="10dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="To"
+                                android:textColor="#000000" />
+
+                            <TextView
+                                android:id="@+id/transaction_to"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textColor="#000000"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="10dp"
+                        android:layout_marginTop="20dp"
+                        android:background="@drawable/chainverse_background_wallet_create_input"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="20dp"
+                        android:paddingVertical="10dp">
+
+                        <LinearLayout
+                            android:id="@+id/view_asset"
+                            android:layout_width="match_parent"
+                            android:visibility="gone"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:layout_width="120dp"
+                                android:layout_height="wrap_content"
+                                android:text="Asset:" />
+
+                            <TextView
+                                android:id="@+id/transaction_asset"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Asset"
+                                android:textColor="#000000"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/view_value"
+                            android:layout_width="match_parent"
+                            android:visibility="gone"
+                            android:layout_marginTop="10dp"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:layout_width="120dp"
+                                android:layout_height="wrap_content"
+                                android:text="Value:" />
+
+                            <TextView
+                                android:id="@+id/transaction_value"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textColor="#000000"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/view_network"
+                            android:layout_width="match_parent"
+                            android:layout_marginTop="10dp"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:layout_width="120dp"
+                                android:layout_height="wrap_content"
+                                android:text="Network:" />
+
+                            <TextView
+                                android:id="@+id/transaction_network"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Binance Smartchain"
+                                android:textColor="#000000"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/view_network_fee"
+                            android:visibility="gone"
+                            android:layout_marginTop="10dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:layout_width="120dp"
+                                android:layout_height="wrap_content"
+                                android:text="Network Fee:" />
+
+                            <TextView
+                                android:id="@+id/transaction_fee"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textColor="#000000"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp">
+
+                        <LinearLayout
+                            android:id="@+id/button_cancel_confirm"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/background_border"
+                            android:gravity="center"
+                            android:paddingHorizontal="37dp"
+                            android:paddingVertical="6dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Cancel" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/button_confirm_sign_next"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="12dp"
+                            android:background="@drawable/circle_background"
+                            android:backgroundTint="@color/ChainverseColorPrimary"
+                            android:gravity="center"
+                            android:paddingVertical="4dp"
+                            android:paddingLeft="15dp"
+                            android:paddingRight="3dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="CONTINUE"
+                                android:textColor="#ffffff"
+                                android:textSize="12dp"
+                                android:textStyle="bold" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="12dp"
+                                android:background="@drawable/circle_background"
+                                android:padding="5dp">
+
+                                <ImageView
+                                    android:id="@+id/icon_confirm_sign_right"
+                                    android:layout_width="12dp"
+                                    android:layout_height="12dp"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/arrow_right"
+                                    android:tint="@color/ChainverseColorPrimary" />
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </ScrollView>
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

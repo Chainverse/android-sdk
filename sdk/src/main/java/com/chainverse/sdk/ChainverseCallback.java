@@ -30,5 +30,7 @@ public interface ChainverseCallback {
     void onSignTransaction(Constants.EFunction function, String signed);
 
     void onTransact(Constants.EFunction function, String tx);
+
+    void onErrorTransaction(Constants.EFunction function, String error);
 }
 

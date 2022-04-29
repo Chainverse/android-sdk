@@ -158,6 +158,11 @@ public class MarketPlaceActivity extends AppCompatActivity {
             public void onTransact(Constants.EFunction function, String tx) {
 
             }
+
+            @Override
+            public void onErrorTransaction(Constants.EFunction function, String error) {
+
+            }
         });
     }
 

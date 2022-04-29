@@ -12,9 +12,11 @@ import android.view.WindowManager;
 
 import com.chainverse.sdk.R;
 import com.chainverse.sdk.common.Constants;
+import com.chainverse.sdk.common.LogUtil;
 import com.chainverse.sdk.common.Utils;
+import com.chainverse.sdk.model.TransactionData;
 import com.chainverse.sdk.ui.screen.AlertScreen;
-import com.chainverse.sdk.ui.screen.BuyNftScreen;
+import com.chainverse.sdk.ui.screen.ConfirmTransaction;
 import com.chainverse.sdk.ui.screen.LoadingScreen;
 import com.chainverse.sdk.ui.screen.SignerScreen;
 import com.chainverse.sdk.ui.screen.ConnectWalletScreen;
@@ -48,7 +50,7 @@ public class ChainverseSDKActivity extends AppCompatActivity {
 
     private void initLayout() {
         screen = getIntent().getStringExtra("screen");
-        if (screen.equals(Constants.SCREEN.WALLET) || screen.equals(Constants.SCREEN.WALLET_INFO) || screen.equals(Constants.SCREEN.CREATE_WALLET) || screen.equals(Constants.SCREEN.EXPORT_WALLET) || screen.equals(Constants.SCREEN.IMPORT_WALLET) || screen.equals(Constants.SCREEN.BACKUP_WALLET) || screen.equals(Constants.SCREEN.VERIFY_WALLET) || screen.equals(Constants.SCREEN.RECOVERY_WALLET)) {
+        if (screen.equals(Constants.SCREEN.WALLET) || screen.equals(Constants.SCREEN.WALLET_INFO) || screen.equals(Constants.SCREEN.CREATE_WALLET) || screen.equals(Constants.SCREEN.EXPORT_WALLET) || screen.equals(Constants.SCREEN.IMPORT_WALLET) || screen.equals(Constants.SCREEN.BACKUP_WALLET) || screen.equals(Constants.SCREEN.VERIFY_WALLET) || screen.equals(Constants.SCREEN.RECOVERY_WALLET) || screen.equals(Constants.SCREEN.CONFIRM_TRANSACTION)) {
             WindowManager.LayoutParams params = getWindow().getAttributes();
             params.height = screenH;
             params.width = screenW;
@@ -85,15 +87,6 @@ public class ChainverseSDKActivity extends AppCompatActivity {
             case Constants.SCREEN.CONFIRM_SIGN:
                 replaceFragment(SignerScreen.NewInstance(getIntent().getStringExtra("type"), getIntent().getParcelableExtra("data")));
                 break;
-            case Constants.SCREEN.BUY_NFT:
-                replaceFragment(
-                        BuyNftScreen.NewInstance(getIntent().getStringExtra("type"),
-                                getIntent().getStringExtra("currency"),
-                                getIntent().getLongExtra("listing_id", 0),
-                                getIntent().getDoubleExtra("price", 0),
-                                getIntent().getBooleanExtra("isAuction", false)
-                        ));
-                break;
             case Constants.SCREEN.WALLET:
                 replaceFragment(new WalletScreen());
                 break;
@@ -125,6 +118,11 @@ public class ChainverseSDKActivity extends AppCompatActivity {
                 break;
             case Constants.SCREEN.LOADING:
                 replaceFragment(new LoadingScreen());
+                break;
+            case Constants.SCREEN.CONFIRM_TRANSACTION:
+                TransactionData transactionData = getIntent().getParcelableExtra("transactionData");
+                boolean isPersonal = getIntent().getBooleanExtra("isPersonal", false);
+                replaceFragment(ConfirmTransaction.NewInstance(transactionData, isPersonal));
                 break;
         }
     }

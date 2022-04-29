@@ -13,7 +13,7 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="44dp"
-            android:src="@drawable/chainverse_modal_top"/>
+            android:src="@drawable/modal_top_horizontal"/>
 
         <ImageButton
             android:id="@+id/chainverse_button_close"
@@ -54,8 +54,6 @@
 
     </LinearLayout>
 
-
-
     <Button
         android:id="@+id/chainverse_button_connect_trust"
         android:layout_width="match_parent"
@@ -73,21 +71,46 @@
         style="?android:attr/borderlessButtonStyle"
         android:visibility="gone"/>
 
-    <Button
-        android:id="@+id/chainverse_button_connect"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:drawableLeft="@drawable/chainverse_ic_wallet"
-        android:drawablePadding="-48dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginTop="26dp"
         android:background="@drawable/chainverse_background_connect_wallet_item"
-        android:text="Chainverse"
-        android:textColor="#000000"
-        android:textSize="16dp"
-        android:textAllCaps="false"
-        style="?android:attr/borderlessButtonStyle"/>
+        android:paddingLeft="10dp"
+        android:gravity="center"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="20dp">
+
+        <TextView
+            android:id="@+id/chainverse_button_connect"
+            android:textAlignment="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16dp"
+            android:textColor="#000000"
+            android:textAllCaps="false"
+            android:text="ChainVerse"
+            style="?android:attr/borderlessButtonStyle"/>
+        <ImageView
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="10dp"
+            android:src="@drawable/chainverse_wallet_logo"/>
+    </RelativeLayout>
+<!--    <Button-->
+<!--        android:id="@+id/chainverse_button_connect"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="48dp"-->
+<!--        android:drawableLeft="@drawable/chainverse_logo"-->
+<!--        android:drawablePadding="-48dp"-->
+<!--        android:layout_marginLeft="20dp"-->
+<!--        android:layout_marginRight="20dp"-->
+<!--        android:layout_marginTop="26dp"-->
+<!--        android:background="@drawable/chainverse_background_connect_wallet_item"-->
+<!--        android:text="Chainverse"-->
+<!--        android:textColor="#000000"-->
+<!--        android:textSize="16dp"-->
+<!--        android:textAllCaps="false"-->
+<!--        style="?android:attr/borderlessButtonStyle"/>-->
 
 
 

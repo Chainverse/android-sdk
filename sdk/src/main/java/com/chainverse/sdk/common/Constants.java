@@ -41,6 +41,7 @@ public class Constants {
         public static String ALERT = "com.chainverse.screen.view.alert";
         public static String LOADING = "com.chainverse.screen.view.loading";
         public static String BUY_NFT = "com.chainverse.screen.view.buyNFT";
+        public static String CONFIRM_TRANSACTION = "com.chainverse.screen.view.confirmTransaction";
     }
 
     public interface TOKEN_SUPPORTED {
@@ -67,5 +68,6 @@ public class Constants {
         moveService,
         transferItem,
         transferToken,
+        signMessage,
     }
 }

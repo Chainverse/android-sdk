@@ -83,4 +83,10 @@ public class CallbackToGame {
             ChainverseSDK.mCallback.onSignTransaction(function, signed);
         }
     }
+
+    public static void onErrorTransaction(Constants.EFunction function, String error) {
+        if (ChainverseSDK.mCallback != null) {
+            ChainverseSDK.mCallback.onErrorTransaction(function, error);
+        }
+    }
 }

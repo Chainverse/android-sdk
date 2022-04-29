@@ -132,6 +132,11 @@ public class DetailNFTActivity extends AppCompatActivity {
             public void onTransact(Constants.EFunction function, String tx) {
                 btnAction.setVisibility(View.GONE);
             }
+
+            @Override
+            public void onErrorTransaction(Constants.EFunction function, String error) {
+
+            }
         });
 
         btnAction.setOnClickListener(new View.OnClickListener() {

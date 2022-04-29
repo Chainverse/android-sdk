@@ -193,6 +193,9 @@ public class WalletCreateStepScreen extends Fragment implements View.OnClickList
         } else if (view.getId() == R.id.button_back_step) {
             switch (step) {
                 case 0:
+                    Intent intent = new Intent(getContext(), ChainverseSDKActivity.class);
+                    intent.putExtra("screen", Constants.SCREEN.WALLET);
+                    getActivity().startActivity(intent);
                     getActivity().finish();
                     break;
                 case 1:

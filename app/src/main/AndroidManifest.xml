@@ -4,7 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="false"
@@ -43,6 +43,6 @@
     </application>
     <queries>
         <!-- Explicit apps you know in advance about: -->
-        <package android:name="org.chainverse"/>
+        <package android:name="org.chainverse" />
     </queries>
 </manifest>
