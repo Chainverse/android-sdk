@@ -28,8 +28,6 @@ public class TransferItemManager {
 
     public TransferItemManager(Context context) {
         mContext = context;
-
-        System.out.println("message " + EncryptPreferenceUtils.getInstance().getXUserSignature());
         map.put("type", "SDK");
         map.put("signature", EncryptPreferenceUtils.getInstance().getXUserSignature());
         map.put("signature_ethers", "true");

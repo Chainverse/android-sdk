@@ -112,7 +112,6 @@ public class EncryptPreferenceUtils {
     public synchronized MessageNonce getXUserMessageNonce() {
         Gson gson = new Gson();
         String value = preferences.getString(KEY_5, "");
-        System.out.println("value " + value);
         MessageNonce messageNonce = gson.fromJson(value, MessageNonce.class);
         return messageNonce;
     }
