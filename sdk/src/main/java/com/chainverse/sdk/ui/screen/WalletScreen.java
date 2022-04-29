@@ -2,11 +2,11 @@ package com.chainverse.sdk.ui.screen;
 
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Rect;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,10 +17,19 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.chainverse.sdk.R;
+import com.chainverse.sdk.common.BroadcastUtil;
 import com.chainverse.sdk.common.Constants;
+import com.chainverse.sdk.common.EncryptPreferenceUtils;
+import com.chainverse.sdk.common.WalletUtils;
 import com.chainverse.sdk.ui.ChainverseSDKActivity;
+
+import java.util.ArrayList;
+
+import wallet.core.jni.CoinType;
+import wallet.core.jni.StoredKey;
 
 
 public class WalletScreen extends Fragment implements View.OnClickListener {
@@ -29,6 +38,7 @@ public class WalletScreen extends Fragment implements View.OnClickListener {
     LinearLayout container_screen_wallet, layout_logo, btnCreate, btnImport;
     ImageView image_logo;
     TextView textCreate, textImport;
+    Button btnQuickLogin;
 
     View mGroupButton, mParent;
 
@@ -53,6 +63,7 @@ public class WalletScreen extends Fragment implements View.OnClickListener {
         btnCreate.setOnClickListener(this);
         btnImport.setOnClickListener(this);
         btnClose.setOnClickListener(this);
+        btnQuickLogin.setOnClickListener(this);
 
         resizeView();
 
@@ -66,9 +77,11 @@ public class WalletScreen extends Fragment implements View.OnClickListener {
         textCreate = mParent.findViewById(R.id.text_create);
         textImport = mParent.findViewById(R.id.text_import);
 
+        btnQuickLogin = mParent.findViewById(R.id.chainverse_button_quick_login);
         btnCreate = mParent.findViewById(R.id.chainverse_button_create);
         btnImport = mParent.findViewById(R.id.chainverse_button_import);
         btnClose = mGroupButton.findViewById(R.id.chainverse_button_close);
+
         image_logo = mParent.findViewById(R.id.image_logo);
     }
 
@@ -123,6 +136,50 @@ public class WalletScreen extends Fragment implements View.OnClickListener {
             getActivity().finish();
         } else if (v.getId() == R.id.chainverse_button_close) {
             getActivity().finish();
+        } else if (v.getId() == R.id.chainverse_button_quick_login) {
+            WalletUtils walletUtils = WalletUtils.getInstance().init(getContext());
+            Intent intent = new Intent(getContext(), ChainverseSDKActivity.class);
+            intent.putExtra("screen", Constants.SCREEN.LOADING);
+            getActivity().startActivity(intent);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    WalletUtils walletUtils1 = WalletUtils.getInstance().init(getContext());
+                    String mnemonic = walletUtils.genMnemonic(128, "");
+                    ArrayList<CoinType> coins = new ArrayList<>();
+                    coins.add(CoinType.SMARTCHAIN);
+                    StoredKey storedKey = null;
+                    try {
+                        storedKey = walletUtils.importWallet(mnemonic, "", "", coins);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    if (storedKey != null) {
+                        BroadcastUtil.send(getContext(), Constants.ACTION.DIMISS_LOADING);
+
+                        String xUserAddress = walletUtils.getAddress();
+                        EncryptPreferenceUtils.getInstance().init(getContext()).setXUserAddress(xUserAddress);
+                        try {
+                            EncryptPreferenceUtils.getInstance().init(getContext()).setXUserSignature(walletUtils.signMessage("ChainVerse"));
+                            EncryptPreferenceUtils.getInstance().init(getContext()).setConnectWallet(Constants.TYPE_IMPORT_WALLET.IMPORTED);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                        BroadcastUtil.send(getContext(), Constants.ACTION.CREATED_WALLET);
+
+                        Intent intentAlert = new Intent(getContext(), ChainverseSDKActivity.class);
+                        intentAlert.putExtra("screen", Constants.SCREEN.ALERT);
+                        intentAlert.putExtra("message", "Import wallet successful");
+                        getActivity().startActivity(intentAlert);
+
+                        getActivity().finish();
+                    } else {
+                        BroadcastUtil.send(getContext(), Constants.ACTION.DIMISS_LOADING);
+                        Toast.makeText(getContext(), "Wrong Recovery Phrase. Please, check again!", Toast.LENGTH_LONG);
+                    }
+                }
+            }, 500);
         }
     }
 }
