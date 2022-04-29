@@ -5,8 +5,10 @@ import android.content.Context;
 import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.common.Constants;
 import com.chainverse.sdk.common.EncryptPreferenceUtils;
+import com.chainverse.sdk.common.LogUtil;
 import com.chainverse.sdk.common.WalletUtils;
 import com.chainverse.sdk.listener.OnEmitterListenter;
+import com.chainverse.sdk.model.MessageNonce;
 
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -26,9 +28,11 @@ public class TransferItemManager {
 
     public TransferItemManager(Context context) {
         mContext = context;
+
+        System.out.println("message " + EncryptPreferenceUtils.getInstance().getXUserSignature());
         map.put("type", "SDK");
         map.put("signature", EncryptPreferenceUtils.getInstance().getXUserSignature());
-        map.put("signature_ethers", "false");
+        map.put("signature_ethers", "true");
         map.put("user_address", WalletUtils.getInstance().init(mContext).getAddress());
         map.put("game_address", ChainverseSDK.gameAddress);
 

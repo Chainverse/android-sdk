@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
             //Connected
             ChainverseUser info = ChainverseSDK.getInstance().getUser();
             btnConnectTrust.setVisibility(View.VISIBLE);
-            LogUtil.log("info_sig", info.getSignature());
+//            LogUtil.log("info_sig", info.getSignature());
         } else {
             //No connect
             btnConnectTrust.setVisibility(View.GONE);
@@ -162,7 +162,8 @@ public class MainActivity extends AppCompatActivity {
         btnChooseWallet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ChainverseSDK.getInstance().showConnectView();
+                ChainverseSDK.getInstance().getMyAsset();
+//                ChainverseSDK.getInstance().showConnectView();
 //                ChainverseSDK.getInstance().approveToken("0x672021e3c741910896cad6D6121446a328ba5634", "0x2ccA92F66BeA2A7fA2119B75F3e5CB698C252564", 3.0);
 //                ChainverseSDK.getInstance().buyNFT("0x672021e3c741910896cad6D6121446a328ba5634", new BigInteger("476"), 0.1);
 //                ChainverseSDK.getInstance().approveNFT("0x7eAdaF22D3a4C10E0bA1aC692654b80954084bdD", new BigInteger("279"));

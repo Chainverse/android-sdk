@@ -375,6 +375,8 @@ public class ChainverseSDK implements Chainverse {
                                 messageNonce.setMessage(messageSigned);
 
                                 encryptPreferenceUtils.setXUserMessageNonce(messageNonce);
+
+                                socketListener();
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -406,39 +408,41 @@ public class ChainverseSDK implements Chainverse {
             WalletUtils walletUtils = WalletUtils.getInstance().init(mContext);
             CallbackToGame.onConnectSuccess(walletUtils.getAddress());
             setAccessToken();
-
-            transferItemManager = new TransferItemManager(mContext);
-            transferItemManager.on(new OnEmitterListenter() {
-                @Override
-                public void call(String event, Object... args) {
-                    switch (event) {
-                        case "transfer_item_to_user":
-                            if (args.length > 0) {
-                                JsonElement jsonElement = new JsonParser().parse(args[0].toString());
-                                Gson gson = new Gson();
-                                ChainverseItem item = gson.fromJson(jsonElement.getAsJsonObject(), new TypeToken<ChainverseItem>() {
-                                }.getType());
-                                CallbackToGame.onItemUpdate(item, ChainverseItem.TRANSFER_ITEM_TO_USER);
-                                getItems();
-                            }
-
-                            break;
-                        case "transfer_item_from_user":
-                            if (args.length > 0) {
-                                JsonElement jsonElement = new JsonParser().parse(args[0].toString());
-                                Gson gson = new Gson();
-                                ChainverseItem item = gson.fromJson(jsonElement.getAsJsonObject(), new TypeToken<ChainverseItem>() {
-                                }.getType());
-                                CallbackToGame.onItemUpdate(item, ChainverseItem.TRANSFER_ITEM_FROM_USER);
-                                getItems();
-                            }
-                            break;
-                    }
-                    LogUtil.log("socket_" + event, args);
-                }
-            });
-            transferItemManager.connect();
         }
+    }
+
+    private void socketListener() {
+        transferItemManager = new TransferItemManager(mContext);
+        transferItemManager.on(new OnEmitterListenter() {
+            @Override
+            public void call(String event, Object... args) {
+                switch (event) {
+                    case "transfer_item_to_user":
+                        if (args.length > 0) {
+                            JsonElement jsonElement = new JsonParser().parse(args[0].toString());
+                            Gson gson = new Gson();
+                            ChainverseItem item = gson.fromJson(jsonElement.getAsJsonObject(), new TypeToken<ChainverseItem>() {
+                            }.getType());
+                            CallbackToGame.onItemUpdate(item, ChainverseItem.TRANSFER_ITEM_TO_USER);
+                            getItems();
+                        }
+
+                        break;
+                    case "transfer_item_from_user":
+                        if (args.length > 0) {
+                            JsonElement jsonElement = new JsonParser().parse(args[0].toString());
+                            Gson gson = new Gson();
+                            ChainverseItem item = gson.fromJson(jsonElement.getAsJsonObject(), new TypeToken<ChainverseItem>() {
+                            }.getType());
+                            CallbackToGame.onItemUpdate(item, ChainverseItem.TRANSFER_ITEM_FROM_USER);
+                            getItems();
+                        }
+                        break;
+                }
+                LogUtil.log("socket_" + event, args);
+            }
+        });
+        transferItemManager.connect();
     }
 
     @Override
