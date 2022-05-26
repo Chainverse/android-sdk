@@ -9,6 +9,7 @@ import android.util.Log;
 import com.chainverse.sdk.ChainverseError;
 import com.chainverse.sdk.ChainverseSDK;
 import com.chainverse.sdk.base.web3.BaseWeb3;
+import com.chainverse.sdk.blockchain.Contract;
 import com.chainverse.sdk.blockchain.ERC20;
 import com.chainverse.sdk.blockchain.ERC721;
 import com.chainverse.sdk.blockchain.HandleContract;
@@ -29,13 +30,21 @@ import com.chainverse.sdk.model.TransactionData;
 import com.chainverse.sdk.model.service.Service;
 import com.chainverse.sdk.ui.ChainverseSDKActivity;
 import com.chainverse.sdk.wallet.chainverse.ChainverseConnect;
+import com.esaulpaugh.headlong.abi.Tuple;
+import com.esaulpaugh.headlong.util.FastHex;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.generated.Uint128;
 import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.abi.datatypes.generated.Uint64;
+import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.RawTransaction;
@@ -1187,6 +1196,18 @@ public class ContractManager {
             BroadcastUtil.send(mContext, Constants.ACTION.DIMISS_LOADING);
         });
 
+    }
+
+    public List callContract(String contractAddress, String nameFunction, Object[] args) throws Exception {
+        String abi = ServiceManager.getInstance().init(mContext, contractAddress).getService().getAbi();
+        Contract contract = Contract.load(mContext, abi, contractAddress);
+        return contract.callContract(nameFunction, args);
+    }
+
+    public List callContract(String contractAddress, String nameFunction, Object[] args, BigInteger value) throws Exception {
+        String abi = ServiceManager.getInstance().init(mContext, contractAddress).getService().getAbi();
+        Contract contract = Contract.load(mContext, abi, contractAddress);
+        return contract.callContract(nameFunction, args, value);
     }
 
     private boolean isDeveloperContract() {

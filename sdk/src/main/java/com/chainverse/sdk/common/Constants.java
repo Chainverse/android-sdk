@@ -69,5 +69,6 @@ public class Constants {
         transferItem,
         transferToken,
         signMessage,
+        callContract
     }
 }

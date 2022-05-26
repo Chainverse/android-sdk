@@ -201,6 +201,7 @@ public class ChainverseSDK implements Chainverse {
                         for (JsonElement el : data) {
                             Gson gson = new Gson();
                             NFT item = gson.fromJson(el, NFT.class);
+
                             InfoSell infoSell = gson.fromJson(el.getAsJsonObject().get("auctions").getAsJsonArray().get(0), InfoSell.class);
                             item.setInfoSell(infoSell);
 
@@ -962,27 +963,15 @@ public class ChainverseSDK implements Chainverse {
         return fee;
     }
 
-//    public String withdrawCVT(double amount) throws Exception {
-//        String tx;
-//        ContractManager contractManager = ContractManager.getInstance().init(mContext);
-//        try {
-//            tx = contractManager.withdrawCVT(amount);
-//        } catch (Exception e) {
-//            throw e;
-//        }
-//        return tx;
-//    }
-//
-//    public String withdrawToken(String token, double amount) throws Exception {
-//        String tx;
-//        ContractManager contractManager = ContractManager.getInstance().init(mContext);
-//        try {
-//            tx = contractManager.withdrawToken(token, amount);
-//        } catch (Exception e) {
-//            throw e;
-//        }
-//        return tx;
-//    }
+    public List callContract(String contractAddress, String nameFunction, Object[] args) throws Exception {
+        ContractManager contractManager = ContractManager.getInstance().init(mContext);
+        return contractManager.callContract(contractAddress, nameFunction, args);
+    }
+
+    public List callContract(String contractAddress, String nameFunction, Object[] args, BigInteger value) throws Exception {
+        ContractManager contractManager = ContractManager.getInstance().init(mContext);
+        return contractManager.callContract(contractAddress, nameFunction, args, value);
+    }
 
     private void setupBouncyCastle() {
         final Provider provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);

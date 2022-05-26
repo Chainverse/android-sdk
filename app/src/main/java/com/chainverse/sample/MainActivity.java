@@ -25,12 +25,16 @@ import com.chainverse.sdk.model.NFT.NFT;
 import com.chainverse.sdk.model.Params.FilterMarket;
 import com.chainverse.sdk.ui.ChainverseSDKActivity;
 
+import org.web3j.tuples.Tuple;
+import org.web3j.tuples.generated.Tuple2;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.List;
 
 import wallet.core.jni.StoredKey;
 
@@ -223,8 +227,12 @@ public class MainActivity extends AppCompatActivity {
 //////                ChainverseSDK.getInstance().getAbiDefination();
 //////                LogUtil.log("nft ", nft);
                 try {
-                    NFT nft = ChainverseSDK.getInstance().getNFT("0x7D5495EE8999258f2eDC5D3ed497889410793D31", new BigInteger("55"));
-                    LogUtil.log("key ", nft);
+                    Object[] args = new Object[2];
+                    args[0] = new BigInteger("2208");
+                    List data = ChainverseSDK.getInstance().callContract("0x2ccA92F66BeA2A7fA2119B75F3e5CB698C252564", "endAuction", args);
+                    System.out.println(data.get(0));
+//                    NFT nft = ChainverseSDK.getInstance().getNFT("0x7D5495EE8999258f2eDC5D3ed497889410793D31", new BigInteger("55"));
+//                    LogUtil.log("key ", nft);
 //                    FilterMarket filterMarket = new FilterMarket();
 //                    filterMarket.setName("");
 //                    filterMarket.setPage(0);

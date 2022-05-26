@@ -47,21 +47,24 @@ public class HandleContract extends Contract {
     private static final String BINARY = "";
 
     // Param type
-    private static final String STRING = "string";
-    private static final String ADDRESS = "address";
-    private static final String UINT256 = "uint256";
-    private static final String BOOL = "bool";
-    private static final String TUPLE = "tuple";
+    public static final String STRING = "string";
+    public static final String ADDRESS = "address";
+    public static final String UINT256 = "uint256";
+    public static final String UINT8 = "uint8";
+    public static final String UINT64 = "uint64";
+    public static final String UINT128 = "uint128";
+    public static final String BOOL = "bool";
+    public static final String TUPLE = "tuple";
 
     // State Mutability
-    private static final String CONSTRUCTOR = "constructor";
-    private static final String NONPAYABLE = "nonpayable";
-    private static final String PAYABLE = "payable";
-    private static final String VIEW = "view";
+    public static final String CONSTRUCTOR = "constructor";
+    public static final String NONPAYABLE = "nonpayable";
+    public static final String PAYABLE = "payable";
+    public static final String VIEW = "view";
 
     // Function type
-    private static final String EVENT = "event";
-    private static final String FUNCTION = "function";
+    public static final String EVENT = "event";
+    public static final String FUNCTION = "function";
 
     String _abi;
     List<AbiDefinition> abiDefinitions;
@@ -247,7 +250,8 @@ public class HandleContract extends Contract {
     protected RemoteFunctionCall view(String func, List inputs, List<TypeReference<?>> output) {
         TypeReference type = (TypeReference) output.get(0);
         final Function function = new Function(func, inputs, output);
-        return executeRemoteCallSingleValueReturn(function, getClassType(type));
+//        return executeRemoteCallSingleValueReturn(function, getClassType(type));
+        return executeRemoteCallSingleValueReturn(function, Tuple2.class);
     }
 
     protected RemoteFunctionCall executeCallMultipleValueTuple(String func, List inputs, List<TypeReference<?>> outputs) {
@@ -335,27 +339,28 @@ public class HandleContract extends Contract {
                 JSONObject obj = arrayAbi.getJSONObject(i);
                 JSONObject format = new JSONObject();
 
-                if (obj.has("type")) {
+                if (obj.has("type") && !obj.getString("type").equals("event")) {
                     format.put("type", obj.getString("type"));
+
+                    if (obj.has("name")) {
+                        format.put("name", obj.getString("name"));
+                    }
+
+                    if (obj.has("inputs")) {
+                        JSONArray inputs = handleInputOutput(obj.getJSONArray("inputs"));
+                        format.put("inputs", inputs);
+                    }
+
+                    if (obj.has("outputs")) {
+                        JSONArray outputs = handleInputOutput(obj.getJSONArray("outputs"));
+                        format.put("outputs", outputs);
+                    }
+
+                    if (obj.has("stateMutability")) {
+                        format.put("stateMutability", obj.getString("stateMutability"));
+                    }
+                    arrayFormat.put(format);
                 }
-
-                if (obj.has("name")) {
-                    format.put("name", obj.getString("name"));
-                }
-
-                if (obj.has("inputs")) {
-
-                    JSONArray inputs = handleInputOutput(obj.getJSONArray("inputs"));
-                    format.put("inputs", inputs);
-                }
-
-                if (obj.has("outputs")) {
-
-                    JSONArray outputs = handleInputOutput(obj.getJSONArray("outputs"));
-                    format.put("outputs", outputs);
-                }
-
-                arrayFormat.put(format);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -372,6 +377,11 @@ public class HandleContract extends Contract {
                 JSONObject inputAbi = params.getJSONObject(i);
 
                 input.put("name", inputAbi.getString("name"));
+
+                if (inputAbi.has("stateMutability")) {
+                    input.put("stateMutability", inputAbi.getString("stateMutability"));
+                }
+
                 switch (inputAbi.getString("type")) {
                     case ADDRESS:
                     case STRING:
@@ -382,6 +392,10 @@ public class HandleContract extends Contract {
                         break;
                     case BOOL:
                         input.put("type", "boolean");
+                        break;
+                    case TUPLE:
+                        JSONArray tuple = handleInputOutput(inputAbi.getJSONArray("components"));
+                        input.put("components", tuple);
                         break;
                     default:
                         break;
