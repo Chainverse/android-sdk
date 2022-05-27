@@ -5,6 +5,7 @@ import android.content.Intent;
 
 import com.chainverse.sdk.base.web3.BaseWeb3;
 import com.chainverse.sdk.common.Constants;
+import com.chainverse.sdk.common.LogUtil;
 import com.chainverse.sdk.common.WalletUtils;
 import com.chainverse.sdk.manager.ServiceManager;
 import com.chainverse.sdk.model.TransactionData;
@@ -19,6 +20,7 @@ import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.abi.datatypes.generated.Uint128;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint64;
@@ -46,6 +48,7 @@ public class Contract {
     public static final String UINT8 = "uint8";
     public static final String UINT64 = "uint64";
     public static final String UINT128 = "uint128";
+    public static final String BYTES32 = "bytes32";
     public static final String BOOL = "bool";
     public static final String TUPLE = "tuple";
 
@@ -94,14 +97,22 @@ public class Contract {
     }
 
     public List callContract(String nameFunction, Object[] args) throws Exception {
-        return executeContract(nameFunction, args, BigInteger.ZERO);
+        return executeContract(nameFunction, "", args, BigInteger.ZERO);
     }
 
     public List callContract(String nameFunction, Object[] args, BigInteger value) throws Exception {
-        return executeContract(nameFunction, args, value);
+        return executeContract(nameFunction, "", args, value);
     }
 
-    private List executeContract(String nameFunction, Object[] args, BigInteger value) throws Exception {
+    public List callContract(String nameFunction, String typeInputs, Object[] args) throws Exception {
+        return executeContract(nameFunction, typeInputs, args, BigInteger.ZERO);
+    }
+
+    public List callContract(String nameFunction, String typeInputs, Object[] args, BigInteger value) throws Exception {
+        return executeContract(nameFunction, typeInputs, args, value);
+    }
+
+    private List executeContract(String nameFunction, String typeInputs, Object[] args, BigInteger value) throws Exception {
         JSONObject usedAbi = null;
         List data = new ArrayList();
         try {
@@ -109,10 +120,28 @@ public class Contract {
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                 if (jsonObject.has("name") && jsonObject.getString("name").equals(nameFunction)) {
-                    usedAbi = jsonArray.getJSONObject(i);
-                    break;
+                    if (typeInputs.isEmpty()) {
+                        usedAbi = jsonArray.getJSONObject(i);
+                        break;
+                    } else {
+                        String[] types = typeInputs.replaceAll("\\(|\\)", "").split(",");
+                        boolean check = false;
+                        for (int m = 0; m < jsonObject.getJSONArray("inputs").length(); m++) {
+                            JSONObject input = jsonObject.getJSONArray("inputs").getJSONObject(m);
+                            if (input.has("type") && input.getString("type").toLowerCase().equals(types[m].toLowerCase())) {
+                                check = true;
+                            } else {
+                                check = false;
+                            }
+                        }
+                        if (check) {
+                            usedAbi = jsonArray.getJSONObject(i);
+                            break;
+                        }
+                    }
                 }
             }
+
             if (usedAbi != null) {
                 if (usedAbi.getString("stateMutability").equals(VIEW)) {
                     data = view(usedAbi, nameFunction, args);
@@ -240,6 +269,9 @@ public class Contract {
                         break;
                     case UINT256:
                         params.add(new Uint256((BigInteger) args[i]));
+                        break;
+                    case BYTES32:
+                        params.add(new Bytes32((byte[]) args[i]));
                         break;
                     case BOOL:
                         params.add(new Bool((Boolean) args[i]));

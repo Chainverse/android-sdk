@@ -53,6 +53,7 @@ public class HandleContract extends Contract {
     public static final String UINT8 = "uint8";
     public static final String UINT64 = "uint64";
     public static final String UINT128 = "uint128";
+    public static final String BYTES32 = "bytes32";
     public static final String BOOL = "bool";
     public static final String TUPLE = "tuple";
 
@@ -377,6 +378,7 @@ public class HandleContract extends Contract {
                 JSONObject inputAbi = params.getJSONObject(i);
 
                 input.put("name", inputAbi.getString("name"));
+                input.put("contractType", inputAbi.getString("type"));
 
                 if (inputAbi.has("stateMutability")) {
                     input.put("stateMutability", inputAbi.getString("stateMutability"));
@@ -388,7 +390,13 @@ public class HandleContract extends Contract {
                         input.put("type", "string");
                         break;
                     case UINT256:
+                    case UINT8:
+                    case UINT64:
+                    case UINT128:
                         input.put("type", "bignumber");
+                        break;
+                    case BYTES32:
+                        input.put("type", "byte[]");
                         break;
                     case BOOL:
                         input.put("type", "boolean");

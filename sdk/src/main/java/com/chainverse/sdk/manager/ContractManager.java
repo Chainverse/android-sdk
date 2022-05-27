@@ -1210,6 +1210,18 @@ public class ContractManager {
         return contract.callContract(nameFunction, args, value);
     }
 
+    public List callContract(String contractAddress, String nameFunction, String typeInputs, Object[] args) throws Exception {
+        String abi = ServiceManager.getInstance().init(mContext, contractAddress).getService().getAbi();
+        Contract contract = Contract.load(mContext, abi, contractAddress);
+        return contract.callContract(nameFunction, typeInputs, args);
+    }
+
+    public List callContract(String contractAddress, String nameFunction, String typeInputs, Object[] args, BigInteger value) throws Exception {
+        String abi = ServiceManager.getInstance().init(mContext, contractAddress).getService().getAbi();
+        Contract contract = Contract.load(mContext, abi, contractAddress);
+        return contract.callContract(nameFunction, typeInputs, args, value);
+    }
+
     private boolean isDeveloperContract() {
         try {
             EthCall ethCall = BaseWeb3.getInstance().init(mContext).callFunction(ChainverseSDK.developerAddress, "isDeveloperContract", new ArrayList<>());

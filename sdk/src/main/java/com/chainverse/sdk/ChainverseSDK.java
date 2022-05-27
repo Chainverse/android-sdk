@@ -15,6 +15,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.chainverse.sdk.base.web3.BaseWeb3;
+import com.chainverse.sdk.blockchain.HandleContract;
 import com.chainverse.sdk.common.BroadcastUtil;
 import com.chainverse.sdk.common.CallbackToGame;
 import com.chainverse.sdk.common.Constants;
@@ -841,6 +842,17 @@ public class ChainverseSDK implements Chainverse {
         return currencies;
     }
 
+    public String getAbi(String contractAddress) {
+        ServiceManager serviceManager = ServiceManager.getInstance().init(mContext, contractAddress);
+        return HandleContract.formatAbi(serviceManager.getService().getAbi());
+    }
+
+    public ChainverseService getServices() {
+        encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(mContext);
+        ChainverseService chainverseService = encryptPreferenceUtils.getService();
+        return chainverseService;
+    }
+
     public double isApproved(String token, String owner, String spender) {
         BigInteger allowence;
         ContractManager contractManager = ContractManager.getInstance().init(mContext);
@@ -971,6 +983,16 @@ public class ChainverseSDK implements Chainverse {
     public List callContract(String contractAddress, String nameFunction, Object[] args, BigInteger value) throws Exception {
         ContractManager contractManager = ContractManager.getInstance().init(mContext);
         return contractManager.callContract(contractAddress, nameFunction, args, value);
+    }
+
+    public List callContract(String contractAddress, String nameFunction, String typeInputs, Object[] args) throws Exception {
+        ContractManager contractManager = ContractManager.getInstance().init(mContext);
+        return contractManager.callContract(contractAddress, nameFunction, typeInputs, args);
+    }
+
+    public List callContract(String contractAddress, String nameFunction, String typeInputs, Object[] args, BigInteger value) throws Exception {
+        ContractManager contractManager = ContractManager.getInstance().init(mContext);
+        return contractManager.callContract(contractAddress, nameFunction, typeInputs, args, value);
     }
 
     private void setupBouncyCastle() {

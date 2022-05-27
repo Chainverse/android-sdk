@@ -23,6 +23,7 @@ import com.chainverse.sdk.ChainverseItem;
 import com.chainverse.sdk.listener.Action;
 import com.chainverse.sdk.model.NFT.NFT;
 import com.chainverse.sdk.model.Params.FilterMarket;
+import com.chainverse.sdk.model.service.ChainverseService;
 import com.chainverse.sdk.ui.ChainverseSDKActivity;
 
 import org.web3j.tuples.Tuple;
@@ -227,10 +228,15 @@ public class MainActivity extends AppCompatActivity {
 //////                ChainverseSDK.getInstance().getAbiDefination();
 //////                LogUtil.log("nft ", nft);
                 try {
-                    Object[] args = new Object[2];
-                    args[0] = new BigInteger("2208");
-                    List data = ChainverseSDK.getInstance().callContract("0x2ccA92F66BeA2A7fA2119B75F3e5CB698C252564", "endAuction", args);
-                    System.out.println(data.get(0));
+                    ChainverseService chainverseService = ChainverseSDK.getInstance().getServices();
+
+                    String abi = ChainverseSDK.getInstance().getAbi(chainverseService.getServices().get(0).getAddress());
+//                    LogUtil.log("abi ");
+//                    Object[] args = new Object[2];
+//                    args[0] = "0xf8DfE75268BfD3Ce03A634eACe315CeCA0E6e69a";
+//                    args[1] = new BigInteger("124");
+//                    List data = ChainverseSDK.getInstance().callContract("0x2ccA92F66BeA2A7fA2119B75F3e5CB698C252564", "getByNFT", args);
+//                    System.out.println(data.get(0));
 //                    NFT nft = ChainverseSDK.getInstance().getNFT("0x7D5495EE8999258f2eDC5D3ed497889410793D31", new BigInteger("55"));
 //                    LogUtil.log("key ", nft);
 //                    FilterMarket filterMarket = new FilterMarket();
