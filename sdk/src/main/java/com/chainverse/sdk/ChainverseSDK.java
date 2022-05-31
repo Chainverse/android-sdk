@@ -847,6 +847,10 @@ public class ChainverseSDK implements Chainverse {
         return HandleContract.formatAbi(serviceManager.getService().getAbi());
     }
 
+    public String formatAbi(String abi) {
+        return HandleContract.formatAbi(abi);
+    }
+
     public ChainverseService getServices() {
         encryptPreferenceUtils = EncryptPreferenceUtils.getInstance().init(mContext);
         ChainverseService chainverseService = encryptPreferenceUtils.getService();

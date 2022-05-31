@@ -229,7 +229,8 @@ public class MainActivity extends AppCompatActivity {
 //////                LogUtil.log("nft ", nft);
                 try {
 //                    ChainverseService chainverseService = ChainverseSDK.getInstance().getServices();
-//
+//                    String abi = ChainverseSDK.getInstance().formatAbi(chainverseService.getServices().get(0).getAbi());
+//                    System.out.println(abi);
 //                    String abi = ChainverseSDK.getInstance().getAbi(chainverseService.getServices().get(0).getAddress());
 //                    LogUtil.log("abi ");
 //                    Object[] args = new Object[2];
