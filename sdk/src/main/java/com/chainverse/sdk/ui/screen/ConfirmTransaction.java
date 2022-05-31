@@ -124,7 +124,7 @@ public class ConfirmTransaction extends Fragment implements View.OnClickListener
             txtFrom.setText(Utils.shortAddress(transactionData.getFrom()));
         }
 
-        if (transactionData.getAsset() != null) {
+        if (transactionData.getAsset() != null || transactionData.getAsset().isEmpty()) {
             viewAsset.setVisibility(View.VISIBLE);
             txtAsset.setText(transactionData.getAsset());
         }
