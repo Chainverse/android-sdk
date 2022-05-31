@@ -70,13 +70,13 @@
 
                         <LinearLayout
                             android:id="@+id/view_arrow"
-                            android:visibility="gone"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginHorizontal="10dp"
                             android:background="@drawable/circle_background"
                             android:backgroundTint="#F3EEEB"
-                            android:padding="5dp">
+                            android:padding="5dp"
+                            android:visibility="gone">
 
                             <ImageView
                                 android:layout_width="12dp"
@@ -88,13 +88,13 @@
 
                         <LinearLayout
                             android:id="@+id/view_to"
-                            android:visibility="gone"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:background="@drawable/chainverse_background_phrase_item"
                             android:orientation="vertical"
                             android:paddingHorizontal="20dp"
-                            android:paddingVertical="10dp">
+                            android:paddingVertical="10dp"
+                            android:visibility="gone">
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -126,8 +126,8 @@
                         <LinearLayout
                             android:id="@+id/view_asset"
                             android:layout_width="match_parent"
-                            android:visibility="gone"
-                            android:layout_height="wrap_content">
+                            android:layout_height="wrap_content"
+                            android:visibility="gone">
 
                             <TextView
                                 android:layout_width="120dp"
@@ -146,9 +146,9 @@
                         <LinearLayout
                             android:id="@+id/view_value"
                             android:layout_width="match_parent"
-                            android:visibility="gone"
+                            android:layout_height="wrap_content"
                             android:layout_marginTop="10dp"
-                            android:layout_height="wrap_content">
+                            android:visibility="gone">
 
                             <TextView
                                 android:layout_width="120dp"
@@ -167,8 +167,8 @@
                         <LinearLayout
                             android:id="@+id/view_network"
                             android:layout_width="match_parent"
-                            android:layout_marginTop="10dp"
-                            android:layout_height="wrap_content">
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp">
 
                             <TextView
                                 android:layout_width="120dp"
@@ -186,10 +186,10 @@
 
                         <LinearLayout
                             android:id="@+id/view_network_fee"
-                            android:visibility="gone"
-                            android:layout_marginTop="10dp"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:visibility="gone">
 
                             <TextView
                                 android:layout_width="120dp"

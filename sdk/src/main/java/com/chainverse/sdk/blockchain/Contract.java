@@ -2,11 +2,14 @@ package com.chainverse.sdk.blockchain;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 
 import com.chainverse.sdk.base.web3.BaseWeb3;
+import com.chainverse.sdk.common.BroadcastUtil;
 import com.chainverse.sdk.common.Constants;
 import com.chainverse.sdk.common.LogUtil;
 import com.chainverse.sdk.common.WalletUtils;
+import com.chainverse.sdk.listener.Action;
 import com.chainverse.sdk.manager.ServiceManager;
 import com.chainverse.sdk.model.TransactionData;
 import com.chainverse.sdk.ui.ChainverseSDKActivity;
@@ -161,38 +164,42 @@ public class Contract {
     }
 
     private void payable(JSONObject abi, String nameFunction, Object[] args, BigInteger value) {
-        WalletUtils walletUtils = WalletUtils.getInstance().init(mContext);
-        try {
-            Function function = new Function(nameFunction, convertTypeParam(abi.getJSONArray("inputs"), args), Collections.emptyList());
-            String functionEncoder = FunctionEncoder.encode(function);
+        showLoading(() -> {
+            WalletUtils walletUtils = WalletUtils.getInstance().init(mContext);
+            try {
+                Function function = new Function(nameFunction, convertTypeParam(abi.getJSONArray("inputs"), args), Collections.emptyList());
+                String functionEncoder = FunctionEncoder.encode(function);
 
-            TransactionData transactionData = this.transactionData;
-            if (transactionData == null || transactionData.getData() == null || transactionData.getData().isEmpty()) {
-                String data = "0x" + functionEncoder;
-                BigInteger gasPrice = web3.ethGasPrice().sendAsync().get().getGasPrice();
-                BigInteger nonce = getNonce();
-                BigInteger gasLimit = getGasLimit(value, Constants.CONTRACT.MarketService, functionEncoder);
+                TransactionData transactionData = this.transactionData;
+                if (transactionData == null || transactionData.getData() == null || transactionData.getData().isEmpty()) {
+                    String data = "0x" + functionEncoder;
+                    BigInteger gasPrice = web3.ethGasPrice().sendAsync().get().getGasPrice();
+                    BigInteger nonce = getNonce();
+                    BigInteger gasLimit = getGasLimit(value, Constants.CONTRACT.MarketService, functionEncoder);
 
-                transactionData = new TransactionData(
-                        nonce.longValue(), gasPrice.longValue(), gasLimit.longValue(),
-                        value.longValue(), data, contractAddress, walletUtils.getAddress(),
-                        Constants.EFunction.callContract, "");
+                    transactionData = new TransactionData(
+                            nonce.longValue(), gasPrice.longValue(), gasLimit.longValue(),
+                            value.longValue(), data, contractAddress, walletUtils.getAddress(),
+                            Constants.EFunction.callContract, "");
+                }
+                BroadcastUtil.send(mContext, Constants.ACTION.DIMISS_LOADING);
+
+                Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
+                intent.putExtra("transactionData", transactionData);
+                intent.putExtra("screen", Constants.SCREEN.CONFIRM_TRANSACTION);
+
+                mContext.startActivity(intent);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-
-            Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
-            intent.putExtra("transactionData", transactionData);
-            intent.putExtra("screen", Constants.SCREEN.CONFIRM_TRANSACTION);
-
-            mContext.startActivity(intent);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            BroadcastUtil.send(mContext, Constants.ACTION.DIMISS_LOADING);
+        });
     }
 
     private List view(JSONObject abi, String nameFunction, Object[] args) throws Exception {
@@ -282,5 +289,18 @@ public class Contract {
             }
         }
         return params;
+    }
+
+    private void showLoading(Action.Callback callback) {
+        Intent intent = new Intent(mContext, ChainverseSDKActivity.class);
+        intent.putExtra("screen", Constants.SCREEN.LOADING);
+        mContext.startActivity(intent);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                callback.onCallback();
+            }
+        }, 500);
     }
 }

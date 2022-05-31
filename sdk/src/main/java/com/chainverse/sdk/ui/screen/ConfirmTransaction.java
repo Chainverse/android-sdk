@@ -115,16 +115,16 @@ public class ConfirmTransaction extends Fragment implements View.OnClickListener
 
         txtStep.setText(getTitle(transactionData.getType()));
 
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
+//        DisplayMetrics metrics = getResources().getDisplayMetrics();
 
         if (transactionData.getType().equals(Constants.EFunction.signMessage)) {
             txtFrom.setText(transactionData.getFrom());
-            viewFrom.getLayoutParams().width = metrics.widthPixels - 200;
+//            viewFrom.getLayoutParams().width = metrics.widthPixels - 200;
         } else {
             txtFrom.setText(Utils.shortAddress(transactionData.getFrom()));
         }
 
-        if (transactionData.getAsset() != null || transactionData.getAsset().isEmpty()) {
+        if (transactionData.getAsset() != null && !transactionData.getAsset().isEmpty()) {
             viewAsset.setVisibility(View.VISIBLE);
             txtAsset.setText(transactionData.getAsset());
         }
@@ -132,6 +132,9 @@ public class ConfirmTransaction extends Fragment implements View.OnClickListener
             viewTo.setVisibility(View.VISIBLE);
             viewArrow.setVisibility(View.VISIBLE);
             txtTo.setText(Utils.shortAddress(transactionData.getReceiver()));
+        } else {
+//            viewFrom.getLayoutParams().width = metrics.widthPixels - 200;
+            txtFrom.setText(transactionData.getFrom());
         }
 
         if (transactionData.getPrice() != null) {
@@ -149,6 +152,7 @@ public class ConfirmTransaction extends Fragment implements View.OnClickListener
             BigDecimal decimals = BigDecimal.valueOf(Math.pow(10, -decimal));
             BigDecimal gas = Convert.fromWei(gasLimit.toString(), Convert.Unit.WEI).multiply(Convert.fromWei(gasPrice.toString(), Convert.Unit.WEI));
             BigDecimal fee = gas.multiply(decimals);
+
             viewNetworkFee.setVisibility(View.VISIBLE);
             txtFee.setText(fee.setScale(6, BigDecimal.ROUND_HALF_UP).toString() + " BNB");
         }

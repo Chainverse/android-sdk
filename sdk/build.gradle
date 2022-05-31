@@ -64,7 +64,7 @@ afterEvaluate {
                 // You can then customize attributes of the publication as shown below.
                 groupId = 'com.github.Chainverse'
                 artifactId = 'android-sdk'
-                version = 'alpha-v1.0.41'
+                version = 'alpha-v1.0.43'
             }
         }
     }

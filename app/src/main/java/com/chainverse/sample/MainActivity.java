@@ -232,11 +232,15 @@ public class MainActivity extends AppCompatActivity {
 //
 //                    String abi = ChainverseSDK.getInstance().getAbi(chainverseService.getServices().get(0).getAddress());
 //                    LogUtil.log("abi ");
-                    Object[] args = new Object[2];
-                    args[0] = "0xf8DfE75268BfD3Ce03A634eACe315CeCA0E6e69a";
-                    args[1] = new BigInteger("727");
-                    List data = ChainverseSDK.getInstance().callContract("0x2ccA92F66BeA2A7fA2119B75F3e5CB698C252564", "getByNFT", args);
-                    System.out.println(data.get(1));
+//                    Object[] args = new Object[2];
+//                    args[0] = new BigInteger("2390");
+//                    args[1] = BigDecimal.valueOf(1000 * Math.pow(10, 18)).toBigInteger();
+//                    List data = ChainverseSDK.getInstance().callContract("0x2ccA92F66BeA2A7fA2119B75F3e5CB698C252564", "buy", args);
+//                    System.out.println(data.get(1));
+//                    ChainverseSDK.getInstance().signMessage("message", false);
+
+//                    ChainverseSDK.getInstance().buyNFT("0x672021e3c741910896cad6D6121446a328ba5634", new BigInteger("2390"), 1000);
+
 //                    NFT nft = ChainverseSDK.getInstance().getNFT("0x7D5495EE8999258f2eDC5D3ed497889410793D31", new BigInteger("55"));
 //                    LogUtil.log("key ", nft);
 //                    FilterMarket filterMarket = new FilterMarket();
